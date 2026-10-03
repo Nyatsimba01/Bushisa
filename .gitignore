@@ -1,0 +1,16 @@
+# Local config files with credentials
+.env
+config.local.php
+
+# Operating system & editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Uploaded images (don't push test photos to GitHub)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Vendor files (if Composer or packages are used later)
+/vendor/
