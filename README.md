@@ -1,2 +1,11 @@
-# Campus-crush
-A student-oriented dating and matching web application developed for the SCS 2114 class
+# Bushisa — NUST Student Social & Dating Platform
+
+A web application built with HTML, CSS, JavaScript, PHP, and MySQL.
+
+## Local Development Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/Nyatsimba01/Bushisa.git](https://github.com/Nyatsimba01/Bushisa.git)
+   cd Bushisa
+   git checkout develop
