@@ -11,14 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $displayName = trim($_POST['display_name'] ?? '');
     $gender = $_POST['gender'] ?? '';
-    $interestedIn = $_POST['interested_in'] ?? '';
 
     // 1. Validate NUST student email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !str_ends_with(strtolower($email), '@students.nust.ac.zw')) {
         $error = 'You must use a valid NUST student email (@students.nust.ac.zw).';
     } elseif (strlen($password) < 8) {
         $error = 'Password must be at least 8 characters long.';
-    } elseif (empty($displayName) || empty($gender) || empty($interestedIn)) {
+    } elseif (empty($displayName) || empty($gender)) {
         $error = 'All fields are required.';
     } else {
         // 2. Check if student email is already registered
@@ -39,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $insertUser->execute([$email, $passwordHash]);
                 $userId = $pdo->lastInsertId();
 
-                // Insert into profiles table
-                $insertProfile = $pdo->prepare('INSERT INTO profiles (user_id, display_name, anon_handle, gender, interested_in) VALUES (?, ?, ?, ?, ?)');
-                $insertProfile->execute([$userId, $displayName, $anonHandle, $gender, $interestedIn]);
+                // Insert into profiles table (without interested_in field)
+                $insertProfile = $pdo->prepare('INSERT INTO profiles (user_id, display_name, anon_handle, gender) VALUES (?, ?, ?, ?)');
+                $insertProfile->execute([$userId, $displayName, $anonHandle, $gender]);
 
                 $pdo->commit();
                 $success = 'Account created successfully! You can now log in.';
@@ -97,15 +96,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="">Select...</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-
-            <label for="interested_in">Interested In</label>
-            <select id="interested_in" name="interested_in" required>
-                <option value="">Select...</option>
-                <option value="male">Men</option>
-                <option value="female">Women</option>
-                <option value="everyone">Everyone</option>
             </select>
 
             <button type="submit">Create Account</button>
