@@ -12,5 +12,8 @@ Thumbs.db
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Runtime logs
+/logs/
+
 # Vendor files (if Composer or packages are used later)
 /vendor/
