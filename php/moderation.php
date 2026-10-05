@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/logger.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/operational.php';
 
 /**
  * Suspend a user account.
@@ -124,19 +125,24 @@ function get_pending_reports(PDO $pdo): array
  */
 function get_flagged_confessions(PDO $pdo): array
 {
+    $columns = operational_confession_columns($pdo);
     $statement = $pdo->prepare(
+        sprintf(
         'SELECT
             confessions.id,
-            confessions.author_id,
-            confessions.body,
+            confessions.%1$s AS author_id,
+            confessions.%2$s AS body,
             confessions.is_flagged,
             confessions.created_at,
             profiles.anon_handle
          FROM confessions
          LEFT JOIN profiles
-            ON profiles.user_id = confessions.author_id
+            ON profiles.user_id = confessions.%1$s
          WHERE confessions.is_flagged = 1
-         ORDER BY confessions.created_at DESC, confessions.id DESC'
+         ORDER BY confessions.created_at DESC, confessions.id DESC',
+        $columns['author'],
+        $columns['body']
+        )
     );
     $statement->execute();
 

@@ -9,9 +9,12 @@ declare(strict_types=1);
  */
 function generate_csrf_token(): string
 {
+    if (isset($_SESSION['csrf_token']) && is_string($_SESSION['csrf_token']) && $_SESSION['csrf_token'] !== '') {
+        return $_SESSION['csrf_token'];
+    }
+
     $token = bin2hex(random_bytes(32));
     $_SESSION['csrf_token'] = $token;
-
     return $token;
 }
 
@@ -39,7 +42,6 @@ function csrf_input_field(): string
 function validate_csrf_token(string $token): bool
 {
     $sessionToken = $_SESSION['csrf_token'] ?? null;
-    unset($_SESSION['csrf_token']);
 
     if (!is_string($sessionToken) || $sessionToken === '') {
         return false;

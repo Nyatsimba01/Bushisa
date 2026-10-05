@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/operational.php';
+
 /*
 CREATE TABLE IF NOT EXISTS rate_limits (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -24,6 +26,7 @@ CREATE TABLE IF NOT EXISTS rate_limits (
  */
 function check_rate_limit(PDO $pdo, string $action, string $identifier, int $max_attempts, int $window_seconds): bool
 {
+    ensure_operational_schema($pdo);
     $sql = <<<'SQL'
 SELECT COUNT(*) AS attempt_count
 FROM rate_limits
@@ -53,6 +56,7 @@ SQL;
  */
 function record_attempt(PDO $pdo, string $action, string $identifier): void
 {
+    ensure_operational_schema($pdo);
     $sql = <<<'SQL'
 INSERT INTO rate_limits (action, identifier, attempted_at)
 VALUES (:action, :identifier, NOW())
@@ -75,6 +79,7 @@ SQL;
  */
 function clear_attempts(PDO $pdo, string $action, string $identifier): void
 {
+    ensure_operational_schema($pdo);
     $sql = <<<'SQL'
 DELETE FROM rate_limits
 WHERE action = :action

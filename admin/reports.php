@@ -12,6 +12,7 @@ require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/report_handler.php';
 require_once __DIR__ . '/../php/moderation.php';
 require_once __DIR__ . '/../php/logger.php';
+require_once __DIR__ . '/../php/frontend.php';
 
 require_login();
 
@@ -132,4 +133,59 @@ function admin_get_reports(PDO $pdo, string $status_filter): array
     return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
 
-// --- Frontend HTML will be added later ---
+render_auth_start('Reports', $csrfToken);
+?>
+<section class="auth-card" aria-labelledby="reports-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="reports-title">Reports</h1>
+    <p class="auth-card__lead">Review private safety reports. Catfish and impersonation reports stay confidential.</p>
+    <?php render_flash($error, $success); ?>
+
+    <div class="card-actions">
+        <?php foreach ($allowedStatusFilters as $filter): ?>
+            <a class="button-secondary" href="reports.php?status=<?= e($filter) ?>"><?= e(ucwords(str_replace('_', ' ', $filter))) ?></a>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="form-grid">
+        <?php if ($reports === []): ?>
+            <article class="empty-state">
+                <h2>No reports</h2>
+                <p>No reports match this filter.</p>
+            </article>
+        <?php else: ?>
+            <?php foreach ($reports as $report): ?>
+                <article class="section-card">
+                    <h2>Report #<?= e($report['id'] ?? '') ?></h2>
+                    <p class="muted">Status: <?= e($report['status'] ?? 'pending') ?> · Submitted <?= e(format_time_ago((string) ($report['created_at'] ?? ''))) ?></p>
+                    <p><?= e($report['reason'] ?? '') ?></p>
+                    <p class="muted">Reporter: <?= e($report['reporter_display_name'] ?? 'Unknown') ?> · Reported: <?= e($report['reported_display_name'] ?? 'Unknown') ?></p>
+                    <div class="card-actions">
+                        <form method="post" action="reports.php?status=<?= e($status_filter) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="report_id" value="<?= e($report['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="reviewed">
+                            <button class="button-secondary" type="submit">Mark reviewed</button>
+                        </form>
+                        <form method="post" action="reports.php?status=<?= e($status_filter) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="report_id" value="<?= e($report['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="dismiss">
+                            <button class="button-secondary" type="submit">Dismiss</button>
+                        </form>
+                        <form method="post" action="reports.php?status=<?= e($status_filter) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="report_id" value="<?= e($report['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="suspend_user">
+                            <button class="button-danger" type="submit">Suspend user</button>
+                        </form>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+    <p class="auth-switch"><a href="dashboard.php">Back to dashboard</a></p>
+</section>
+<?php
+render_auth_end();

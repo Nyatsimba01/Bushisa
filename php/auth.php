@@ -92,7 +92,7 @@ function attempt_login(PDO $pdo, string $email, string $password, ?string $ident
  */
 function register_user(PDO $pdo, array $data): array
 {
-    $studentId = strtoupper(trim(str_replace("\0", '', (string) ($data['nust_student_id'] ?? ''))));
+    $studentId = strtolower(trim(str_replace("\0", '', (string) ($data['nust_student_id'] ?? ''))));
     $email = clean_email((string) ($data['email'] ?? ''));
     $password = (string) ($data['password'] ?? '');
     $displayName = trim(str_replace("\0", '', (string) ($data['display_name'] ?? '')));
@@ -101,7 +101,7 @@ function register_user(PDO $pdo, array $data): array
     $faculty = trim(str_replace("\0", '', (string) ($data['faculty'] ?? '')));
     $yearOfStudy = trim(str_replace("\0", '', (string) ($data['year_of_study'] ?? '')));
 
-    if ($studentId === '' || !preg_match('/^[A-Z0-9]{4,20}$/', $studentId)) {
+    if ($studentId === '' || !preg_match('/^[a-z0-9]{4,20}$/', $studentId)) {
         return [
             'success' => false,
             'error' => 'Please enter a valid NUST student ID.',
@@ -189,7 +189,7 @@ function register_user(PDO $pdo, array $data): array
         ];
     }
 
-    $existingUser = $pdo->prepare('SELECT id FROM users WHERE email = :email OR nust_student_id = :student_id LIMIT 1');
+    $existingUser = $pdo->prepare('SELECT id FROM users WHERE email = :email OR LOWER(nust_student_id) = :student_id LIMIT 1');
     $existingUser->execute([
         ':email' => $email,
         ':student_id' => $studentId,

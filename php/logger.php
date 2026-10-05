@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/operational.php';
+
 /**
  * Log an action to the audit_log table.
  *
@@ -13,6 +15,7 @@ declare(strict_types=1);
  */
 function log_action(PDO $pdo, ?int $user_id, string $action, ?string $ip = null): void
 {
+    ensure_operational_schema($pdo);
     $resolvedIp = $ip ?? ($_SERVER['REMOTE_ADDR'] ?? null);
 
     $sql = <<<'SQL'

@@ -316,6 +316,155 @@
   /**
    * @returns {void}
    */
+  const initialiseNotificationPanel = () => {
+    const bell = document.querySelector('[data-notification-bell]');
+    const panel = document.querySelector('[data-notification-panel]');
+    const closeButton = document.querySelector('[data-notification-close]');
+
+    if (!(bell instanceof HTMLButtonElement) || !(panel instanceof HTMLElement)) {
+      return;
+    }
+
+    const closePanel = () => {
+      panel.hidden = true;
+      bell.setAttribute('aria-expanded', 'false');
+      bell.focus();
+    };
+
+    const openPanel = () => {
+      panel.hidden = false;
+      bell.setAttribute('aria-expanded', 'true');
+      const focusTarget = panel.querySelector('button, a');
+      if (focusTarget instanceof HTMLElement) {
+        focusTarget.focus();
+      }
+    };
+
+    bell.addEventListener('click', () => {
+      if (panel.hidden) {
+        openPanel();
+      } else {
+        closePanel();
+      }
+    });
+
+    if (closeButton instanceof HTMLButtonElement) {
+      closeButton.addEventListener('click', closePanel);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) {
+        closePanel();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Node ? event.target : null;
+      if (!target || panel.hidden || panel.contains(target) || bell.contains(target)) {
+        return;
+      }
+
+      closePanel();
+    });
+  };
+
+  /**
+   * @returns {void}
+   */
+  const initialiseConfessionComposer = () => {
+    const openButton = document.querySelector('[data-confession-open]');
+    const modal = document.querySelector('[data-confession-modal]');
+    const closeButton = document.querySelector('[data-confession-close]');
+
+    if (!(openButton instanceof HTMLButtonElement) || !(modal instanceof HTMLElement)) {
+      return;
+    }
+
+    const textarea = modal.querySelector('textarea');
+
+    const closeModal = () => {
+      modal.hidden = true;
+      openButton.focus();
+    };
+
+    openButton.addEventListener('click', () => {
+      modal.hidden = false;
+      if (textarea instanceof HTMLTextAreaElement) {
+        textarea.focus();
+      }
+    });
+
+    if (closeButton instanceof HTMLButtonElement) {
+      closeButton.addEventListener('click', closeModal);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.hidden) {
+        closeModal();
+      }
+    });
+  };
+
+  /**
+   * @returns {void}
+   */
+  const initialiseStaticSwipes = () => {
+    const buttons = Array.from(document.querySelectorAll('[data-swipe-target][data-swipe-direction]'));
+    if (buttons.length === 0) {
+      return;
+    }
+
+    buttons.forEach((button) => {
+      if (!(button instanceof HTMLButtonElement)) {
+        return;
+      }
+
+      button.addEventListener('click', async () => {
+        const targetId = button.dataset.swipeTarget ?? '';
+        const direction = button.dataset.swipeDirection ?? '';
+        const card = button.closest('[data-candidate-id]');
+
+        if (!targetId || !['like', 'pass'].includes(direction)) {
+          return;
+        }
+
+        button.disabled = true;
+
+        try {
+          const response = await window.fetch('api/swipe.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': readCsrfToken()
+            },
+            body: JSON.stringify({
+              target_id: targetId,
+              direction
+            })
+          });
+
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(payload.error ?? 'Could not save your choice.');
+          }
+
+          if (card instanceof HTMLElement) {
+            card.remove();
+          }
+
+          const didMatch = payload.match === true || payload.matched === true;
+          showToast(didMatch ? 'It is a match. Open Find Match to continue carefully.' : 'Choice saved.', didMatch ? 'success' : 'info');
+        } catch (error) {
+          button.disabled = false;
+          showToast(error instanceof Error ? error.message : 'Could not save your choice.', 'error');
+        }
+      });
+    });
+  };
+
+  /**
+   * @returns {void}
+   */
   const init = () => {
     const namespace = getBushisaNamespace();
     const csrfToken = readCsrfToken();
@@ -329,6 +478,9 @@
     namespace.CSRF_TOKEN = csrfToken;
 
     initialiseMobileNav(findNavToggleButton());
+    initialiseNotificationPanel();
+    initialiseConfessionComposer();
+    initialiseStaticSwipes();
     installGlobalFetchGuard();
   };
 

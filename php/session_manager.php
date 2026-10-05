@@ -4,6 +4,17 @@ declare(strict_types=1);
 
 const BUSHISA_SESSION_TIMEOUT = 1800;
 
+function bushisa_cookie_secure(): bool
+{
+    $override = getenv('SESSION_COOKIE_SECURE');
+    if ($override !== false && $override !== '') {
+        return filter_var($override, FILTER_VALIDATE_BOOL);
+    }
+
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443');
+}
+
 /**
  * Configure secure session cookie parameters.
  *
@@ -15,7 +26,7 @@ function bushisa_session_cookie_params(): array
         'lifetime' => BUSHISA_SESSION_TIMEOUT,
         'path' => '/',
         'domain' => '',
-        'secure' => true,
+        'secure' => bushisa_cookie_secure(),
         'httponly' => true,
         'samesite' => 'Strict',
     ];
@@ -39,7 +50,7 @@ function refresh_session_expiry(): void
         'expires' => time() + BUSHISA_SESSION_TIMEOUT,
         'path' => $params['path'] ?? '/',
         'domain' => $params['domain'] ?? '',
-        'secure' => true,
+        'secure' => bushisa_cookie_secure(),
         'httponly' => true,
         'samesite' => 'Strict',
     ]);
@@ -57,7 +68,7 @@ function start_secure_session(): void
     }
 
     ini_set('session.use_strict_mode', '1');
-    ini_set('session.cookie_secure', '1');
+    ini_set('session.cookie_secure', bushisa_cookie_secure() ? '1' : '0');
     ini_set('session.cookie_httponly', '1');
     ini_set('session.cookie_samesite', 'Strict');
 
@@ -110,7 +121,7 @@ function destroy_session(): void
             'expires' => time() - 3600,
             'path' => $params['path'] ?? '/',
             'domain' => $params['domain'] ?? '',
-            'secure' => true,
+            'secure' => bushisa_cookie_secure(),
             'httponly' => true,
             'samesite' => 'Strict',
         ]);

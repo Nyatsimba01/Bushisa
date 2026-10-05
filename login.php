@@ -13,6 +13,9 @@ require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/auth.php';
 require_once __DIR__ . '/php/function.php';
+require_once __DIR__ . '/php/frontend.php';
+
+ensure_operational_schema($pdo);
 
 $error = null;
 $successRedirect = null;
@@ -146,29 +149,35 @@ $csrfToken = generate_csrf_token();
         <h1>Bushisa</h1>
         <p class="subtitle">Sign in to your account</p>
 
-        <?php if (!empty($error)): ?>
-            <div class="alert"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
+$emailValue = isset($_POST['email']) && is_string($_POST['email']) ? $_POST['email'] : '';
 
-        <form action="login.php" method="POST">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
+render_auth_start('Sign in', $csrfToken);
+?>
+<section class="auth-card" aria-labelledby="login-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="login-title">Welcome back to Bushisa</h1>
+    <p class="auth-card__lead">Sign in with your NUST student email to continue discovery, confessions and approved conversations.</p>
 
-            <div class="field">
-                <label for="email">NUST Student Email</label>
-                <input type="email" id="email" name="email" placeholder="e.g. s0123456x@students.nust.ac.zw" required>
-            </div>
+    <?php render_flash($error, null); ?>
 
-            <div class="field">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+    <form class="form-grid" method="post" action="login.php" data-server-form>
+        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
 
-            <button type="submit">Sign In</button>
-        </form>
+        <label class="field">
+            <span>Student email</span>
+            <input type="email" name="email" value="<?= e($emailValue) ?>" autocomplete="email" inputmode="email" required placeholder="name@students.nust.ac.zw">
+        </label>
 
-        <div class="footer">
-            Don't have an account? <a href="public/register.php">Register here</a>
-        </div>
-    </div>
-</body>
-</html>
+        <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+
+        <button class="button" type="submit">Sign in</button>
+    </form>
+
+    <p class="auth-switch">New to Bushisa? <a href="register.php">Create your student account</a></p>
+    <p class="field-help">Verification depends on the active backend. Bushisa will not display identity as verified unless the server proves it.</p>
+</section>
+<?php
+render_auth_end();
