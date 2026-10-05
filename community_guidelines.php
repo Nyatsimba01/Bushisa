@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/php/security_headers.php';
 require_once __DIR__ . '/php/session_manager.php';
+require_once __DIR__ . '/php/frontend.php';
 
 $page_title = 'Community Guidelines | Bushisa';
 
@@ -17,4 +18,21 @@ $guidelines = [
     'Consequences' => 'Warnings -> Temporary suspension -> Permanent ban.',
 ];
 
-// --- Frontend HTML will be added later ---
+render_auth_start('Community Guidelines');
+?>
+<section class="auth-card" aria-labelledby="guidelines-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="guidelines-title">Community Guidelines</h1>
+    <p class="auth-card__lead">Bushisa is built around privacy, consent and respectful student discovery.</p>
+    <div class="form-grid">
+        <?php foreach ($guidelines as $heading => $content): ?>
+            <article class="section-card">
+                <h2><?= e($heading) ?></h2>
+                <p class="muted"><?= e($content) ?></p>
+            </article>
+        <?php endforeach; ?>
+    </div>
+    <p class="auth-switch"><a href="profile.php">Back to Bushisa</a></p>
+</section>
+<?php
+render_auth_end();

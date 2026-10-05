@@ -11,6 +11,7 @@ require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/moderation.php';
 require_once __DIR__ . '/../php/logger.php';
+require_once __DIR__ . '/../php/frontend.php';
 
 require_login();
 
@@ -86,10 +87,16 @@ $csrfToken = generate_csrf_token();
  */
 function moderation_get_suspended_users(PDO $pdo): array
 {
+    $emailColumn = operational_column_exists($pdo, 'users', 'email') ? 'email' : 'student_email';
+    if (!operational_column_exists($pdo, 'users', 'is_suspended')) {
+        return [];
+    }
+
     $statement = $pdo->prepare(
+        sprintf(
         'SELECT
             users.id,
-            users.email,
+            users.%1$s AS email,
             users.created_at,
             users.is_suspended,
             profiles.display_name
@@ -97,11 +104,79 @@ function moderation_get_suspended_users(PDO $pdo): array
          LEFT JOIN profiles
             ON profiles.user_id = users.id
          WHERE users.is_suspended = 1
-         ORDER BY users.created_at DESC, users.id DESC'
+         ORDER BY users.created_at DESC, users.id DESC',
+        $emailColumn
+        )
     );
     $statement->execute();
 
     return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
 
-// --- Frontend HTML will be added later ---
+render_auth_start('Moderation', $csrfToken);
+?>
+<section class="auth-card" aria-labelledby="moderation-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="moderation-title">Moderation</h1>
+    <p class="auth-card__lead">Manage flagged confessions and suspended accounts.</p>
+    <?php render_flash($error, $success); ?>
+
+    <section class="form-grid" aria-labelledby="flagged-title">
+        <h2 id="flagged-title">Flagged confessions</h2>
+        <?php if ($flagged === []): ?>
+            <article class="empty-state">
+                <h2>No flagged confessions</h2>
+                <p>The confession moderation queue is clear.</p>
+            </article>
+        <?php else: ?>
+            <?php foreach ($flagged as $confession): ?>
+                <article class="section-card">
+                    <h2>@<?= e($confession['anon_handle'] ?? 'anonymous') ?></h2>
+                    <p class="muted">Flagged <?= e(format_time_ago((string) ($confession['created_at'] ?? ''))) ?></p>
+                    <p><?= e($confession['body'] ?? '') ?></p>
+                    <div class="card-actions">
+                        <form method="post" action="moderation.php">
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="confession_id" value="<?= e($confession['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="unflag_confession">
+                            <button class="button-secondary" type="submit">Unflag</button>
+                        </form>
+                        <form method="post" action="moderation.php">
+                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="confession_id" value="<?= e($confession['id'] ?? '') ?>">
+                            <input type="hidden" name="action" value="delete_confession">
+                            <button class="button-danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </section>
+
+    <section class="form-grid" aria-labelledby="suspended-title">
+        <h2 id="suspended-title">Suspended users</h2>
+        <?php if ($suspended_users === []): ?>
+            <article class="empty-state">
+                <h2>No suspended users</h2>
+                <p>No accounts are currently suspended.</p>
+            </article>
+        <?php else: ?>
+            <?php foreach ($suspended_users as $user): ?>
+                <article class="section-card">
+                    <h2><?= e($user['display_name'] ?? 'User') ?></h2>
+                    <p class="muted"><?= e($user['email'] ?? '') ?></p>
+                    <form method="post" action="moderation.php">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="user_id" value="<?= e($user['id'] ?? '') ?>">
+                        <input type="hidden" name="action" value="unsuspend_user">
+                        <button class="button-secondary" type="submit">Unsuspend</button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </section>
+
+    <p class="auth-switch"><a href="dashboard.php">Back to dashboard</a></p>
+</section>
+<?php
+render_auth_end();

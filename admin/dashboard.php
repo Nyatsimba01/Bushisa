@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/moderation.php';
+require_once __DIR__ . '/../php/frontend.php';
 
 require_login();
 
@@ -22,7 +23,9 @@ $total_messages = dashboard_count($pdo, 'SELECT COUNT(*) FROM messages');
 $total_confessions = dashboard_count($pdo, 'SELECT COUNT(*) FROM confessions');
 $pending_reports_count = dashboard_count($pdo, "SELECT COUNT(*) FROM reports WHERE status = 'pending'");
 $flagged_confessions_count = dashboard_count($pdo, 'SELECT COUNT(*) FROM confessions WHERE is_flagged = 1');
-$suspended_users_count = dashboard_count($pdo, 'SELECT COUNT(*) FROM users WHERE is_suspended = 1');
+$suspended_users_count = dashboard_column_exists($pdo, 'users', 'is_suspended')
+    ? dashboard_count($pdo, 'SELECT COUNT(*) FROM users WHERE is_suspended = 1')
+    : 0;
 $new_users_today = dashboard_count($pdo, 'SELECT COUNT(*) FROM users WHERE DATE(created_at) = CURDATE()');
 
 $stats = [
@@ -81,7 +84,7 @@ function dashboard_count_active_users(PDO $pdo): int
  */
 function dashboard_column_exists(PDO $pdo, string $table, string $column): bool
 {
-    $allowedTables = ['messages'];
+    $allowedTables = ['messages', 'users'];
     if (!in_array($table, $allowedTables, true)) {
         return false;
     }
@@ -92,4 +95,25 @@ function dashboard_column_exists(PDO $pdo, string $table, string $column): bool
     return $statement->fetch(PDO::FETCH_ASSOC) !== false;
 }
 
-// --- Frontend HTML will be added later ---
+render_auth_start('Admin Dashboard');
+?>
+<section class="auth-card" aria-labelledby="admin-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="admin-title">Admin Dashboard</h1>
+    <p class="auth-card__lead">Operational overview for Bushisa moderation.</p>
+    <div class="card-grid">
+        <?php foreach ($stats as $label => $value): ?>
+            <article class="section-card">
+                <h2><?= e(str_replace('_', ' ', ucwords($label, '_'))) ?></h2>
+                <p class="hero-statement"><?= e($value) ?></p>
+            </article>
+        <?php endforeach; ?>
+    </div>
+    <div class="card-actions">
+        <a class="button-secondary" href="reports.php">Review reports</a>
+        <a class="button-secondary" href="moderation.php">Moderation queue</a>
+        <a class="button-secondary" href="../discover.php">Back to app</a>
+    </div>
+</section>
+<?php
+render_auth_end();

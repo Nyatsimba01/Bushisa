@@ -1,5 +1,4 @@
 <?php
-<?php
 
 declare(strict_types=1);
 
@@ -12,6 +11,7 @@ require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/rate_limit.php';
 require_once __DIR__ . '/../php/logger.php';
 require_once __DIR__ . '/../php/function.php';
+require_once __DIR__ . '/../php/operational.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['error' => 'Method not allowed'], 405);
@@ -26,6 +26,19 @@ $payload = json_decode($rawBody !== false ? $rawBody : '', true);
 if (!is_array($payload)) {
     json_response(['error' => 'Invalid request body'], 400);
 }
+
+$submittedToken = '';
+if (isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_string($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+    $submittedToken = $_SERVER['HTTP_X_CSRF_TOKEN'];
+} elseif (isset($payload['csrf_token']) && is_string($payload['csrf_token'])) {
+    $submittedToken = $payload['csrf_token'];
+}
+
+if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
+    json_response(['error' => 'Invalid CSRF token'], 403);
+}
+
+ensure_operational_schema($pdo);
 
 $targetId = clean_int($payload['target_id'] ?? null);
 $direction = isset($payload['direction']) && is_string($payload['direction']) ? clean_enum($payload['direction'], ['like', 'pass']) : null;
@@ -43,6 +56,10 @@ if ($targetId === $currentUserId) {
     json_response(['error' => 'Cannot swipe yourself'], 400);
 }
 
+if (operational_is_blocked($pdo, $currentUserId, $targetId)) {
+    json_response(['error' => 'This profile is unavailable'], 403);
+}
+
 $targetStatement = $pdo->prepare('SELECT id, is_suspended FROM users WHERE id = :id LIMIT 1');
 $targetStatement->execute([':id' => $targetId]);
 $targetUser = $targetStatement->fetch(PDO::FETCH_ASSOC);
@@ -51,10 +68,18 @@ if ($targetUser === false || ((int) ($targetUser['is_suspended'] ?? 0)) === 1) {
     json_response(['error' => 'Target user is unavailable'], 404);
 }
 
-$existingSwipe = $pdo->prepare('SELECT id FROM swipes WHERE swiper_id = :swiper_id AND swiped_id = :swiped_id LIMIT 1');
+$swipeColumns = operational_swipe_columns($pdo);
+$matchColumns = operational_match_columns($pdo);
+
+$existingSwipe = $pdo->prepare(
+    sprintf(
+        'SELECT id FROM swipes WHERE swiper_id = :swiper_id AND %1$s = :target_id LIMIT 1',
+        $swipeColumns['target']
+    )
+);
 $existingSwipe->execute([
     ':swiper_id' => $currentUserId,
-    ':swiped_id' => $targetId,
+    ':target_id' => $targetId,
 ]);
 
 if ($existingSwipe->fetchColumn() !== false) {
@@ -69,22 +94,30 @@ try {
     record_attempt($pdo, 'swipe', $rateLimitKey);
 
     $insertSwipe = $pdo->prepare(
-        'INSERT INTO swipes (swiper_id, swiped_id, direction, created_at)
-         VALUES (:swiper_id, :swiped_id, :direction, NOW())'
+        sprintf(
+            'INSERT INTO swipes (swiper_id, %1$s, %2$s, created_at)
+             VALUES (:swiper_id, :target_id, :direction, NOW())',
+            $swipeColumns['target'],
+            $swipeColumns['direction']
+        )
     );
     $insertSwipe->execute([
         ':swiper_id' => $currentUserId,
-        ':swiped_id' => $targetId,
+        ':target_id' => $targetId,
         ':direction' => $direction,
     ]);
 
     if ($direction === 'like') {
         $reverseSwipe = $pdo->prepare(
+            sprintf(
             'SELECT id FROM swipes
              WHERE swiper_id = :target_id
-               AND swiped_id = :current_user_id
-               AND direction = "like"
-             LIMIT 1'
+               AND %1$s = :current_user_id
+               AND %2$s = "like"
+             LIMIT 1',
+            $swipeColumns['target'],
+            $swipeColumns['direction']
+            )
         );
         $reverseSwipe->execute([
             ':target_id' => $targetId,
@@ -96,10 +129,14 @@ try {
             $userB = max($currentUserId, $targetId);
 
             $existingMatch = $pdo->prepare(
-                'SELECT id FROM matches
-                 WHERE (user_a_id = :user_a AND user_b_id = :user_b)
-                    OR (user_a_id = :user_b AND user_b_id = :user_a)
-                 LIMIT 1'
+                sprintf(
+                    'SELECT id FROM matches
+                     WHERE (%1$s = :user_a AND %2$s = :user_b)
+                        OR (%1$s = :user_b AND %2$s = :user_a)
+                     LIMIT 1',
+                    $matchColumns['user_a'],
+                    $matchColumns['user_b']
+                )
             );
             $existingMatch->execute([
                 ':user_a' => $userA,
@@ -109,8 +146,13 @@ try {
 
             if ($matchId === false) {
                 $insertMatch = $pdo->prepare(
-                    'INSERT INTO matches (user_a_id, user_b_id, created_at)
-                     VALUES (:user_a_id, :user_b_id, NOW())'
+                    sprintf(
+                        'INSERT INTO matches (%1$s, %2$s, %3$s)
+                         VALUES (:user_a_id, :user_b_id, NOW())',
+                        $matchColumns['user_a'],
+                        $matchColumns['user_b'],
+                        $matchColumns['created_at']
+                    )
                 );
                 $insertMatch->execute([
                     ':user_a_id' => $userA,
@@ -120,6 +162,25 @@ try {
             } else {
                 $matchId = (int) $matchId;
             }
+
+            operational_write_notification(
+                $pdo,
+                $targetId,
+                'match',
+                'New match',
+                'You have a new established match on Bushisa.',
+                'matches.php',
+                'match:' . $matchId . ':' . $targetId
+            );
+            operational_write_notification(
+                $pdo,
+                $currentUserId,
+                'match',
+                'New match',
+                'You have a new established match on Bushisa.',
+                'matches.php',
+                'match:' . $matchId . ':' . $currentUserId
+            );
 
             $response = [
                 'match' => true,

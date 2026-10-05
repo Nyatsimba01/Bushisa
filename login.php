@@ -13,6 +13,9 @@ require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/auth.php';
 require_once __DIR__ . '/php/function.php';
+require_once __DIR__ . '/php/frontend.php';
+
+ensure_operational_schema($pdo);
 
 $error = null;
 $successRedirect = null;
@@ -44,4 +47,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $csrfToken = generate_csrf_token();
 
-// --- Frontend HTML will be added later ---
+$emailValue = isset($_POST['email']) && is_string($_POST['email']) ? $_POST['email'] : '';
+
+render_auth_start('Sign in', $csrfToken);
+?>
+<section class="auth-card" aria-labelledby="login-title">
+    <span class="brand-mark" aria-hidden="true">B</span>
+    <h1 id="login-title">Welcome back to Bushisa</h1>
+    <p class="auth-card__lead">Sign in with your NUST student email to continue discovery, confessions and approved conversations.</p>
+
+    <?php render_flash($error, null); ?>
+
+    <form class="form-grid" method="post" action="login.php" data-server-form>
+        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+
+        <label class="field">
+            <span>Student email</span>
+            <input type="email" name="email" value="<?= e($emailValue) ?>" autocomplete="email" inputmode="email" required placeholder="name@students.nust.ac.zw">
+        </label>
+
+        <label class="field">
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+
+        <button class="button" type="submit">Sign in</button>
+    </form>
+
+    <p class="auth-switch">New to Bushisa? <a href="register.php">Create your student account</a></p>
+    <p class="field-help">Verification depends on the active backend. Bushisa will not display identity as verified unless the server proves it.</p>
+</section>
+<?php
+render_auth_end();

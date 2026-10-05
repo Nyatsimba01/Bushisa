@@ -11,8 +11,11 @@ require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/rate_limit.php';
 require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/function.php';
+require_once __DIR__ . '/php/frontend.php';
+require_once __DIR__ . '/php/operational.php';
 
 require_login();
+ensure_operational_schema($pdo);
 
 $currentUserId = (int) $_SESSION['user_id'];
 $error = null;
@@ -105,21 +108,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $offset = ($page - 1) * $perPage;
-if ($usesUserContentSchema) {
+$confessionRuntimeColumns = operational_confession_columns($pdo);
+$handleSelect = operational_column_exists($pdo, 'confessions', 'anon_handle')
+    ? 'COALESCE(c.anon_handle, p.anon_handle, "anonymous") AS anon_handle'
+    : 'COALESCE(p.anon_handle, "anonymous") AS anon_handle';
+
+if ($usesUserContentSchema || $usesAuthorBodySchema) {
     $feedStatement = $pdo->prepare(
-        'SELECT c.id, c.content AS body, c.created_at, c.is_flagged, p.anon_handle
-         FROM confessions c
-         LEFT JOIN profiles p ON p.user_id = c.user_id
-         ORDER BY c.created_at DESC, c.id DESC
-         LIMIT :limit OFFSET :offset'
-    );
-} elseif ($usesAuthorBodySchema) {
-    $feedStatement = $pdo->prepare(
-        'SELECT c.id, c.body, c.created_at, c.is_flagged, p.anon_handle
-         FROM confessions c
-         LEFT JOIN profiles p ON p.user_id = c.author_id
-         ORDER BY c.created_at DESC, c.id DESC
-         LIMIT :limit OFFSET :offset'
+        sprintf(
+            'SELECT
+                c.id,
+                c.%1$s AS body,
+                c.created_at,
+                c.is_flagged,
+                %3$s,
+                COUNT(cv.id) AS view_count
+             FROM confessions c
+             LEFT JOIN profiles p ON p.user_id = c.%2$s
+             LEFT JOIN confession_views cv ON cv.confession_id = c.id
+             WHERE c.is_flagged = 0
+             GROUP BY c.id, c.%1$s, c.created_at, c.is_flagged, anon_handle
+             ORDER BY view_count DESC, c.created_at DESC, c.id DESC
+             LIMIT :limit OFFSET :offset',
+            $confessionRuntimeColumns['body'],
+            $confessionRuntimeColumns['author'],
+            $handleSelect
+        )
     );
 } else {
     $feedStatement = false;
@@ -134,4 +148,72 @@ if ($feedStatement !== false) {
 
 $csrfToken = generate_csrf_token();
 
-// --- Frontend HTML will be added later ---
+render_page_shell_start('confessions', 'Confessions', $csrfToken, $currentUserId, false, 'Anonymous posts from the Bushisa community');
+?>
+<?php render_flash($error, $success); ?>
+
+<section class="empty-state">
+    <h2>Trending confessions</h2>
+    <p>The feed is ordered by deduplicated view count, then newest confession. Anonymous handles remain noninteractive.</p>
+</section>
+
+<section class="confessions-feed" aria-labelledby="confessions-title">
+    <h2 class="section-title" id="confessions-title">Anonymous feed</h2>
+    <?php if ($confessions === []): ?>
+        <article class="empty-state">
+            <h2>No confessions yet</h2>
+            <p>Be the first to share anonymously. Do not include details that identify you or someone else.</p>
+        </article>
+    <?php else: ?>
+        <?php foreach ($confessions as $confession): ?>
+            <?php
+            $handle = (string) ($confession['anon_handle'] ?? 'anonymous');
+            $body = (string) ($confession['body'] ?? '');
+            ?>
+            <article class="confession-card">
+                <div class="confession-card__meta">
+                    <strong>@<?= e($handle) ?></strong>
+                    <span><?= e((int) ($confession['view_count'] ?? 0)) ?> views</span>
+                    <time datetime="<?= e($confession['created_at'] ?? '') ?>"><?= e(format_time_ago((string) ($confession['created_at'] ?? ''))) ?></time>
+                </div>
+                <p class="confession-card__body"><?= e($body) ?></p>
+                <div class="card-actions">
+                    <button class="button-secondary" type="button" disabled>Reference unavailable</button>
+                    <a class="button-secondary" href="community_guidelines.php">Report</a>
+                </div>
+            </article>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</section>
+
+<?php if ($total_pages > 1): ?>
+    <nav class="pagination" aria-label="Confession pages">
+        <?php if ($page > 1): ?>
+            <a class="button-secondary" href="confessions.php?page=<?= e($page - 1) ?>">Previous</a>
+        <?php endif; ?>
+        <span class="muted">Page <?= e($page) ?> of <?= e($total_pages) ?></span>
+        <?php if ($page < $total_pages): ?>
+            <a class="button-secondary" href="confessions.php?page=<?= e($page + 1) ?>">Next</a>
+        <?php endif; ?>
+    </nav>
+<?php endif; ?>
+
+<button class="confession-fab" type="button" aria-label="Write confession" data-confession-open>+</button>
+
+<section class="confession-modal" id="write-confession" role="dialog" aria-modal="true" aria-labelledby="write-confession-title" data-confession-modal hidden>
+    <h2 id="write-confession-title">Write confession</h2>
+    <p class="field-help">Your anonymous handle is shown, but your real profile must remain private. Avoid identifying details.</p>
+    <form class="form-grid" method="post" action="confessions.php">
+        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+        <label class="field">
+            <span>Confession</span>
+            <textarea name="body" maxlength="500" required placeholder="Share what is on your mind..."></textarea>
+        </label>
+        <div class="card-actions">
+            <button class="confession-modal__submit" type="submit">Post anonymously</button>
+            <button class="button-secondary" type="button" data-confession-close>Cancel</button>
+        </div>
+    </form>
+</section>
+<?php
+render_page_shell_end();

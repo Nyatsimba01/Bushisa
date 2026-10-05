@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/operational.php';
+
 /*
 CREATE TABLE IF NOT EXISTS blocks (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -24,6 +26,7 @@ CREATE TABLE IF NOT EXISTS blocks (
  */
 function block_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
 {
+    ensure_operational_schema($pdo);
     $pdo->beginTransaction();
 
     try {
@@ -42,7 +45,7 @@ function block_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
             sprintf(
                 'DELETE FROM matches
                  WHERE (%1$s = :blocker_id AND %2$s = :blocked_id)
-                    OR (%1$s = :blocked_id AND %2$s = :blocker_id)',
+                    OR (%1$s = :reverse_blocked_id AND %2$s = :reverse_blocker_id)',
                 $matchUserAColumn,
                 $matchUserBColumn
             )
@@ -50,16 +53,16 @@ function block_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
         $deleteMatch->execute([
             ':blocker_id' => $blocker_id,
             ':blocked_id' => $blocked_id,
+            ':reverse_blocked_id' => $blocked_id,
+            ':reverse_blocker_id' => $blocker_id,
         ]);
 
         $pdo->commit();
-
         return true;
     } catch (Throwable $throwable) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-
         throw $throwable;
     }
 }
@@ -74,6 +77,7 @@ function block_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
  */
 function unblock_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
 {
+    ensure_operational_schema($pdo);
     $statement = $pdo->prepare('DELETE FROM blocks WHERE blocker_id = :blocker_id AND blocked_id = :blocked_id');
     return $statement->execute([
         ':blocker_id' => $blocker_id,
@@ -91,12 +95,18 @@ function unblock_user(PDO $pdo, int $blocker_id, int $blocked_id): bool
  */
 function is_blocked(PDO $pdo, int $user_a, int $user_b): bool
 {
+    ensure_operational_schema($pdo);
     $statement = $pdo->prepare(
-        'SELECT 1 FROM blocks WHERE (blocker_id = :user_a AND blocked_id = :user_b) OR (blocker_id = :user_b AND blocked_id = :user_a) LIMIT 1'
+        'SELECT 1 FROM blocks
+         WHERE (blocker_id = :user_a AND blocked_id = :user_b)
+            OR (blocker_id = :reverse_user_b AND blocked_id = :reverse_user_a)
+         LIMIT 1'
     );
     $statement->execute([
         ':user_a' => $user_a,
         ':user_b' => $user_b,
+        ':reverse_user_b' => $user_b,
+        ':reverse_user_a' => $user_a,
     ]);
 
     return (bool) $statement->fetchColumn();
@@ -111,28 +121,30 @@ function is_blocked(PDO $pdo, int $user_a, int $user_b): bool
  */
 function get_blocked_user_ids(PDO $pdo, int $user_id): array
 {
+    ensure_operational_schema($pdo);
     $statement = $pdo->prepare(
-        'SELECT blocker_id, blocked_id FROM blocks WHERE blocker_id = :user_id OR blocked_id = :user_id'
+        'SELECT blocker_id, blocked_id FROM blocks
+         WHERE blocker_id = :blocker_user_id OR blocked_id = :blocked_user_id'
     );
-    $statement->execute([':user_id' => $user_id]);
+    $statement->execute([
+        ':blocker_user_id' => $user_id,
+        ':blocked_user_id' => $user_id,
+    ]);
 
     $blockedIds = [];
     while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         if (!is_array($row)) {
             continue;
         }
-
         $blockerId = isset($row['blocker_id']) ? (int) $row['blocker_id'] : 0;
         $blockedId = isset($row['blocked_id']) ? (int) $row['blocked_id'] : 0;
 
         if ($blockerId > 0 && $blockerId !== $user_id) {
             $blockedIds[$blockerId] = $blockerId;
         }
-
         if ($blockedId > 0 && $blockedId !== $user_id) {
             $blockedIds[$blockedId] = $blockedId;
         }
     }
-
     return array_values($blockedIds);
 }

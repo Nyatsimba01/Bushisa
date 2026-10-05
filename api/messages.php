@@ -11,15 +11,25 @@ require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/rate_limit.php';
 require_once __DIR__ . '/../php/logger.php';
 require_once __DIR__ . '/../php/function.php';
+require_once __DIR__ . '/../php/operational.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['error' => 'Method not allowed'], 405);
 }
 
 require_login();
+ensure_operational_schema($pdo);
 
 $currentUserId = (int) $_SESSION['user_id'];
-$matchId = clean_int($_GET['match_id'] ?? null);
+$rawBody = '';
+$payload = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rawBody = file_get_contents('php://input');
+    $decodedPayload = json_decode($rawBody !== false ? $rawBody : '', true);
+    $payload = is_array($decodedPayload) ? $decodedPayload : [];
+}
+
+$matchId = clean_int($_GET['match_id'] ?? $payload['match_id'] ?? null);
 
 if ($matchId === null || $matchId <= 0) {
     json_response(['error' => 'Invalid match ID'], 400);
@@ -53,12 +63,26 @@ if ($match === false) {
 
 $otherUserId = (int) ((int) $match['user_a_id'] === $currentUserId ? $match['user_b_id'] : $match['user_a_id']);
 
+if (operational_is_blocked($pdo, $currentUserId, $otherUserId)) {
+    json_response(['error' => 'This conversation is unavailable'], 403);
+}
+
 $messageColumnsStatement = $pdo->query('SHOW COLUMNS FROM messages');
 $messageColumns = $messageColumnsStatement !== false ? $messageColumnsStatement->fetchAll(PDO::FETCH_COLUMN) : [];
 $messageBodyColumn = in_array('body', $messageColumns, true) ? 'body' : 'message_text';
 $messageTimeColumn = in_array('sent_at', $messageColumns, true) ? 'sent_at' : 'created_at';
+$hasUnsentAt = in_array('unsent_at', $messageColumns, true);
+$hasUnsentBy = in_array('unsent_by', $messageColumns, true);
+$hasModerationBody = in_array('moderation_body', $messageColumns, true);
+
+$selectUnsentAt = $hasUnsentAt ? 'unsent_at' : 'NULL AS unsent_at';
+$selectUnsentBy = $hasUnsentBy ? 'unsent_by' : 'NULL AS unsent_by';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (!operational_has_message_approval($pdo, $matchId)) {
+        json_response(['error' => 'Chat permission has not been approved'], 403);
+    }
+
     $afterId = clean_int($_GET['after_id'] ?? null);
     if ($afterId === null || $afterId < 0) {
         $afterId = 0;
@@ -67,12 +91,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $messagesStatement = $pdo->prepare(
         sprintf(
             'SELECT id, sender_id, %1$s AS body, %2$s AS sent_at, is_read
+                , %3$s, %4$s
              FROM messages
              WHERE match_id = :match_id
                AND id > :after_id
              ORDER BY id ASC',
             $messageBodyColumn,
-            $messageTimeColumn
+            $messageTimeColumn,
+            $selectUnsentAt,
+            $selectUnsentBy
         )
     );
     $messagesStatement->execute([
@@ -80,6 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ':after_id' => $afterId,
     ]);
     $messages = $messagesStatement->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    foreach ($messages as &$message) {
+        if (!empty($message['unsent_at'])) {
+            $message['body'] = 'Message unsent';
+            $message['is_unsent'] = true;
+        } else {
+            $message['is_unsent'] = false;
+        }
+    }
+    unset($message);
 
     if ($messages !== []) {
         $markReadStatement = $pdo->prepare(
@@ -102,9 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     ]);
 }
 
-$rawBody = file_get_contents('php://input');
-$payload = json_decode($rawBody !== false ? $rawBody : '', true);
-
 if (!is_array($payload)) {
     json_response(['error' => 'Invalid request body'], 400);
 }
@@ -118,6 +151,58 @@ if (isset($_SERVER['HTTP_X_CSRF_TOKEN']) && is_string($_SERVER['HTTP_X_CSRF_TOKE
 
 if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
     json_response(['error' => 'Invalid CSRF token'], 403);
+}
+
+$action = isset($payload['action']) && is_string($payload['action']) ? clean_enum($payload['action'], ['send', 'unsend']) : 'send';
+if ($action === null) {
+    json_response(['error' => 'Invalid message action'], 400);
+}
+
+if ($action === 'unsend') {
+    $messageId = clean_int($payload['message_id'] ?? null);
+    if ($messageId === null || $messageId <= 0) {
+        json_response(['error' => 'Invalid message ID'], 400);
+    }
+
+    if (!$hasUnsentAt || !$hasUnsentBy || !$hasModerationBody) {
+        json_response(['error' => 'Unsend is not available until message columns are migrated'], 501);
+    }
+
+    try {
+        $statement = $pdo->prepare(
+            sprintf(
+                'UPDATE messages
+                 SET moderation_body = CASE WHEN moderation_body IS NULL THEN %1$s ELSE moderation_body END,
+                     %1$s = "",
+                     unsent_at = NOW(),
+                     unsent_by = :current_user_id
+                 WHERE id = :message_id
+                   AND match_id = :match_id
+                   AND sender_id = :current_user_id
+                   AND unsent_at IS NULL',
+                $messageBodyColumn
+            )
+        );
+        $statement->execute([
+            ':message_id' => $messageId,
+            ':match_id' => $matchId,
+            ':current_user_id' => $currentUserId,
+        ]);
+
+        if ($statement->rowCount() < 1) {
+            json_response(['error' => 'Message cannot be unsent'], 403);
+        }
+
+        log_action($pdo, $currentUserId, 'message_unsent:' . $messageId, $_SERVER['REMOTE_ADDR'] ?? null);
+        json_response(['success' => true, 'data' => ['id' => $messageId, 'is_unsent' => true, 'body' => 'Message unsent']]);
+    } catch (Throwable $throwable) {
+        log_to_file('Message unsend failed for user ' . $currentUserId . ': ' . $throwable->getMessage(), 'ERROR');
+        json_response(['error' => 'Unable to unsend message'], 500);
+    }
+}
+
+if (!operational_has_message_approval($pdo, $matchId)) {
+    json_response(['error' => 'Chat permission has not been approved'], 403);
 }
 
 $rateLimitKey = (string) $currentUserId;
@@ -155,11 +240,14 @@ try {
     $messageFetchStatement = $pdo->prepare(
         sprintf(
             'SELECT id, sender_id, %1$s AS body, %2$s AS sent_at, is_read
+                , %3$s, %4$s
              FROM messages
              WHERE id = :id
              LIMIT 1',
             $messageBodyColumn,
-            $messageTimeColumn
+            $messageTimeColumn,
+            $selectUnsentAt,
+            $selectUnsentBy
         )
     );
     $messageFetchStatement->execute([':id' => $messageId]);
