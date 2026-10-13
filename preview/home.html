@@ -22,6 +22,11 @@
     .page-home .home-footer{margin-top:26px}
     .page-home .home-consent{margin-top:30px}
     @media(max-width:979px){.page-home .topbar h1{font-size:29px}.page-home .demo-badge{display:none}}
+
+    /* Keep the real Figma sample portraits filling the complete card surface. */
+    .page-home .profile-card__image{width:100%;min-width:0;max-width:none;aspect-ratio:auto;position:relative;display:block;overflow:hidden}
+    .page-home .profile-card__image .demo-profile-image{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:100%;max-width:none;object-fit:cover;object-position:center 40%}
+    .page-home .home-photo-overlay{z-index:1}
   </style>
 </head>
 <body class="bushisa-app page-home">
@@ -44,9 +49,9 @@
       <ul class="matches-strip__list">
         <li><div class="match-avatar-link"><span class="demo-avatar">+</span><span>New</span></div></li>
         <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/amara.jpg" alt="Fictional demo avatar for Amara"><span>Amara</span></div></li>
-        <li><div class="match-avatar-link"><span class="demo-avatar">K</span><span>Kwame</span></div></li>
-        <li><div class="match-avatar-link"><span class="demo-avatar">R</span><span>Rudo</span></div></li>
-        <li><div class="match-avatar-link"><span class="demo-avatar">F</span><span>Farai</span></div></li>
+        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/kwame.jpg" alt="Fictional demo avatar for Kwame"><span>Kwame</span></div></li>
+        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/rudo.jpg" alt="Fictional demo avatar for Rudo"><span>Rudo</span></div></li>
+        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/farai.jpg" alt="Fictional demo avatar for Farai"><span>Farai</span></div></li>
       </ul>
     </section>
     <section aria-labelledby="suggested">
@@ -54,10 +59,10 @@
         <div><h2 class="hero-statement" id="suggested">Suggested for you</h2><p>Sample concept profiles · Not real activity</p></div>
         <button class="home-filter-button" type="button" data-demo-action="filter">☷ Filter</button>
       </div>
-      <p class="demo-image-disclaimer">This is a layout preview. Some Figma sample photos are represented by placeholders; the real Home page displays database profile photos.</p>
+      <p class="demo-image-disclaimer">These fictional example photos are taken from the Figma design. The real Home page uses database profile photos.</p>
       <div class="profile-grid">
         <article class="profile-card">
-          <div class="profile-card__image"><div class="demo-photo-empty"><span>Photo placeholder</span></div><div class="home-photo-overlay"><h3>Naledi, 20</h3><p>BSc Computer Science · NUST</p></div></div>
+          <div class="profile-card__image"><img class="demo-profile-image" src="assets/naledi.jpg" alt="Figma sample portrait of fictional profile Naledi"><div class="home-photo-overlay"><h3>Naledi, 20</h3><p>BSc Computer Science · NUST</p></div></div>
           <div class="profile-card__body">
             <div class="home-conversation-prompt"><p class="home-eyebrow">CONVERSATION PROMPT</p><p class="profile-card__bio">The late-night snack that defines me is probably...</p></div>
             <p class="demo-navigation-note">Reading · Jazz · Coffee</p>
