@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Bushisa · Home · Figma-only Preview</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    [hidden]{display:none!important}
+    .demo-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;margin-left:10px;border-radius:99px;background:#4a2434;color:#f4b598;font-size:11px}
+    .demo-toast{position:fixed;z-index:99;bottom:120px;right:18px;background:#3b2931;border:1px solid #795760;border-radius:12px;padding:14px 18px;max-width:330px;color:#f8ede2;box-shadow:0 12px 40px #0006}
+    .demo-photo-empty{height:100%;display:grid;place-items:center;background:radial-gradient(circle at 70% 22%,#714553,#3d2a32 50%,#21151a 100%);color:#f4b598}
+    .demo-photo-empty span{font:400 22px Georgia,serif;opacity:.9}
+    .demo-avatar{display:grid;place-items:center;width:64px;height:64px;background:linear-gradient(135deg,#744757,#3b2931);border-radius:50%;color:#f8ede2;font:400 23px Georgia,serif}
+    .demo-avatar--photo{object-fit:cover;background:#3b2931}
+    .demo-image-disclaimer{margin:0 0 14px;color:#f4b598;font-size:12px}
+    .demo-navigation-note{font-size:13px;color:#c8b4b9;margin:16px 0 0}
+    .demo-navigation-note a{color:#f4b598}
+    .page-home .profile-card__image .demo-profile-image{width:100%;height:100%;object-fit:cover}
+    .page-home .home-card-actions button:disabled{opacity:.5;cursor:not-allowed}
+    .page-home .home-footer{margin-top:26px}
+    .page-home .home-consent{margin-top:30px}
+    @media(max-width:979px){.page-home .topbar h1{font-size:29px}.page-home .demo-badge{display:none}}
+  </style>
+</head>
+<body class="bushisa-app page-home">
+<div class="app-shell" id="home">
+  <header class="topbar">
+    <h1>Bushisa</h1>
+    <button type="button" class="notification-bell icon-button" id="previewBell" aria-label="Preview notifications" aria-expanded="false" aria-controls="previewNotifications"><span class="ui-icon ui-icon--bell" aria-hidden="true"></span><span class="notification-bell__dot"></span></button>
+  </header>
+  <nav class="primary-nav" aria-label="Demo navigation">
+    <a class="primary-nav__item is-active" href="#home" aria-current="page"><span class="primary-nav__icon primary-nav__icon--home" aria-hidden="true"></span><span class="primary-nav__label">Home</span></a>
+    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--search" aria-hidden="true"></span><span class="primary-nav__label">Find Match</span></a>
+    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--confessions" aria-hidden="true"></span><span class="primary-nav__label">Confessions</span></a>
+    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--you" aria-hidden="true"></span><span class="primary-nav__label">You</span></a>
+  </nav>
+  <main class="page-content">
+    <div class="home-concept-note">DESIGN PREVIEW ONLY · Fictional profiles · No account, messaging or database connections <span class="demo-badge">Figma integration branch</span></div>
+    <div class="home-welcome"><p>Hey, Tinashe. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
+    <section class="matches-strip home-chats" aria-labelledby="previewChats">
+      <div class="home-section-heading"><h2 id="previewChats">Your chats</h2><a href="#next-stages">See all →</a></div>
+      <ul class="matches-strip__list">
+        <li><div class="match-avatar-link"><span class="demo-avatar">+</span><span>New</span></div></li>
+        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/amara.jpg" alt="Fictional demo avatar for Amara"><span>Amara</span></div></li>
+        <li><div class="match-avatar-link"><span class="demo-avatar">K</span><span>Kwame</span></div></li>
+        <li><div class="match-avatar-link"><span class="demo-avatar">R</span><span>Rudo</span></div></li>
+        <li><div class="match-avatar-link"><span class="demo-avatar">F</span><span>Farai</span></div></li>
+      </ul>
+    </section>
+    <section aria-labelledby="suggested">
+      <div class="home-suggestions-heading">
+        <div><h2 class="hero-statement" id="suggested">Suggested for you</h2><p>Sample concept profiles · Not real activity</p></div>
+        <button class="home-filter-button" type="button" data-demo-action="filter">☷ Filter</button>
+      </div>
+      <p class="demo-image-disclaimer">This is a layout preview. Some Figma sample photos are represented by placeholders; the real Home page displays database profile photos.</p>
+      <div class="profile-grid">
+        <article class="profile-card">
+          <div class="profile-card__image"><div class="demo-photo-empty"><span>Photo placeholder</span></div><div class="home-photo-overlay"><h3>Naledi, 20</h3><p>BSc Computer Science · NUST</p></div></div>
+          <div class="profile-card__body">
+            <div class="home-conversation-prompt"><p class="home-eyebrow">CONVERSATION PROMPT</p><p class="profile-card__bio">The late-night snack that defines me is probably...</p></div>
+            <p class="demo-navigation-note">Reading · Jazz · Coffee</p>
+            <div class="card-actions home-card-actions"><button type="button" class="discover-card__action home-pass" data-demo-action="pass" aria-label="Pass on demo profile Naledi">×</button><button type="button" class="discover-card__action home-like" data-demo-action="like" aria-label="Like demo profile Naledi"><span aria-hidden="true">♡</span></button><button type="button" class="home-filter-button" data-demo-action="report">Report</button></div>
+          </div>
+        </article>
+        <article class="profile-card">
+          <div class="profile-card__image"><img class="demo-profile-image" src="assets/tafadzwa.jpg" alt="Figma sample portrait of fictional profile Tafadzwa"><div class="home-photo-overlay"><h3>Tafadzwa, 21</h3><p>BEng Electrical · NUST</p></div></div>
+          <div class="profile-card__body">
+            <div class="home-conversation-prompt"><p class="home-eyebrow">CONVERSATION PROMPT</p><p class="profile-card__bio">Exam-season survival trick? Guitar breaks between study sessions.</p></div>
+            <p class="demo-navigation-note">Engineering · Guitar · Travel</p>
+            <div class="card-actions home-card-actions"><button type="button" class="discover-card__action home-pass" data-demo-action="pass" aria-label="Pass on demo profile Tafadzwa">×</button><button type="button" class="discover-card__action home-like" data-demo-action="like" aria-label="Like demo profile Tafadzwa"><span aria-hidden="true">♡</span></button><button type="button" class="home-filter-button" data-demo-action="report">Report</button></div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section class="home-consent" id="next-stages" aria-labelledby="previewConsent"><h2 id="previewConsent">A mutual yes. Then a hello.</h2><p>Liking each other creates a mutual match, not permission to message. A conversation starts only after an invitation is accepted.</p><p class="demo-navigation-note">The other Figma pages will be integrated in later stages. Demo controls here do not update real accounts.</p></section>
+    <footer class="home-footer">For NUST students · 18+ only · Independent student project <span>Figma Home preview · No live data</span></footer>
+  </main>
+  <aside class="notification-panel" id="previewNotifications" aria-label="Demo notifications" hidden><div class="notification-panel__header"><h2>Notifications</h2><button type="button" id="previewClose" class="icon-button" aria-label="Close notifications">×</button></div><p>You're all caught up. This preview doesn't load real notifications.</p></aside>
+  <div class="demo-toast" id="previewToast" role="status" hidden></div>
+</div>
+<script>
+(function(){
+ const bell=document.getElementById('previewBell'),panel=document.getElementById('previewNotifications'),close=document.getElementById('previewClose'),toast=document.getElementById('previewToast');
+ let timeoutId=null;
+ function show(message){toast.textContent=message;toast.hidden=false;clearTimeout(timeoutId);timeoutId=setTimeout(()=>{toast.hidden=true},3500)}
+ function hidePanel(){panel.hidden=true;bell.setAttribute('aria-expanded','false');bell.focus()}
+ bell.addEventListener('click',()=>{const next=panel.hidden;panel.hidden=!next;bell.setAttribute('aria-expanded',String(next))});
+ close.addEventListener('click',hidePanel);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)hidePanel()});
+ document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));
+})();
+</script>
+</body>
+</html>
