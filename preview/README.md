@@ -1,6 +1,6 @@
 # Bushisa Figma Home preview (frontend-only)
 
-This is a separate visual checkpoint of the Home screen. It does not connect to the database, authenticate users, send likes, or message anyone. Names and photos are fictional design examples. Some sample portraits remain placeholders because not every Figma image could be exported. Real profile photos on the PHP page remain database-driven.
+This is a separate visual checkpoint of the Home screen. It does not connect to the database, authenticate users, send likes, or message anyone. Names and photos are fictional design examples. The Home preview now includes its Figma sample profile portraits and sample match avatars. Real profile photos on the PHP page remain database-driven.
 
 ## Preview safely with XAMPP on Windows
 
