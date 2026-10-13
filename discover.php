@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/php/security_headers.php';
 require_once __DIR__ . '/php/session_manager.php';
+require_once __DIR__ . '/php/csrf.php';
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/function.php';
@@ -123,7 +124,7 @@ SQL;
 $currentProfile = get_profile($pdo, $currentUserId);
 $firstName = trim((string) ($currentProfile['display_name'] ?? 'there'));
 $firstName = explode(' ', $firstName)[0] ?: 'there';
-$csrfToken = function_exists('generate_csrf_token') ? generate_csrf_token() : null;
+$csrfToken = generate_csrf_token();
 render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
 ?>
 <div class="home-concept-note" role="note">CONCEPT PREVIEW · Layout follows our Figma design · Profiles shown below come from your actual development database</div>
