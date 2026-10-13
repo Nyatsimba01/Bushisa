@@ -94,7 +94,8 @@
  bell.addEventListener('click',()=>{const next=panel.hidden;panel.hidden=!next;bell.setAttribute('aria-expanded',String(next))});
  close.addEventListener('click',hidePanel);
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)hidePanel()});
- document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));\n document.querySelectorAll('[data-demo-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This screen is not connected yet. We are previewing Home first.')}));
+ document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));
+ document.querySelectorAll('[data-demo-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This screen is not connected yet. We are previewing Home first.')}));
 })();
 </script>
 </body>
