@@ -120,10 +120,18 @@ SQL;
     $candidates = $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
 
-render_page_shell_start('home', 'Bushisa', null, $currentUserId, true);
+$currentProfile = get_profile($pdo, $currentUserId);
+$firstName = trim((string) ($currentProfile['display_name'] ?? 'there'));
+$firstName = explode(' ', $firstName)[0] ?: 'there';
+$csrfToken = function_exists('generate_csrf_token') ? generate_csrf_token() : null;
+render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
 ?>
-<section class="matches-strip" aria-labelledby="matches-title">
-    <h2 class="sr-only" id="matches-title">Established matches</h2>
+<div class="home-concept-note" role="note">CONCEPT PREVIEW · Layout follows our Figma design · Profiles shown below come from your actual development database</div>
+<div class="home-welcome"><p>Hey, <?= e($firstName) ?>. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
+<?php
+?>
+<section class="matches-strip home-chats" aria-labelledby="matches-title">
+    <div class="home-section-heading"><h2 id="matches-title">Your chats</h2><a href="matches.php">See all <span aria-hidden="true">→</span></a></div>
     <?php if ($establishedMatches === []): ?>
         <div class="empty-state">
             <h2>No established matches yet</h2>
@@ -145,7 +153,7 @@ render_page_shell_start('home', 'Bushisa', null, $currentUserId, true);
 </section>
 
 <section aria-labelledby="home-heading">
-    <h2 class="hero-statement" id="home-heading">A little spark. A real connection.</h2>
+    <div class="home-suggestions-heading"><div><h2 class="hero-statement" id="home-heading">Suggested for you</h2><p>Discover new people at your own pace.</p></div><a class="home-filter-button" href="profile.php#preferences">☷ <span>Filter</span></a></div>
 
     <?php if ($preferences === null): ?>
         <div class="empty-state">
@@ -173,18 +181,18 @@ render_page_shell_start('home', 'Bushisa', null, $currentUserId, true);
                 ?>
                 <article class="profile-card" data-candidate-id="<?= e($candidate['user_id'] ?? '') ?>">
                     <div class="profile-card__image">
-                        <?= render_avatar($candidate['profile_photo_path'] ?? null, $name) ?>
+                        <?= render_avatar($candidate['profile_photo_path'] ?? null, $name, 'home-photo') ?>
+                        <div class="home-photo-overlay"><h3 class="profile-card__name"><?= e($name) ?><?= $age !== null ? ', ' . e($age) : '' ?></h3><p><?= e((string) ($candidate['faculty'] ?? 'NUST')) ?> · NUST</p></div>
                     </div>
                     <div class="profile-card__body">
-                        <h3 class="profile-card__name"><?= e($name) ?></h3>
-                        <?php if ($meta !== []): ?>
-                            <p class="profile-card__meta"><?= e(implode(' · ', $meta)) ?></p>
-                        <?php endif; ?>
-                        <p class="profile-card__bio"><?= e($candidate['bio'] !== '' ? $candidate['bio'] : 'No bio added yet.') ?></p>
-                        <div class="card-actions">
-                            <button class="discover-card__action discover-card__action--like" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="like">Like</button>
-                            <button class="discover-card__action" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="pass">Pass</button>
-                            <a class="button-secondary" href="community_guidelines.php">Report</a>
+                        <div class="home-conversation-prompt">
+                            <p class="home-eyebrow">ABOUT ME</p>
+                            <p class="profile-card__bio"><?= e($candidate['bio'] !== '' ? $candidate['bio'] : 'This student has not added a bio yet.') ?></p>
+                        </div>
+                        <div class="card-actions home-card-actions">
+                            <button class="discover-card__action home-pass" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="pass" aria-label="Pass on <?= e($name) ?>" title="Pass">×</button>
+                            <button class="discover-card__action discover-card__action--like home-like" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="like" aria-label="Like <?= e($name) ?>" title="Like"><span aria-hidden="true">♡</span></button>
+                            <a class="home-report" href="community_guidelines.php">Safety &amp; reporting</a>
                         </div>
                     </div>
                 </article>
@@ -192,5 +200,7 @@ render_page_shell_start('home', 'Bushisa', null, $currentUserId, true);
         </div>
     <?php endif; ?>
 </section>
+<section class="home-consent" aria-labelledby="home-consent-title"><h2 id="home-consent-title">A mutual yes. Then a hello.</h2><p>Liking each other creates a mutual match, not permission to message. A conversation starts only after the invitation is accepted.</p><a href="matches.php">Explore Find Match →</a></section>
+<footer class="home-footer">For NUST students · 18+ only · Independent student project <span><a href="community_guidelines.php">Community rules</a> / <a href="privacy_policy.php">Safety &amp; privacy</a></span></footer>
 <?php
 render_page_shell_end();
