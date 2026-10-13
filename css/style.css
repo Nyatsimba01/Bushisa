@@ -1096,3 +1096,21 @@ button:disabled {
 }
 @media(min-width:1240px) {.page-home .profile-grid {grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:370px) {.page-home .primary-nav {left:8px;right:8px}.page-home .page-content {padding-left:16px;padding-right:16px}.page-home .home-concept-note {margin-left:-16px;margin-right:-16px;padding-left:16px}.page-home .home-report {font-size:10px}}
+
+/* Figma Home: image containers fill the entire card at all viewport sizes. */
+.page-home .profile-card__image {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  aspect-ratio: auto;
+}
+.page-home .profile-card__image .home-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+}
