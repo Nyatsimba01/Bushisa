@@ -37,15 +37,15 @@
   </header>
   <nav class="primary-nav" aria-label="Demo navigation">
     <a class="primary-nav__item is-active" href="#home" aria-current="page"><span class="primary-nav__icon primary-nav__icon--home" aria-hidden="true"></span><span class="primary-nav__label">Home</span></a>
-    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--search" aria-hidden="true"></span><span class="primary-nav__label">Find Match</span></a>
-    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--confessions" aria-hidden="true"></span><span class="primary-nav__label">Confessions</span></a>
-    <a class="primary-nav__item" href="#next-stages"><span class="primary-nav__icon primary-nav__icon--you" aria-hidden="true"></span><span class="primary-nav__label">You</span></a>
+    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--search" aria-hidden="true"></span><span class="primary-nav__label">Find Match</span></a>
+    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--confessions" aria-hidden="true"></span><span class="primary-nav__label">Confessions</span></a>
+    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--you" aria-hidden="true"></span><span class="primary-nav__label">You</span></a>
   </nav>
   <main class="page-content">
     <div class="home-concept-note">DESIGN PREVIEW ONLY · Fictional profiles · No account, messaging or database connections <span class="demo-badge">Figma integration branch</span></div>
     <div class="home-welcome"><p>Hey, Tinashe. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
     <section class="matches-strip home-chats" aria-labelledby="previewChats">
-      <div class="home-section-heading"><h2 id="previewChats">Your chats</h2><a href="#next-stages">See all →</a></div>
+      <div class="home-section-heading"><h2 id="previewChats">Your chats</h2><a href="#" data-demo-link>See all →</a></div>
       <ul class="matches-strip__list">
         <li><div class="match-avatar-link"><span class="demo-avatar">+</span><span>New</span></div></li>
         <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/amara.jpg" alt="Fictional demo avatar for Amara"><span>Amara</span></div></li>
@@ -94,7 +94,7 @@
  bell.addEventListener('click',()=>{const next=panel.hidden;panel.hidden=!next;bell.setAttribute('aria-expanded',String(next))});
  close.addEventListener('click',hidePanel);
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)hidePanel()});
- document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));
+ document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));\n document.querySelectorAll('[data-demo-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This screen is not connected yet. We are previewing Home first.')}));
 })();
 </script>
 </body>
