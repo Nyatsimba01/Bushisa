@@ -1,102 +1,109 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="color-scheme" content="dark">
-  <title>Bushisa · Home · Figma-only Preview</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <style>
-    [hidden]{display:none!important}
-    .demo-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;margin-left:10px;border-radius:99px;background:#4a2434;color:#f4b598;font-size:11px}
-    .demo-toast{position:fixed;z-index:99;bottom:120px;right:18px;background:#3b2931;border:1px solid #795760;border-radius:12px;padding:14px 18px;max-width:330px;color:#f8ede2;box-shadow:0 12px 40px #0006}
-    .demo-photo-empty{height:100%;display:grid;place-items:center;background:radial-gradient(circle at 70% 22%,#714553,#3d2a32 50%,#21151a 100%);color:#f4b598}
-    .demo-photo-empty span{font:400 22px Georgia,serif;opacity:.9}
-    .demo-avatar{display:grid;place-items:center;width:64px;height:64px;background:linear-gradient(135deg,#744757,#3b2931);border-radius:50%;color:#f8ede2;font:400 23px Georgia,serif}
-    .demo-avatar--photo{object-fit:cover;background:#3b2931}
-    .demo-image-disclaimer{margin:0 0 14px;color:#f4b598;font-size:12px}
-    .demo-navigation-note{font-size:13px;color:#c8b4b9;margin:16px 0 0}
-    .demo-navigation-note a{color:#f4b598}
-    .page-home .profile-card__image .demo-profile-image{width:100%;height:100%;object-fit:cover}
-    .page-home .home-card-actions button:disabled{opacity:.5;cursor:not-allowed}
-    .page-home .home-footer{margin-top:26px}
-    .page-home .home-consent{margin-top:30px}
-    @media(max-width:979px){.page-home .topbar h1{font-size:29px}.page-home .demo-badge{display:none}}
-
-    /* Keep the real Figma sample portraits filling the complete card surface. */
-    .page-home .profile-card__image{width:100%;min-width:0;max-width:none;aspect-ratio:auto;position:relative;display:block;overflow:hidden}
-    .page-home .profile-card__image .demo-profile-image{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:100%;max-width:none;object-fit:cover;object-position:center 40%}
-    .page-home .home-photo-overlay{z-index:1}
-  </style>
-</head>
-<body class="bushisa-app page-home">
-<div class="app-shell" id="home">
-  <header class="topbar">
-    <h1>Bushisa</h1>
-    <button type="button" class="notification-bell icon-button" id="previewBell" aria-label="Preview notifications" aria-expanded="false" aria-controls="previewNotifications"><span class="ui-icon ui-icon--bell" aria-hidden="true"></span><span class="notification-bell__dot"></span></button>
-  </header>
-  <nav class="primary-nav" aria-label="Demo navigation">
-    <a class="primary-nav__item is-active" href="#home" aria-current="page"><span class="primary-nav__icon primary-nav__icon--home" aria-hidden="true"></span><span class="primary-nav__label">Home</span></a>
-    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--search" aria-hidden="true"></span><span class="primary-nav__label">Find Match</span></a>
-    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--confessions" aria-hidden="true"></span><span class="primary-nav__label">Confessions</span></a>
-    <a class="primary-nav__item" href="#" data-demo-link><span class="primary-nav__icon primary-nav__icon--you" aria-hidden="true"></span><span class="primary-nav__label">You</span></a>
-  </nav>
-  <main class="page-content">
-    <div class="home-concept-note">DESIGN PREVIEW ONLY · Fictional profiles · No account, messaging or database connections <span class="demo-badge">Figma integration branch</span></div>
-    <div class="home-welcome"><p>Hey, Tinashe. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
-    <section class="matches-strip home-chats" aria-labelledby="previewChats">
-      <div class="home-section-heading"><h2 id="previewChats">Your chats</h2><a href="#" data-demo-link>See all →</a></div>
-      <ul class="matches-strip__list">
-        <li><div class="match-avatar-link"><span class="demo-avatar">+</span><span>New</span></div></li>
-        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/amara.jpg" alt="Fictional demo avatar for Amara"><span>Amara</span></div></li>
-        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/kwame.jpg" alt="Fictional demo avatar for Kwame"><span>Kwame</span></div></li>
-        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/rudo.jpg" alt="Fictional demo avatar for Rudo"><span>Rudo</span></div></li>
-        <li><div class="match-avatar-link"><img class="demo-avatar demo-avatar--photo" src="assets/farai.jpg" alt="Fictional demo avatar for Farai"><span>Farai</span></div></li>
-      </ul>
-    </section>
-    <section aria-labelledby="suggested">
-      <div class="home-suggestions-heading">
-        <div><h2 class="hero-statement" id="suggested">Suggested for you</h2><p>Sample concept profiles · Not real activity</p></div>
-        <button class="home-filter-button" type="button" data-demo-action="filter">☷ Filter</button>
-      </div>
-      <p class="demo-image-disclaimer">These fictional example photos are taken from the Figma design. The real Home page uses database profile photos.</p>
-      <div class="profile-grid">
-        <article class="profile-card">
-          <div class="profile-card__image"><img class="demo-profile-image" src="assets/naledi.jpg" alt="Figma sample portrait of fictional profile Naledi"><div class="home-photo-overlay"><h3>Naledi, 20</h3><p>BSc Computer Science · NUST</p></div></div>
-          <div class="profile-card__body">
-            <div class="home-conversation-prompt"><p class="home-eyebrow">CONVERSATION PROMPT</p><p class="profile-card__bio">The late-night snack that defines me is probably...</p></div>
-            <p class="demo-navigation-note">Reading · Jazz · Coffee</p>
-            <div class="card-actions home-card-actions"><button type="button" class="discover-card__action home-pass" data-demo-action="pass" aria-label="Pass on demo profile Naledi">×</button><button type="button" class="discover-card__action home-like" data-demo-action="like" aria-label="Like demo profile Naledi"><span aria-hidden="true">♡</span></button><button type="button" class="home-filter-button" data-demo-action="report">Report</button></div>
-          </div>
-        </article>
-        <article class="profile-card">
-          <div class="profile-card__image"><img class="demo-profile-image" src="assets/tafadzwa.jpg" alt="Figma sample portrait of fictional profile Tafadzwa"><div class="home-photo-overlay"><h3>Tafadzwa, 21</h3><p>BEng Electrical · NUST</p></div></div>
-          <div class="profile-card__body">
-            <div class="home-conversation-prompt"><p class="home-eyebrow">CONVERSATION PROMPT</p><p class="profile-card__bio">Exam-season survival trick? Guitar breaks between study sessions.</p></div>
-            <p class="demo-navigation-note">Engineering · Guitar · Travel</p>
-            <div class="card-actions home-card-actions"><button type="button" class="discover-card__action home-pass" data-demo-action="pass" aria-label="Pass on demo profile Tafadzwa">×</button><button type="button" class="discover-card__action home-like" data-demo-action="like" aria-label="Like demo profile Tafadzwa"><span aria-hidden="true">♡</span></button><button type="button" class="home-filter-button" data-demo-action="report">Report</button></div>
-          </div>
-        </article>
-      </div>
-    </section>
-    <section class="home-consent" id="next-stages" aria-labelledby="previewConsent"><h2 id="previewConsent">A mutual yes. Then a hello.</h2><p>Liking each other creates a mutual match, not permission to message. A conversation starts only after an invitation is accepted.</p><p class="demo-navigation-note">The other Figma pages will be integrated in later stages. Demo controls here do not update real accounts.</p></section>
-    <footer class="home-footer">For NUST students · 18+ only · Independent student project <span>Figma Home preview · No live data</span></footer>
-  </main>
-  <aside class="notification-panel" id="previewNotifications" aria-label="Demo notifications" hidden><div class="notification-panel__header"><h2>Notifications</h2><button type="button" id="previewClose" class="icon-button" aria-label="Close notifications">×</button></div><p>You're all caught up. This preview doesn't load real notifications.</p></aside>
-  <div class="demo-toast" id="previewToast" role="status" hidden></div>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Bushisa · Home · Figma concept preview</title><link rel="stylesheet" href="home-figma.css"></head>
+<body id="top">
+<header class="site-header"><div class="header-inner">
+<a href="#top" class="brand" aria-label="Bushisa Home"><img src="assets/icons/brand-heart.svg" class="" alt="" aria-hidden="true"><span class="brand-title">Bushisa</span><span class="brand-subtitle">NUST CONNECTIONS</span></a>
+<nav class="desktop-nav" aria-label="Main navigation"><a href="#top" class="active" aria-current="page"><img src="assets/icons/home.svg" class="" alt="" aria-hidden="true"><span>Home</span></a>
+<a href="#" data-preview-link><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"><span>Find Match</span></a>
+<a href="#" data-preview-link><img src="assets/icons/confessions.svg" class="" alt="" aria-hidden="true"><span>Confessions</span></a>
+<a href="#" data-preview-link><img src="assets/icons/you.svg" class="" alt="" aria-hidden="true"><span>You</span></a></nav>
+<div class="header-actions"><button type="button" class="round-button" data-preview-action="bell" aria-label="Preview notifications"><img src="assets/icons/bell.svg" class="" alt="" aria-hidden="true"><span class="unread-count">1</span></button><button type="button" class="round-button account-letter" data-preview-action="account" aria-label="Preview profile">T</button></div>
+</div></header>
+<div class="preview-banner"><div class="inner"><span class="preview-eye" aria-hidden="true">◉</span><span class="desktop-text">CONCEPT PREVIEW · Sample profiles and chats shown for illustration only · Not real activity</span><span class="mobile-text">CONCEPT PREVIEW · Sample profiles shown for illustration only</span></div></div>
+<main class="main">
+<div class="welcome"><p>Hey, Tinashe. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
+<section class="chats" aria-labelledby="chats-title">
+  <div class="section-head"><div class="head-with-pill"><h2 id="chats-title" class="section-title">Your chats</h2><span class="pill">2 requests</span></div><a href="#" data-preview-link class="peach-link">See all →</a></div>
+  <div class="chats-strip" aria-label="Fictional chat examples">
+ <div class="chat-circle "><span class="new-circle"><img src="assets/icons/new-chat.svg" class="" alt="" aria-hidden="true"></span><span>New</span></div>
+ <div class="chat-circle unread"><img class="avatar" src="assets/amara.jpg" alt="Fictional design portrait for Amara"><span>Amara</span></div>
+ <div class="chat-circle "><img class="avatar" src="assets/kwame.jpg" alt="Fictional design portrait for Kwame"><span>Kwame</span></div>
+ <div class="chat-circle "><img class="avatar" src="assets/rudo.jpg" alt="Fictional design portrait for Rudo"><span>Rudo</span></div>
+ <div class="chat-circle "><img class="avatar" src="assets/farai.jpg" alt="Fictional design portrait for Farai"><span>Farai</span></div>
+ <div class="chat-divider" role="separator"></div>
+ <div class="chat-circle "><img class="avatar" src="assets/pending-1.jpg" alt="Fictional design portrait for Pending"><span class="pending-icon">?</span><span>Pending</span></div>
+ <div class="chat-circle "><img class="avatar" src="assets/pending-2.jpg" alt="Fictional design portrait for Pending"><span class="pending-icon">?</span><span>Pending</span></div>
+ <div class="chat-note"><strong>Mutual match required</strong>Chat opens only after a match and an accepted invitation.<br>No pressure yet. Passing stays private.</div>
+ </div>
+ <div class="chats-bottom"><span class="private-pass">No passes yet. Passing stays private.</span></div>
+</section>
+<section class="suggestions" aria-labelledby="suggested-title">
+<div class="section-head"><div><h2 id="suggested-title" class="section-title">Suggested for you</h2><p class="section-head-sub">Sample concept profiles · Not real activity</p></div><div class="suggestion-tools"><button type="button" class="soft-button" data-preview-action="filter"><img src="assets/icons/filter.svg" class="" alt="" aria-hidden="true"> Filter</button><button type="button" class="soft-button dimmed" data-preview-action="undo">Undo last pass</button></div></div>
+<div class="suggestions-grid"><article class="profile-card " aria-label="Fictional Figma profile Naledi">
+ <div class="profile-picture">
+ <img src="assets/naledi.jpg" alt="Fictional Figma sample portrait of Naledi">
+ <button type="button" class="overlay-action" data-preview-action="photo" aria-label="Like Naledi's sample photo"><img src="assets/icons/camera.svg" class="" alt="" aria-hidden="true"> Like photo</button>
+ <div class="photo-overlay"><h3>Naledi, 20</h3><p>BSc Computer Science · NUST</p></div>
+ <span class="share-badge"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> 4 shared interests</span>
+ </div>
+ <div class="profile-content">
+ <div class="prompt-box"><p class="prompt-label">CONVERSATION PROMPT</p><p class="prompt-value"><span class="desktop-text">Ideal date between lectures? Coffee and a quiet walk.</span><span class="mobile-text">"The late-night snack that defines me is probably..."</span></p>
+ <div class="answer-line"><button type="button" class="small-action" data-preview-action="answer"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> Like answer</button><span class="sample-answer ">Cold pizza and a library deadline.</span></div></div>
+ <div class="tags"><span class="tag">📚 Reading</span><span class="tag">🎵 Jazz</span><span class="tag">☕ Coffee snob</span></div>
+ <div class="photo-feedback"><button type="button" class="small-action" data-preview-action="photo"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> Like photo</button> <span>Add a note (optional)</span></div>
+ <div class="profile-actions"><button type="button" class="circle-action" data-preview-action="pass" aria-label="Pass fictional Naledi profile"><img src="assets/icons/pass.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action like" data-preview-action="like" aria-label="Like fictional Naledi profile"><img src="assets/icons/like.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action" data-preview-action="save" aria-label="Bookmark fictional Naledi profile"><img src="assets/icons/bookmark.svg" class="" alt="" aria-hidden="true"></button></div>
+ <button type="button" class="confess-button" data-preview-action="confess"><img src="assets/icons/confess.svg" class="" alt="" aria-hidden="true"><span class="desktop-text">Confess about…</span><span class="mobile-text">Write a confession</span></button>
+ </div></article><article class="profile-card " aria-label="Fictional Figma profile Tafadzwa">
+ <div class="profile-picture">
+ <img src="assets/tafadzwa.jpg" alt="Fictional Figma sample portrait of Tafadzwa">
+ <button type="button" class="overlay-action" data-preview-action="photo" aria-label="Like Tafadzwa's sample photo"><img src="assets/icons/camera.svg" class="" alt="" aria-hidden="true"> Like photo</button>
+ <div class="photo-overlay"><h3>Tafadzwa, 21</h3><p>BEng Electrical · NUST</p></div>
+ 
+ </div>
+ <div class="profile-content">
+ <div class="prompt-box"><p class="prompt-label">CONVERSATION PROMPT</p><p class="prompt-value"><span class="desktop-text">Exam-season survival trick? Guitar breaks between study sessions.</span><span class="mobile-text">"Two truths and a lie about my degree..."</span></p>
+ <div class="answer-line"><button type="button" class="small-action" data-preview-action="answer"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> Like answer</button><span class="sample-answer mobile-only"></span></div></div>
+ <div class="tags"><span class="tag">⚡ Engineering</span><span class="tag">🎸 Guitar</span><span class="tag">🌍 Travel</span></div>
+ <div class="photo-feedback"><button type="button" class="small-action" data-preview-action="photo"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> Like photo</button> <span>Add a note (optional)</span></div>
+ <div class="profile-actions"><button type="button" class="circle-action" data-preview-action="pass" aria-label="Pass fictional Tafadzwa profile"><img src="assets/icons/pass.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action like" data-preview-action="like" aria-label="Like fictional Tafadzwa profile"><img src="assets/icons/like.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action" data-preview-action="save" aria-label="Bookmark fictional Tafadzwa profile"><img src="assets/icons/bookmark.svg" class="" alt="" aria-hidden="true"></button></div>
+ <button type="button" class="confess-button" data-preview-action="confess"><img src="assets/icons/confess.svg" class="" alt="" aria-hidden="true"><span class="desktop-text">Confess about…</span><span class="mobile-text">Write a confession</span></button>
+ </div></article></div>
+<div class="feature-row">
+<section class="story-panel" aria-labelledby="story-title"><img src="assets/icons/sprout.svg" class="story-icon" alt="" aria-hidden="true"><h3 id="story-title">Your story starts here.</h3><p>There are no discovery profiles or established matches yet. While we get things ready, make your profile feel like you.</p><a href="#" data-preview-link class="peach-link">Add a bio &amp; conversation prompt →</a><a href="#" data-preview-link class="peach-link">Explore Find Match →</a></section>
+<article class="profile-card small-profile" aria-label="Fictional Figma profile Chiedza">
+ <div class="profile-picture">
+ <img src="assets/chiedza.jpg" alt="Fictional Figma sample portrait of Chiedza">
+ <button type="button" class="overlay-action" data-preview-action="photo" aria-label="Like Chiedza's sample photo"><img src="assets/icons/camera.svg" class="" alt="" aria-hidden="true"> Like photo</button>
+ <div class="photo-overlay"><h3>Chiedza, 22</h3><p>BA Media Studies · NUST</p></div>
+ 
+ </div>
+ <div class="profile-content">
+ <div class="prompt-box"><p class="prompt-label">CONVERSATION PROMPT</p><p class="prompt-value">My camera roll is mostly campus sunsets.</p>
+ <div class="answer-line"><button type="button" class="small-action" data-preview-action="answer"><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"> Like answer</button><span class="sample-answer mobile-only"></span></div></div>
+ 
+ 
+ <div class="profile-actions"><button type="button" class="circle-action" data-preview-action="pass" aria-label="Pass fictional Chiedza profile"><img src="assets/icons/pass.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action like" data-preview-action="like" aria-label="Like fictional Chiedza profile"><img src="assets/icons/like.svg" class="" alt="" aria-hidden="true"></button><button type="button" class="circle-action" data-preview-action="save" aria-label="Bookmark fictional Chiedza profile"><img src="assets/icons/bookmark.svg" class="" alt="" aria-hidden="true"></button></div>
+ <button type="button" class="confess-button" data-preview-action="confess"><img src="assets/icons/confess.svg" class="" alt="" aria-hidden="true"><span class="desktop-text">Confess about…</span><span class="mobile-text">Write a confession</span></button>
+ </div></article>
+<section class="consent-panel"><p class="kicker">A MATCH IS JUST THE START</p><h3>A mutual yes. Then a hello.</h3><p>Liking each other creates a mutual match, not permission to message. Chat starts only when a chat invitation is accepted.</p></section>
 </div>
+</section>
+<section class="caught-up"><h3><img src="assets/icons/caught-up.svg" class="" alt="" aria-hidden="true"> You’re caught up.</h3><p>Want to revisit someone or check your chats? Discovery is finite for now, so you can return to your matches without endless browsing.</p><div class="caught-up-actions"><button type="button" class="soft-button" data-preview-action="undo">Revisit someone</button><button type="button" class="soft-button" data-preview-action="chats">Check your chats</button></div></section>
+<section class="process-section"><h2>A connection, at your pace.</h2><div class="process-steps">
+<div class="process-step"><span class="number">1</span><strong>Your profile</strong><p>Share a little about you.</p></div><div class="process-step"><span class="number">2</span><strong>Discover</strong><p>Find shared answers.</p></div><div class="process-step"><span class="number">3</span><strong>Like</strong><p>Show your interest.</p></div><div class="process-step"><span class="number">4</span><strong>Mutual match</strong><p>You both choose each other.</p></div><div class="process-step"><span class="number">5</span><strong>Chat consent</strong><p>An invitation must be accepted.</p></div>
+</div></section>
+<div class="beta-bar"><span class="beta-chip">BETA</span>Matching, chat and media are still in testing. Discovery and conversations aren't ready to use yet.</div>
+</main>
+<footer class="site-footer"><span>For NUST students · 18+ only · Independent student project</span><span class="links"><a href="#" data-preview-link>Community rules</a> / <a href="#" data-preview-link>Safety &amp; privacy</a></span></footer>
+<nav class="bottom-nav" aria-label="Mobile navigation"><a href="#top" class="active" aria-current="page"><img src="assets/icons/home.svg" class="" alt="" aria-hidden="true"><span>Home</span></a>
+<a href="#" data-preview-link><img src="assets/icons/nav-heart.svg" class="" alt="" aria-hidden="true"><span>Find Match</span></a>
+<a href="#" data-preview-link><img src="assets/icons/confessions.svg" class="" alt="" aria-hidden="true"><span>Confessions</span></a>
+<a href="#" data-preview-link><img src="assets/icons/you.svg" class="" alt="" aria-hidden="true"><span>You</span></a></nav>
+<aside class="notification-panel" id="notice" aria-label="Example notifications" hidden><button class="close-button" type="button" id="notice-close">✕</button><h3>Notifications</h3><p>Figma concept preview only. This is not connected to a real account or the live notification service.</p></aside>
+<div class="toast" id="preview-toast" role="status" hidden></div>
 <script>
 (function(){
- const bell=document.getElementById('previewBell'),panel=document.getElementById('previewNotifications'),close=document.getElementById('previewClose'),toast=document.getElementById('previewToast');
- let timeoutId=null;
- function show(message){toast.textContent=message;toast.hidden=false;clearTimeout(timeoutId);timeoutId=setTimeout(()=>{toast.hidden=true},3500)}
- function hidePanel(){panel.hidden=true;bell.setAttribute('aria-expanded','false');bell.focus()}
- bell.addEventListener('click',()=>{const next=panel.hidden;panel.hidden=!next;bell.setAttribute('aria-expanded',String(next))});
- close.addEventListener('click',hidePanel);
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)hidePanel()});
- document.querySelectorAll('[data-demo-action]').forEach(btn=>btn.addEventListener('click',()=>show('Preview only: this action does not send or save data.')));
- document.querySelectorAll('[data-demo-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This screen is not connected yet. We are previewing Home first.')}));
+ const toast=document.getElementById('preview-toast');const note=document.getElementById('notice');const timer={id:null};const bell=document.querySelector('[data-preview-action="bell"]');
+ function show(message){toast.textContent=message;toast.hidden=false;clearTimeout(timer.id);timer.id=setTimeout(()=>{toast.hidden=true},3400)}
+ function closeNote(){note.hidden=true;bell.setAttribute('aria-expanded','false');bell.focus()}
+ document.querySelectorAll('[data-preview-action]').forEach(button=>button.addEventListener('click',()=>{
+  const action=button.dataset.previewAction;
+  if(action==='bell'){note.hidden=!note.hidden;bell.setAttribute('aria-expanded',String(!note.hidden));return}
+  show('Figma preview only — '+(action==='like'?'likes and matches':action==='confess'?'confessions':action==='chats'?'messages':action==='account'?'profile settings':action+' actions')+' will be connected to the backend later.');
+ }));
+ document.getElementById('notice-close').addEventListener('click',closeNote);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!note.hidden)closeNote()});
+ document.querySelectorAll('[data-preview-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This is the Home design preview. Other screens are not connected yet.')}))
 })();
 </script>
-</body>
-</html>
+</body></html>
