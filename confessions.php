@@ -13,6 +13,7 @@ require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/frontend.php';
 require_once __DIR__ . '/php/operational.php';
+require_once __DIR__ . '/php/confession_reports.php';
 
 require_login();
 ensure_operational_schema($pdo);
@@ -20,6 +21,11 @@ ensure_operational_schema($pdo);
 $currentUserId = (int) $_SESSION['user_id'];
 $error = null;
 $success = null;
+$reportError = null;
+$reportSuccess = isset($_SESSION['confession_report_notice']) && is_string($_SESSION['confession_report_notice'])
+    ? $_SESSION['confession_report_notice'] : null;
+unset($_SESSION['confession_report_notice']);
+$reportPostId = null;
 $csrfToken = null;
 $confessions = [];
 $page = clean_int($_GET['page'] ?? null) ?? 1;
@@ -43,9 +49,24 @@ $total_pages = $totalConfessions > 0 ? (int) ceil($totalConfessions / $perPage) 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+    $isReporting = isset($_POST['report_confession']);
+    $reportPostId = $isReporting ? clean_int($_POST['confession_id'] ?? null) : null;
 
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
-        $error = 'Invalid form submission. Please try again.';
+        if ($isReporting) {
+            $reportError = 'Invalid report form. Please try again.';
+        } else {
+            $error = 'Invalid form submission. Please try again.';
+        }
+    } elseif ($isReporting) {
+        $reportReason = isset($_POST['reason']) && is_string($_POST['reason']) ? $_POST['reason'] : '';
+        $reportDetails = isset($_POST['details']) && is_string($_POST['details']) ? $_POST['details'] : '';
+        $result = bushisa_report_confession($pdo, $currentUserId, $reportPostId ?? 0, $reportReason, $reportDetails);
+        if ($result['success']) {
+            $_SESSION['confession_report_notice'] = 'Report submitted privately for moderator review. Thank you for helping keep Bushisa respectful.';
+            redirect('confessions.php?sort=' . $sort . '&page=' . $page);
+        }
+        $reportError = $result['error'] ?? 'Unable to send this report.';
     } else {
         $rateLimitKey = (string) $currentUserId;
         if (!check_rate_limit($pdo, 'confession', $rateLimitKey, 5, 3600)) {
@@ -234,6 +255,9 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
         </button>
     </header>
     <?php render_flash(null, $success); ?>
+    <?php if ($reportSuccess !== null): ?>
+        <div class="cf-report-success" role="status"><?= e($reportSuccess) ?></div>
+    <?php endif; ?>
     <div class="cf-layout">
         <section class="cf-feed" aria-label="Anonymous confession feed">
             <div class="cf-toolbar">
@@ -288,7 +312,7 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                                 <div class="cf-bubble__actions">
                                     <span class="cf-bubble__views"><?= e((string) $views) ?> <?= $views === 1 ? 'view' : 'views' ?></span>
                                     <div class="cf-bubble__links">
-                                        <a href="community_guidelines.php" title="Reporting and safety guidance">Report help</a>
+                                        <button type="button" class="cf-report-trigger" data-report-confession="<?= e((string) $confession['id']) ?>" aria-label="Report confession #<?= e((string) $confession['id']) ?>">Report</button>
                                         <button class="cf-bubble__soon" type="button" disabled title="Reactions are being tested">♡ Like soon</button>
                                     </div>
                                 </div>
@@ -315,13 +339,13 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
         </section>
         <aside class="cf-aside" aria-label="Community guidance">
             <h2>See something harmful?</h2>
-            <p>Use Report on the post. Posting and reporting are still being tested; do not rely on immediate review or removal.</p>
+            <p>Use Report on a post to privately send it to the moderator queue. Reporting does not hide a post automatically. Review and removal are not immediate.</p>
             <a href="community_guidelines.php">Read community rules →</a>
         </aside>
     </div>
     <div class="cf-beta">
         <strong>BETA</strong>
-        <span>This is a development build. Reactions, reporting and some safety controls are still being tested. Use only fictional test content until verification and moderation are ready.</span>
+        <span>This is a development build. Reporting sends posts to a private moderator queue, but reviews are not monitored in real time. Use only fictional test content until verification and moderation are ready.</span>
     </div>
 </main>
 <footer class="site-footer cf-footer">
@@ -357,6 +381,43 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
         </form>
     </div>
 </section>
+<section class="cf-modal cf-report-modal" id="report-confession-dialog" role="dialog" aria-modal="true"
+         aria-labelledby="cf-report-title" data-report-modal <?= $reportError === null ? 'hidden' : '' ?>>
+    <div class="cf-composer cf-report-composer">
+        <div class="cf-composer__top">
+            <div>
+                <span class="cf-report-eyebrow">CONFIDENTIAL MODERATOR REPORT</span>
+                <h2 id="cf-report-title">Report this confession</h2>
+            </div>
+            <button type="button" class="cf-composer__close" data-report-close aria-label="Close reporting form">×</button>
+        </div>
+        <p>Tell the moderators what concerns you. This report is private and will not appear beside the confession. Do not include anyone's personal details.</p>
+        <?php if ($reportError !== null): ?>
+            <div class="cf-report-error" role="alert"><?= e($reportError) ?></div>
+        <?php endif; ?>
+        <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>" data-report-form>
+            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="report_confession" value="1">
+            <input type="hidden" name="confession_id" value="<?= e((string) ($reportPostId ?? '')) ?>" data-report-id>
+            <p class="cf-report-target" data-report-target>Choose the confession to report.</p>
+            <label for="cf-report-reason">Why are you reporting this?</label>
+            <select id="cf-report-reason" name="reason" required>
+                <option value="">Choose a reason</option>
+                <?php foreach (bushisa_confession_report_reasons() as $reasonCode => $reasonLabel): ?>
+                    <option value="<?= e($reasonCode) ?>" <?= (($_POST['reason'] ?? '') === $reasonCode && $reportError !== null) ? 'selected' : '' ?>><?= e($reasonLabel) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <label for="cf-report-details">More context (optional)</label>
+            <textarea id="cf-report-details" name="details" maxlength="140" rows="3" placeholder="A short explanation for moderators..."><?= e($reportError !== null && isset($_POST['details']) && is_string($_POST['details']) ? $_POST['details'] : '') ?></textarea>
+            <p class="cf-composer__help">Up to 140 characters. Reports are reviewed by moderators, not shared publicly.</p>
+            <div class="cf-composer__actions">
+                <button class="cf-composer__cancel" type="button" data-report-close>Cancel</button>
+                <button class="cf-composer__submit" type="submit">Submit report →</button>
+            </div>
+        </form>
+    </div>
+</section>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
+<script src="<?= e(asset_path('js/confessions-report.js')) ?>"></script>
 </body>
 </html>
