@@ -1,0 +1,39 @@
+name: Figma Home discovery checks
+
+on:
+  push:
+    branches: [figma-integration]
+    paths:
+      - 'discover.php'
+      - 'php/discovery_feed.php'
+      - 'api/discovery_feed.php'
+      - 'js/app.js'
+      - 'js/discovery_feed.js'
+      - 'preview/home.html'
+      - 'preview/scroll-demo.js'
+      - '.github/workflows/discovery-checks.yml'
+  pull_request:
+    paths:
+      - 'discover.php'
+      - 'php/discovery_feed.php'
+      - 'api/discovery_feed.php'
+      - 'js/app.js'
+      - 'js/discovery_feed.js'
+      - 'preview/home.html'
+      - 'preview/scroll-demo.js'
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax check
+        run: |
+          php -l php/discovery_feed.php
+          php -l api/discovery_feed.php
+          php -l discover.php
+      - name: Browser JavaScript syntax check
+        run: |
+          node --check js/app.js
+          node --check js/discovery_feed.js
+          node --check preview/scroll-demo.js
