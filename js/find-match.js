@@ -15,6 +15,7 @@
   const selected = root.querySelector('[data-selected]');
   const error = root.querySelector('[data-match-error]');
   const complete = root.querySelector('[data-match-complete]');
+  const actions = root.querySelector('[data-match-actions]');
   const labels = ['Your intentions', 'Your vibe', 'Shared interests', 'Preferences'];
   const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   let step = 0;
@@ -47,6 +48,7 @@
   function display() {
     groups.forEach((group, i) => { group.hidden = i !== step; });
     if (complete) complete.hidden = true;
+    if (actions) actions.hidden = false;
     if (progressLabel) progressLabel.textContent = 'Step ' + (step + 1) + ' of 4 · ' + labels[step];
     progress.forEach((item, i) => {
       item.classList.toggle('is-current', i === step);
@@ -63,6 +65,7 @@
   function showComplete() {
     groups.forEach(group => { group.hidden = true; });
     if (complete) complete.hidden = false;
+    if (actions) actions.hidden = true;
     if (progressLabel) progressLabel.textContent = 'Your answers are saved';
     progress.forEach(item => { item.classList.add('is-done'); item.classList.remove('is-current'); item.removeAttribute('aria-current'); });
     document.querySelector('[data-match-flow-title]')?.scrollIntoView({ behavior: 'auto', block: 'start' });
