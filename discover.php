@@ -21,7 +21,13 @@ $discovery = bushisa_discovery_batch($pdo, $currentUserId, $preferences);
 $candidates = $discovery['profiles'];
 $currentProfile = get_profile($pdo, $currentUserId);
 $displayName = trim((string) ($currentProfile['display_name'] ?? ''));
-$firstName = $displayName !== '' ? explode(' ', $displayName)[0] : 'there';
+$nameParts = preg_split('/[\\s_]+/u', $displayName);
+$firstName = is_array($nameParts) ? trim((string) ($nameParts[0] ?? '')) : '';
+$firstName = $firstName !== ''
+    ? (function_exists('mb_convert_case')
+        ? mb_convert_case($firstName, MB_CASE_TITLE, 'UTF-8')
+        : ucfirst(strtolower($firstName)))
+    : 'there';
 $initial = function_exists('mb_substr')
     ? mb_strtoupper(mb_substr($firstName, 0, 1))
     : strtoupper(substr($firstName, 0, 1));
@@ -177,12 +183,12 @@ render_document_head('Home', $csrfToken, $currentUserId);
             </h1>
             <p class="home-firstlook__lead">
                 <?= $needsDiscoverySetup
-                    ? 'Make your profile yours and choose what matters to you. There’s plenty to explore in the meantime.'
-                    : 'There aren’t any eligible profiles for your preferences right now. Your story is still yours to shape, and other corners of Bushisa are here to explore.' ?>
+                    ? 'Set up your preferences and make your profile yours. There’s more to explore along the way.'
+                    : 'No eligible profiles match your preferences right now. In the meantime, you can explore more of Bushisa.' ?>
             </p>
             <span class="home-firstlook__status">
                 <span class="home-firstlook__status-dot" aria-hidden="true"></span>
-                <?= $needsDiscoverySetup ? 'Your discovery preferences are not set up yet' : 'No eligible discovery profiles right now' ?>
+                <?= $needsDiscoverySetup ? 'Start with your discovery preferences' : 'Explore at your own pace' ?>
             </span>
         </div>
         <div class="home-firstlook__explore" aria-label="Explore Bushisa">
@@ -227,6 +233,15 @@ render_document_head('Home', $csrfToken, $currentUserId);
             </div>
             <a class="peach-link" href="matches.php">See all →</a>
         </div>
+        <?php if ($establishedMatches === [] && $pendingCount === 0): ?>
+            <div class="home-quiet-chats">
+                <span class="home-quiet-chats__icon" aria-hidden="true">
+                    <img src="<?= e(asset_path('preview/assets/icons/new-chat.svg')) ?>" alt="">
+                </span>
+                <p>Conversations will appear here when available.</p>
+                <a href="matches.php">View Find Match →</a>
+            </div>
+        <?php else: ?>
         <div class="chats-strip" aria-label="Your actual matches and pending requests">
             <a class="chat-circle" href="matches.php">
                 <span class="new-circle"><img src="<?= e(asset_path('preview/assets/icons/new-chat.svg')) ?>" alt="" aria-hidden="true"></span>
@@ -262,6 +277,7 @@ render_document_head('Home', $csrfToken, $currentUserId);
                 </div>
             <?php endif; ?>
         </div>
+        <?php endif; ?>
         <div class="chats-bottom"><span class="private-pass">Passing stays private. Conversations require consent.</span></div>
     </section>
 
@@ -284,7 +300,7 @@ render_document_head('Home', $csrfToken, $currentUserId);
                 <span class="home-empty-summary__mark" aria-hidden="true">♡</span>
                 <span><?= $needsDiscoverySetup
                     ? 'Your discovery preferences are waiting to be set.'
-                    : 'You’re all caught up with eligible profiles for now.' ?></span>
+                    : 'No eligible profiles available for your preferences right now.' ?></span>
                 <a href="profile.php#preferences"><?= $needsDiscoverySetup ? 'Set preferences' : 'Adjust preferences' ?> →</a>
             </div>
         <?php else: ?>
