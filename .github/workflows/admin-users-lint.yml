@@ -1,0 +1,19 @@
+name: Admin Users PHP lint
+
+on:
+  push:
+    paths:
+      - 'admin/users.php'
+      - '.github/workflows/admin-users-lint.yml'
+  pull_request:
+    paths:
+      - 'admin/users.php'
+      - '.github/workflows/admin-users-lint.yml'
+
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check admin users PHP syntax
+        run: php -l admin/users.php

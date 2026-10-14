@@ -110,6 +110,7 @@ render_auth_start('Admin Dashboard');
         <?php endforeach; ?>
     </div>
     <div class="card-actions">
+        <a class="button-secondary" href="users.php">Manage users</a>
         <a class="button-secondary" href="reports.php">Review reports</a>
         <a class="button-secondary" href="moderation.php">Moderation queue</a>
         <a class="button-secondary" href="../discover.php">Back to app</a>
