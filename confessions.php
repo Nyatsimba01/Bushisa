@@ -58,27 +58,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rawBody = function_exists('mb_substr') ? mb_substr($rawBody, 0, 500) : substr($rawBody, 0, 500);
                 $sanitisedBody = clean($rawBody);
 
-                $profileStatement = $pdo->prepare('SELECT anon_handle FROM profiles WHERE user_id = :user_id LIMIT 1');
+                $profileStatement = $pdo->prepare('SELECT anon_handle, display_name FROM profiles WHERE user_id = :user_id LIMIT 1');
                 $profileStatement->execute([':user_id' => $currentUserId]);
-                $anonHandle = $profileStatement->fetchColumn();
+                $identity = $profileStatement->fetch(PDO::FETCH_ASSOC) ?: [];
+                $anonHandle = trim((string) ($identity['anon_handle'] ?? ''));
+                $publicName = trim((string) ($identity['display_name'] ?? ''));
 
-                if (!is_string($anonHandle) || $anonHandle === '') {
-                    $error = 'Unable to load your anonymous handle.';
+                if ($anonHandle === '' || ($publicName !== '' && strcasecmp($anonHandle, $publicName) === 0)) {
+                    $error = 'Please choose a separate Confessions username in You before posting.';
                 } else {
                     try {
                         $pdo->beginTransaction();
                         record_attempt($pdo, 'confession', $rateLimitKey);
 
                         if ($usesUserContentSchema) {
-                            $insertConfession = $pdo->prepare(
-                                'INSERT INTO confessions (user_id, anon_handle, content, created_at, is_flagged)
-                                 VALUES (:user_id, :anon_handle, :content, NOW(), 0)'
-                            );
-                            $insertConfession->execute([
-                                ':user_id' => $currentUserId,
-                                ':anon_handle' => $anonHandle,
-                                ':content' => $sanitisedBody,
-                            ]);
+                            // Support both the original and newer confession schemas.
+                            if (in_array('anon_handle', $confessionColumns, true)) {
+                                $insertConfession = $pdo->prepare(
+                                    'INSERT INTO confessions (user_id, anon_handle, content, created_at, is_flagged)
+                                     VALUES (:user_id, :anon_handle, :content, NOW(), 0)'
+                                );
+                                $insertConfession->execute([
+                                    ':user_id' => $currentUserId,
+                                    ':anon_handle' => $anonHandle,
+                                    ':content' => $sanitisedBody,
+                                ]);
+                            } else {
+                                $insertConfession = $pdo->prepare(
+                                    'INSERT INTO confessions (user_id, content, created_at, is_flagged)
+                                     VALUES (:user_id, :content, NOW(), 0)'
+                                );
+                                $insertConfession->execute([
+                                    ':user_id' => $currentUserId,
+                                    ':content' => $sanitisedBody,
+                                ]);
+                            }
                         } elseif ($usesAuthorBodySchema) {
                             $insertConfession = $pdo->prepare(
                                 'INSERT INTO confessions (author_id, body, created_at, is_flagged)
@@ -114,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $page = min($page, $total_pages);
 $offset = ($page - 1) * $perPage;
 $confessionRuntimeColumns = operational_confession_columns($pdo);
-$handleSelect = operational_column_exists($pdo, 'confessions', 'anon_handle')
-    ? 'COALESCE(c.anon_handle, p.anon_handle, "anonymous") AS anon_handle'
-    : 'COALESCE(p.anon_handle, "anonymous") AS anon_handle';
+// Always use the separate pseudonym from profiles; never a stale snapshot.
+// The public name is read only to suppress old duplicate handles.
+$handleSelect = 'p.anon_handle AS anon_handle, p.display_name AS account_display_name';
 
 if ($usesUserContentSchema || $usesAuthorBodySchema) {
     $feedStatement = $pdo->prepare(
@@ -132,7 +146,7 @@ if ($usesUserContentSchema || $usesAuthorBodySchema) {
              LEFT JOIN profiles p ON p.user_id = c.%2$s
              LEFT JOIN confession_views cv ON cv.confession_id = c.id
              WHERE c.is_flagged = 0
-             GROUP BY c.id, c.%1$s, c.created_at, c.is_flagged, anon_handle
+             GROUP BY c.id, c.%1$s, c.created_at, c.is_flagged, p.anon_handle, p.display_name
              ORDER BY %4$s
              LIMIT :limit OFFSET :offset',
             $confessionRuntimeColumns['body'],
@@ -246,8 +260,12 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                 <div class="cf-list">
                     <?php foreach ($confessions as $confession): ?>
                         <?php
-                            $handle = ltrim(trim((string) ($confession['anon_handle'] ?? 'anonymous')), '@');
-                            $handle = $handle === '' ? 'anonymous' : $handle;
+                            $handle = ltrim(trim((string) ($confession['anon_handle'] ?? '')), '@');
+                            $accountDisplayName = trim((string) ($confession['account_display_name'] ?? ''));
+                            // Do not reveal the matching public display name from an old account.
+                            if ($handle === '' || ($accountDisplayName !== '' && strcasecmp($handle, $accountDisplayName) === 0)) {
+                                $handle = 'anonymous';
+                            }
                             $views = max(0, (int) ($confession['view_count'] ?? 0));
                         ?>
                         <article class="cf-card">
@@ -319,7 +337,7 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
             <h2 id="write-confession-title">A thought worth sharing?</h2>
             <button type="button" class="cf-composer__close" data-confession-close aria-label="Close composer">×</button>
         </div>
-        <p>Posts show your anonymous handle, not your real profile. Leave out names, contact details and identifying information.</p>
+        <p>Other students see your separate Confessions username, not your public profile name. Choose or update it in <a href="profile.php#confessions-identity">You → Confessions identity</a>. Avoid personal details. Moderators can still attribute posts for safety.</p>
         <?php render_flash($error, null); ?>
         <form method="post" action="confessions.php?sort=<?= e($sort) ?>">
             <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
