@@ -131,6 +131,20 @@ function destroy_session(): void
 }
 
 /**
+ * Resolve the login route within the current application's mounted folder.
+ * Works at /login.php, /Bushisa-Figma/login.php and admin/api subfolders.
+ */
+function bushisa_login_path(): string
+{
+    $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/'));
+    $directory = dirname($script);
+    if (in_array(basename($directory), ['admin', 'api', 'public'], true)) {
+        $directory = dirname($directory);
+    }
+    return ($directory === '/' || $directory === '.' ? '' : rtrim($directory, '/')) . '/login.php';
+}
+
+/**
  * Ensure the user is authenticated before continuing.
  *
  * @return void
@@ -143,7 +157,7 @@ function require_login(): void
 
     if (!isset($_SESSION['user_id'])) {
         destroy_session();
-        header('Location: /login.php');
+        header('Location: ' . bushisa_login_path(), true, 302);
         exit;
     }
 
