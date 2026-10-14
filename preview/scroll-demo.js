@@ -28,16 +28,47 @@
     return node;
   };
 
+
+  const icon = (name) => {
+    const img = make('img', '');
+    img.src = 'assets/icons/' + name + '.svg';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    return img;
+  };
+
+  // Fictional examples only. Every extra card keeps the Figma card sections.
+  const examples = [
+    { prompt: 'What is your favourite way to spend a free afternoon?', answer: 'Sketching campus buildings.', tags: ['🎨 Art', '☕ Coffee', '📚 Reading'] },
+    { prompt: 'What small thing always makes your day better?', answer: 'A good playlist between lectures.', tags: ['🎵 Music', '🌱 Nature', '🎧 Playlists'] },
+    { prompt: 'What would your dream student club be?', answer: 'A photography and storytelling club.', tags: ['📷 Photography', '💬 Stories', '🌍 Exploring'] }
+  ];
+
+  const demoButton = (action, iconName, label, className = '') => {
+    const button = make('button', className);
+    button.type = 'button';
+    button.dataset.previewAction = action;
+    button.setAttribute('aria-label', label + ' — preview only');
+    button.append(icon(iconName));
+    return button;
+  };
+
   const sample = (number) => {
+    const data = examples[(number - 4) % examples.length];
     const article = make('article', 'profile-card scroll-demo-profile');
-    article.setAttribute('aria-label', 'Illustrative layout placeholder ' + number);
+    article.setAttribute('aria-label', 'Illustrative profile layout ' + number);
 
     const picture = make('div', 'profile-picture scroll-demo-picture');
     picture.append(make('span', 'scroll-demo-initial', String(number).padStart(2, '0')));
+
+    const photoButton = demoButton('photo', 'camera', 'Like sample photo', 'overlay-action');
+    photoButton.append(document.createTextNode(' Like photo'));
+    picture.append(photoButton);
+
     const overlay = make('div', 'photo-overlay');
     overlay.append(
-      make('h3', '', 'Demo profile ' + number),
-      make('p', '', 'Illustrative only · NUST concept')
+      make('h3', '', 'Demo profile ' + number + ', ' + (20 + (number % 5))),
+      make('p', '', 'Illustrative academic details · NUST')
     );
     picture.append(overlay);
 
@@ -45,31 +76,35 @@
     const prompt = make('div', 'prompt-box');
     prompt.append(
       make('p', 'prompt-label', 'CONVERSATION PROMPT'),
-      make('p', 'prompt-value', 'This sample card demonstrates how additional profiles would appear while scrolling.')
+      make('p', 'prompt-value', data.prompt)
     );
+    const answer = make('div', 'answer-line');
+    const likeAnswer = demoButton('answer', 'nav-heart', 'Like sample answer', 'small-action');
+    likeAnswer.append(document.createTextNode(' Like answer'));
+    answer.append(likeAnswer, make('span', 'sample-answer', data.answer));
+    prompt.append(answer);
+
     const tags = make('div', 'tags');
-    tags.append(make('span', 'tag', 'UI demonstration'), make('span', 'tag', 'Not a real account'));
+    for (const tag of data.tags) tags.append(make('span', 'tag', tag));
+
+    const feedback = make('div', 'photo-feedback');
+    const likePhoto = demoButton('photo', 'nav-heart', 'Like sample photo', 'small-action');
+    likePhoto.append(document.createTextNode(' Like photo'));
+    feedback.append(likePhoto, make('span', '', 'Add a note (optional)'));
+
     const actions = make('div', 'profile-actions');
-
-    const button = (kind, icon, label) => {
-      const b = make('button', 'circle-action' + (kind === 'like' ? ' like' : ''));
-      b.type = 'button';
-      b.dataset.previewAction = kind;
-      b.setAttribute('aria-label', label + ' demo card ' + number);
-      const img = make('img', '');
-      img.src = 'assets/icons/' + icon + '.svg';
-      img.alt = '';
-      img.setAttribute('aria-hidden', 'true');
-      b.append(img);
-      return b;
-    };
-
     actions.append(
-      button('pass', 'pass', 'Pass on'),
-      button('like', 'like', 'Like'),
-      button('save', 'bookmark', 'Bookmark')
+      demoButton('pass', 'pass', 'Pass', 'circle-action'),
+      demoButton('like', 'like', 'Like', 'circle-action like'),
+      demoButton('save', 'bookmark', 'Bookmark', 'circle-action')
     );
-    body.append(prompt, tags, actions);
+
+    const confess = demoButton('confess', 'confess', 'Write a sample confession', 'confess-button');
+    const desktop = make('span', 'desktop-text', 'Confess about…');
+    const mobile = make('span', 'mobile-text', 'Write a confession');
+    confess.append(desktop, mobile);
+
+    body.append(prompt, tags, feedback, actions, confess);
     article.append(picture, body);
     return article;
   };
