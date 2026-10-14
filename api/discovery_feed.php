@@ -9,6 +9,8 @@ require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/block_handler.php';
 require_once __DIR__ . '/../php/discovery_feed.php';
+require_once __DIR__ . '/../php/frontend.php';
+require_once __DIR__ . '/../php/discovery_cards.php';
 
 header('Cache-Control: private, no-store');
 header('X-Content-Type-Options: nosniff');
@@ -37,7 +39,12 @@ if (isset($_GET['after'])) {
 
 try {
     $preferences = get_preferences($pdo, $viewerId);
-    json_response(bushisa_discovery_batch($pdo, $viewerId, $preferences, $afterId));
+    $batch = bushisa_discovery_batch($pdo, $viewerId, $preferences, $afterId);
+    json_response([
+        'html' => bushisa_render_discovery_cards($batch['profiles']),
+        'has_more' => $batch['has_more'],
+        'next_cursor' => $batch['next_cursor'],
+    ]);
 } catch (Throwable $throwable) {
     error_log('Bushisa discovery fetch failed: ' . $throwable->getMessage());
     json_response(['error' => 'Unable to load profiles right now.'], 500);
