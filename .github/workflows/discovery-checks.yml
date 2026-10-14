@@ -6,6 +6,10 @@ on:
     paths:
       - 'discover.php'
       - 'php/discovery_feed.php'
+      - 'php/discovery_cards.php'
+      - 'php/frontend.php'
+      - 'css/home-discovery-cards.css'
+      - 'tests/discovery_cards_test.php'
       - 'api/discovery_feed.php'
       - 'js/app.js'
       - 'js/discovery_feed.js'
@@ -16,6 +20,10 @@ on:
     paths:
       - 'discover.php'
       - 'php/discovery_feed.php'
+      - 'php/discovery_cards.php'
+      - 'php/frontend.php'
+      - 'css/home-discovery-cards.css'
+      - 'tests/discovery_cards_test.php'
       - 'api/discovery_feed.php'
       - 'js/app.js'
       - 'js/discovery_feed.js'
@@ -30,8 +38,13 @@ jobs:
       - name: PHP syntax check
         run: |
           php -l php/discovery_feed.php
+          php -l php/discovery_cards.php
+          php -l php/frontend.php
+          php -l tests/discovery_cards_test.php
           php -l api/discovery_feed.php
           php -l discover.php
+      - name: Card rendering and output escaping
+        run: php tests/discovery_cards_test.php
       - name: Browser JavaScript syntax check
         run: |
           node --check js/app.js
