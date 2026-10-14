@@ -1114,3 +1114,48 @@ button:disabled {
   object-fit: cover;
   object-position: center;
 }
+
+
+/* Automatic discovery pagination follows Home's Figma colour and spacing. */
+.page-home .home-discovery-pagination { padding-top: 20px; }
+.page-home .home-discovery-sentinel { display: block; height: 2px; pointer-events: none; }
+.page-home .home-discovery-sentinel[hidden] { display: none; }
+.page-home .home-discovery-loading {
+  margin: 0 0 12px;
+  text-align: center;
+  color: #c8b4b9;
+  font-size: 13px;
+}
+.page-home .home-discovery-error {
+  margin: 12px 0 0;
+  padding: 14px;
+  border: 1px solid #57404a;
+  border-radius: 12px;
+  background: #3b2931;
+  color: #f8ede2;
+  font-size: 13px;
+}
+.page-home .home-discovery-error button {
+  border: 0;
+  background: none;
+  color: #f4b598;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.page-home .home-discovery-end {
+  background: #302128;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 10px 0;
+}
+.page-home .home-discovery-end[hidden] { display: none; }
+.page-home .home-discovery-end h3 {
+  margin: 0 0 8px;
+  font: 400 22px/1.35 Georgia, 'Times New Roman', serif;
+}
+.page-home .home-discovery-end p {
+  color: #c8b4b9;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+.page-home .home-discovery-end a { color: #f4b598; font-size: 13px; }
