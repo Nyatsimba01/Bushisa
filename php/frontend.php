@@ -93,6 +93,9 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php elseif (current_page_name() === 'profile.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/you-figma.css')) ?>">
+    <?php elseif (current_page_name() === 'confessions.php'): ?>
+        <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset_path('css/confessions-figma.css')) ?>">
     <?php elseif (current_page_name() === 'matches.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/find-match-figma.css')) ?>">
