@@ -179,224 +179,302 @@ $photoBytes = $photoFile !== '' && is_file($photoFile) ? filesize($photoFile) : 
 $quotaBytes = 5 * 1024 * 1024;
 $quotaPercent = $photoBytes > 0 ? min(100, (int) round(($photoBytes / $quotaBytes) * 100)) : 0;
 
-render_page_shell_start('you', 'You', $csrfToken, $userId, false, 'Profile, privacy and account settings');
+$profileName = trim((string) ($profile['display_name'] ?? ''));
+$profileInitial = $profileName !== ''
+    ? (function_exists('mb_strtoupper') ? mb_strtoupper(mb_substr($profileName, 0, 1)) : strtoupper(substr($profileName, 0, 1)))
+    : 'B';
+$hasBio = trim((string) ($profile['bio'] ?? '')) !== '';
+$hasPrompt = trim((string) ($personalityDetails['conversation_prompt'] ?? '')) !== '';
+$hasInterests = $personalityDetails['interests'] !== [];
+$isPhotoSet = $photoFile !== '' && is_file($photoFile);
+$displayPhotoUrl = $isPhotoSet ? profile_photo_url($photoPath) : null;
+$hasPreferenceSetup = $preferences !== null;
+$promptChoices = [
+    'What helps you unwind after lectures?',
+    'Which campus food spot deserves the hype?',
+    'What’s your exam-season survival trick?',
+];
+$navItems = [
+    ['href' => 'discover.php', 'label' => 'Home', 'icon' => 'home', 'active' => false],
+    ['href' => 'matches.php', 'label' => 'Find Match', 'icon' => 'nav-heart', 'active' => false],
+    ['href' => 'confessions.php', 'label' => 'Confessions', 'icon' => 'confessions', 'active' => false],
+    ['href' => 'profile.php', 'label' => 'You', 'icon' => 'you', 'active' => true],
+];
+$unreadCount = 0;
+try {
+    if (operational_table_exists($pdo, 'notifications')) {
+        $countStatement = $pdo->prepare('SELECT COUNT(*) FROM notifications WHERE recipient_id = :user AND read_at IS NULL');
+        $countStatement->execute([':user' => $userId]);
+        $unreadCount = (int) $countStatement->fetchColumn();
+    }
+} catch (Throwable $exception) {
+    error_log('Profile notification count unavailable: ' . $exception->getMessage());
+}
+
+render_document_head('You', $csrfToken, $userId);
 ?>
-<?php render_flash($error, $success); ?>
-
-<section class="settings-grid">
-    <article class="section-card">
-        <h2>Profile summary</h2>
-        <div class="profile-summary">
-            <?= render_avatar($photoPath, (string) ($profile['display_name'] ?? 'You')) ?>
-            <div>
-                <h3><?= e($profile['display_name'] ?? 'Your profile') ?></h3>
-                <p class="muted"><?= e($profile['faculty'] ?? 'Faculty not set') ?> · <?= e($profile['year_of_study'] ?? 'Year not set') ?></p>
-            </div>
-        </div>
-    </article>
-
-    <article class="section-card">
-        <h2>Shared image quota</h2>
-        <div class="quota-meter" style="--quota: <?= e($quotaPercent) ?>%">
-            <div class="quota-meter__bar"><span class="quota-meter__fill"></span></div>
-            <p class="quota-meter__label"><?= e(number_format((float) $photoBytes / 1048576, 2)) ?> MB used of 5 MB. Backend currently enforces one upload, not the required three-slot aggregate quota.</p>
-        </div>
-    </article>
-</section>
-
-<section class="section-card" aria-labelledby="media-title">
-    <h2 id="media-title">Images</h2>
-    <div class="card-grid">
-        <div class="image-slot">
-            <div>
-                <strong>Profile photo</strong>
-                <p class="muted">Active backend slot</p>
-            </div>
-            <?= render_avatar($photoPath, (string) ($profile['display_name'] ?? 'Profile photo')) ?>
-        </div>
-        <div class="image-slot">
-            <div>
-                <strong>Discovery photo 1</strong>
-                <p class="muted">Needs schema support</p>
-            </div>
-            <button class="button-secondary" type="button" disabled>Add</button>
-        </div>
-        <div class="image-slot">
-            <div>
-                <strong>Discovery photo 2</strong>
-                <p class="muted">Needs schema support</p>
-            </div>
-            <button class="button-secondary" type="button" disabled>Add</button>
+<body class="page-you-figma bushisa-app" id="top">
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="discover.php" aria-label="Bushisa Home">
+            <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="" aria-hidden="true">
+            <span class="brand-title">Bushisa</span>
+            <span class="brand-subtitle">NUST CONNECTIONS</span>
+        </a>
+        <nav class="desktop-nav" aria-label="Main navigation">
+            <?php foreach ($navItems as $item): ?>
+                <a href="<?= e($item['href']) ?>" <?= $item['active'] ? 'class="active" aria-current="page"' : '' ?>>
+                    <img src="<?= e(asset_path('preview/assets/icons/' . $item['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+                    <span><?= e($item['label']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+        <div class="header-actions">
+            <button type="button" class="round-button notification-bell" data-notification-bell
+                    aria-controls="notificationPanel" aria-expanded="false" aria-label="Open notifications">
+                <img src="<?= e(asset_path('preview/assets/icons/bell.svg')) ?>" alt="" aria-hidden="true">
+                <?php if ($unreadCount > 0): ?>
+                    <span class="unread-count"><?= e($unreadCount > 9 ? '9+' : (string) $unreadCount) ?></span>
+                <?php endif; ?>
+            </button>
+            <a class="round-button account-letter" href="#profile-editor" aria-label="Your profile"><?= e($profileInitial) ?></a>
         </div>
     </div>
-</section>
+</header>
+<?php render_notification_panel(); ?>
 
-<section class="section-card" aria-labelledby="edit-profile-title">
-    <h2 id="edit-profile-title">Edit profile</h2>
-    <form class="form-grid" method="post" action="profile.php" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+<main class="you-main">
+    <div class="you-intro">
+        <span class="you-eyebrow">START WITH YOU</span>
+        <h1>A little more you.</h1>
+        <p>Build a profile that feels natural, not perfect. A few details can make the first hello easier.</p>
+    </div>
+    <?php render_flash($error, $success); ?>
 
-        <label class="field">
-            <span>Verified student email</span>
-            <input type="email" value="<?= e($user['email'] ?? $user['student_email'] ?? '') ?>" readonly>
-            <p class="field-help">This is read-only in the UI and must remain server-enforced.</p>
-        </label>
+    <div class="you-workspace">
+        <div class="you-editor-column">
+            <section class="you-editor-card" id="profile-editor" aria-labelledby="you-preview-title">
+                <div class="you-card-heading">
+                    <span id="you-preview-title">YOUR PROFILE PREVIEW</span>
+                    <span class="you-draft">Your draft</span>
+                </div>
+                <div class="you-identity">
+                    <?php if ($displayPhotoUrl !== null): ?>
+                        <img class="you-avatar" src="<?= e($displayPhotoUrl) ?>" alt="Current profile photo">
+                    <?php else: ?>
+                        <span class="you-avatar you-avatar--initial" aria-hidden="true"><?= e($profileInitial) ?></span>
+                    <?php endif; ?>
+                    <div>
+                        <h2><?= e($profileName !== '' ? $profileName : 'Your profile') ?></h2>
+                        <p><?= e($profile['faculty'] ?? 'Faculty not set') ?> · <?= e($profile['year_of_study'] ?? 'Year not set') ?></p>
+                    </div>
+                </div>
 
-        <label class="field">
-            <span>Display name</span>
-            <input type="text" name="display_name" value="<?= e($profile['display_name'] ?? '') ?>" maxlength="30" required>
-        </label>
+                <div class="you-divider"></div>
 
-        <label class="field">
-            <span>Bio</span>
-            <textarea name="bio" maxlength="500" placeholder="Share a little context for discovery."><?= e($profile['bio'] ?? '') ?></textarea>
-        </label>
+                <form method="post" action="profile.php#profile-editor" enctype="multipart/form-data" class="you-main-form">
+                    <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                    <section class="you-form-section" aria-labelledby="you-photos-title">
+                        <h3 id="you-photos-title">Your photos</h3>
+                        <div class="you-photo-slots">
+                            <label class="you-photo-slot you-photo-slot--main">
+                                <?php if ($displayPhotoUrl !== null): ?>
+                                    <img class="you-photo-slot__preview" src="<?= e($displayPhotoUrl) ?>" alt="" aria-hidden="true">
+                                <?php else: ?>
+                                    <img class="you-photo-slot__icon" src="<?= e(asset_path('preview/assets/icons/camera.svg')) ?>" alt="" aria-hidden="true">
+                                <?php endif; ?>
+                                <span>Main photo</span>
+                                <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" aria-label="Choose a main profile photo">
+                            </label>
+                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Second photo, not yet available">
+                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
+                            </div>
+                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Third photo, not yet available">
+                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
+                            </div>
+                        </div>
+                        <p class="you-photo-meta"><?= e(number_format((float) $photoBytes / 1048576, 2)) ?> MB used of 5 MB. Main photo <?= $isPhotoSet ? 'added' : 'not added' ?>.</p>
+                        <p class="you-inline-note"><span aria-hidden="true">ⓘ</span> Only one profile photo is supported by the current backend; extra slots are in testing.</p>
+                    </section>
 
-        <label class="field">
-            <span>Faculty</span>
-            <select name="faculty">
-                <option value="">Keep current</option>
-                <?php foreach ($faculties as $faculty): ?>
-                    <option value="<?= e($faculty) ?>" <?= ($profile['faculty'] ?? '') === $faculty ? 'selected' : '' ?>><?= e($faculty) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+                    <label class="you-field" for="you-bio">
+                        <span>Short bio</span>
+                        <textarea id="you-bio" name="bio" maxlength="500" rows="4" placeholder="What should someone know about you?"><?= e($profile['bio'] ?? '') ?></textarea>
+                        <small>A few honest lines are enough.</small>
+                    </label>
+                    <div class="you-profile-details">
+                        <label class="you-field" for="you-display-name">
+                            <span>Display name</span>
+                            <input id="you-display-name" type="text" name="display_name" value="<?= e($profile['display_name'] ?? '') ?>" maxlength="30" required>
+                        </label>
+                        <label class="you-field" for="you-faculty">
+                            <span>Faculty</span>
+                            <select id="you-faculty" name="faculty">
+                                <option value="">Keep current</option>
+                                <?php foreach ($faculties as $faculty): ?>
+                                    <option value="<?= e($faculty) ?>" <?= ($profile['faculty'] ?? '') === $faculty ? 'selected' : '' ?>><?= e($faculty) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="you-field" for="you-year">
+                            <span>Year of study</span>
+                            <select id="you-year" name="year_of_study">
+                                <option value="">Keep current</option>
+                                <?php foreach ($years as $year): ?>
+                                    <option value="<?= e($year) ?>" <?= ($profile['year_of_study'] ?? '') === $year ? 'selected' : '' ?>><?= e($year) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                    </div>
+                    <button class="you-save-button" type="submit">Save profile <span aria-hidden="true">✓</span></button>
+                </form>
 
-        <label class="field">
-            <span>Year of study</span>
-            <select name="year_of_study">
-                <option value="">Keep current</option>
-                <?php foreach ($years as $year): ?>
-                    <option value="<?= e($year) ?>" <?= ($profile['year_of_study'] ?? '') === $year ? 'selected' : '' ?>><?= e($year) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+                <form id="conversation-and-interests" method="post" action="profile.php#conversation-and-interests" class="you-personality-form">
+                    <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                    <input type="hidden" name="save_personality" value="1">
+                    <label class="you-field" for="you-interests">
+                        <span>Interests</span>
+                        <input id="you-interests" name="interests" type="text" maxlength="350"
+                               placeholder="+ Choose your interests"
+                               value="<?= e(implode(', ', $personalityDetails['interests'])) ?>" <?= !$personalityEnabled ? 'disabled' : '' ?>>
+                        <small>Choose up to five interests, separated by commas.</small>
+                    </label>
 
-        <label class="field">
-            <span>Replace profile photo</span>
-            <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp">
-            <p class="field-help">The existing image remains until the server accepts the replacement.</p>
-        </label>
+                    <div class="you-form-section">
+                        <h3>Conversation prompts</h3>
+                        <p class="you-muted">Choose an optional conversation starter. One question and answer can currently be saved.</p>
+                        <div class="you-prompt-choices" aria-label="Choose a conversation starter">
+                            <?php foreach ($promptChoices as $choice): ?>
+                                <button class="you-prompt-option" type="button" data-prompt-choice="<?= e($choice) ?>" <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($choice) ?></button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <label class="you-field" for="you-prompt">
+                        <span>Your conversation question</span>
+                        <textarea id="you-prompt" name="conversation_prompt" maxlength="160" rows="2"
+                                  placeholder="Choose a prompt above or write your own." <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_prompt']) ?></textarea>
+                    </label>
+                    <label class="you-field" for="you-answer">
+                        <span>Short answer</span>
+                        <textarea id="you-answer" name="conversation_answer" maxlength="240" rows="3"
+                                  placeholder="Add a short answer…" <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_answer']) ?></textarea>
+                        <small>Your answer needs a question. Keep it short and personal.</small>
+                    </label>
+                    <?php if (!$personalityEnabled): ?>
+                        <p class="you-inline-note">Conversation details will become editable after the optional database migration.</p>
+                    <?php endif; ?>
+                    <button class="you-save-button" type="submit" <?= !$personalityEnabled ? 'disabled' : '' ?>>Save conversation details <span aria-hidden="true">✓</span></button>
+                </form>
+            </section>
 
-        <button class="button" type="submit">Save profile</button>
-    </form>
-</section>
-
-<section class="section-card" id="conversation-and-interests" aria-labelledby="conversation-title">
-    <h2 id="conversation-title">Conversation prompt and interests</h2>
-    <p class="muted">These details appear on your discovery card in the original Figma layout. Share only information you want other eligible students to see.</p>
-
-    <?php if (!$personalityEnabled): ?>
-        <p class="field-help" role="status">
-            This feature is waiting for the non-destructive database migration
-            <code>database/migrations/20261014_profile_personality.sql</code>.
-            Your existing profile still works as before.
-        </p>
-    <?php endif; ?>
-
-    <form class="form-grid" method="post" action="profile.php#conversation-and-interests">
-        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="save_personality" value="1">
-
-        <label class="field">
-            <span>Conversation starter question</span>
-            <textarea name="conversation_prompt" maxlength="160" rows="2"
-                placeholder="What little thing improves your day on campus?" <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_prompt']) ?></textarea>
-            <p class="field-help">Optional, up to 160 characters.</p>
-        </label>
-
-        <label class="field">
-            <span>Your answer</span>
-            <textarea name="conversation_answer" maxlength="240" rows="3"
-                placeholder="Write a short answer in your own words." <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_answer']) ?></textarea>
-            <p class="field-help">Optional, up to 240 characters. A question is needed before an answer can be saved.</p>
-        </label>
-
-        <label class="field">
-            <span>Interests</span>
-            <input type="text" name="interests" maxlength="350"
-                value="<?= e(implode(', ', $personalityDetails['interests'])) ?>"
-                placeholder="Reading, Guitar, Coffee" <?= !$personalityEnabled ? 'disabled' : '' ?>>
-            <p class="field-help">Up to five interests, separated by commas. Each may contain up to 40 characters.</p>
-        </label>
-
-        <button class="button" type="submit" <?= !$personalityEnabled ? 'disabled' : '' ?>>
-            Save conversation details
-        </button>
-    </form>
-</section>
-
-<section class="section-card" id="preferences" aria-labelledby="preferences-title">
-    <h2 id="preferences-title">Discovery preferences</h2>
-    <form class="form-grid" method="post" action="profile.php">
-        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="display_name" value="<?= e($profile['display_name'] ?? '') ?>">
-        <input type="hidden" name="bio" value="<?= e($profile['bio'] ?? '') ?>">
-        <input type="hidden" name="faculty" value="<?= e($profile['faculty'] ?? '') ?>">
-        <input type="hidden" name="year_of_study" value="<?= e($profile['year_of_study'] ?? '') ?>">
-
-        <label class="field">
-            <span>Preferred gender</span>
-            <select name="preferred_gender">
-                <option value="">Keep current</option>
-                <option value="female" <?= ($preferences['preferred_gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
-                <option value="male" <?= ($preferences['preferred_gender'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
-            </select>
-        </label>
-
-        <div class="form-row">
-            <label class="field">
-                <span>Minimum age</span>
-                <input type="number" name="age_range_min" min="18" max="99" value="<?= e($preferences['age_range_min'] ?? 18) ?>">
-            </label>
-            <label class="field">
-                <span>Maximum age</span>
-                <input type="number" name="age_range_max" min="18" max="99" value="<?= e($preferences['age_range_max'] ?? 30) ?>">
-            </label>
+            <details class="you-settings-expander" id="preferences">
+                <summary>Discovery preferences <span>Review or update your filters</span></summary>
+                <div class="you-settings-inner">
+                    <p>These filters decide which eligible profiles appear in your Home feed.</p>
+                    <form method="post" action="profile.php#preferences" class="you-preferences-form">
+                        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="display_name" value="<?= e($profile['display_name'] ?? '') ?>">
+                        <input type="hidden" name="bio" value="<?= e($profile['bio'] ?? '') ?>">
+                        <input type="hidden" name="faculty" value="<?= e($profile['faculty'] ?? '') ?>">
+                        <input type="hidden" name="year_of_study" value="<?= e($profile['year_of_study'] ?? '') ?>">
+                        <label class="you-field"><span>Preferred gender</span>
+                            <select name="preferred_gender">
+                                <option value="">Keep current</option>
+                                <option value="female" <?= ($preferences['preferred_gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                                <option value="male" <?= ($preferences['preferred_gender'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
+                            </select>
+                        </label>
+                        <div class="you-form-row">
+                            <label class="you-field"><span>Minimum age (18+)</span>
+                                <input type="number" name="age_range_min" min="18" max="99" value="<?= e($preferences['age_range_min'] ?? 18) ?>">
+                            </label>
+                            <label class="you-field"><span>Maximum age</span>
+                                <input type="number" name="age_range_max" min="18" max="99" value="<?= e($preferences['age_range_max'] ?? 30) ?>">
+                            </label>
+                        </div>
+                        <label class="you-field"><span>Preferred faculty</span>
+                            <select name="preferred_faculty">
+                                <option value="Any">Any</option>
+                                <?php foreach ($faculties as $faculty): ?>
+                                    <option value="<?= e($faculty) ?>" <?= ($preferences['preferred_faculty'] ?? '') === $faculty ? 'selected' : '' ?>><?= e($faculty) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <button class="you-save-button" type="submit">Save discovery preferences</button>
+                    </form>
+                </div>
+            </details>
         </div>
 
-        <label class="field">
-            <span>Preferred faculty</span>
-            <select name="preferred_faculty">
-                <option value="Any">Any</option>
-                <?php foreach ($faculties as $faculty): ?>
-                    <option value="<?= e($faculty) ?>" <?= ($preferences['preferred_faculty'] ?? '') === $faculty ? 'selected' : '' ?>><?= e($faculty) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+        <aside class="you-sidebar" aria-label="Profile setup and safety">
+            <section class="you-checklist" aria-labelledby="you-checklist-title">
+                <h2 id="you-checklist-title">Ready for your first hello?</h2>
+                <p>Your next steps before discovery. Student verification and age eligibility still need proper enforcement.</p>
+                <div class="you-task">
+                    <span class="you-task__check <?= $hasBio ? 'is-done' : '' ?>" aria-hidden="true"><?= $hasBio ? '✓' : '' ?></span>
+                    <div><strong>Write a short bio</strong><p>Let someone get a sense of you.</p><a href="#you-bio"><?= $hasBio ? 'Review bio' : 'Add bio' ?> →</a></div>
+                </div>
+                <div class="you-task">
+                    <span class="you-task__check <?= $hasPrompt && $hasInterests ? 'is-done' : '' ?>" aria-hidden="true"><?= $hasPrompt && $hasInterests ? '✓' : '' ?></span>
+                    <div><strong>Add interests &amp; a prompt</strong><p>Give a conversation somewhere to start.</p><a href="#conversation-and-interests"><?= $hasPrompt && $hasInterests ? 'Review answers' : 'Edit profile' ?> →</a></div>
+                </div>
+                <div class="you-task">
+                    <span class="you-task__check" aria-hidden="true"></span>
+                    <div><strong>Verify student status</strong><p>Verification is not confirmed by this development build.</p><span class="you-task__unavailable">Not yet supported</span></div>
+                </div>
+                <div class="you-task">
+                    <span class="you-task__check" aria-hidden="true"></span>
+                    <div><strong>Confirm you're 18+</strong><p>Required before any real access to adult matching features.</p><span class="you-task__unavailable">Age verification pending</span></div>
+                </div>
+                <div class="you-task">
+                    <span class="you-task__check <?= $isPhotoSet ? 'is-done' : '' ?>" aria-hidden="true"><?= $isPhotoSet ? '✓' : '' ?></span>
+                    <div><strong>Add a photo</strong><p>Only the main photo upload currently works.</p><a href="#you-photos-title"><?= $isPhotoSet ? 'View photo' : 'Choose photo' ?> →</a></div>
+                </div>
+            </section>
 
-        <button class="button" type="submit">Save preferences</button>
-    </form>
-</section>
+            <section class="you-privacy" aria-labelledby="you-privacy-title">
+                <h2 id="you-privacy-title">Privacy &amp; account</h2>
+                <div class="you-privacy-row"><span class="you-privacy-icon" aria-hidden="true">◉</span>
+                    <div><strong>Profile visibility</strong><p>Review who can see your profile.</p></div><span class="you-task__unavailable">In testing</span>
+                </div>
+                <div class="you-privacy-row"><span class="you-privacy-icon" aria-hidden="true">Ⅱ</span>
+                    <div><strong>Pause profile</strong><p>Hide from new discovery without deleting your account.</p></div><span class="you-task__unavailable">In testing</span>
+                </div>
+                <a class="you-privacy-row" href="community_guidelines.php"><span class="you-privacy-icon" aria-hidden="true">♧</span>
+                    <div><strong>Blocking &amp; reporting</strong><p>Read safety and community guidance.</p></div><span aria-hidden="true">›</span>
+                </a>
+                <a class="you-privacy-row" href="#account"><span class="you-privacy-icon" aria-hidden="true">⚙</span>
+                    <div><strong>Account settings</strong><p>Account details and deletion options.</p></div><span aria-hidden="true">›</span>
+                </a>
+                <p class="you-privacy-note">Some privacy and safety controls are still being integrated.</p>
+            </section>
+            <details class="you-settings-expander" id="account">
+                <summary>Account &amp; notifications <span>See available controls</span></summary>
+                <div class="you-settings-inner">
+                    <label class="you-field"><span>Student email (read-only)</span><input type="email" value="<?= e($user['email'] ?? $user['student_email'] ?? '') ?>" readonly></label>
+                    <p class="you-muted">Notification preferences are still in testing. No browser push permissions are requested here.</p>
+                    <div class="you-account-actions"><a href="privacy_policy.php">Privacy policy</a><a href="logout.php">Log out</a><a href="account_delete.php">Delete account</a></div>
+                </div>
+            </details>
+        </aside>
+    </div>
 
-<section class="settings-grid">
-    <article class="section-card" id="notifications">
-        <h2>Notification preferences</h2>
-        <div class="preferences-panel">
-            <label class="switch-row"><span>Matches and milestones</span><input type="checkbox" checked disabled></label>
-            <label class="switch-row"><span>Confession references</span><input type="checkbox" disabled></label>
-            <label class="switch-row"><span>Message requests</span><input type="checkbox" disabled></label>
-        </div>
-        <p class="field-help">Backend preferences and browser push permission are not yet separate contracts.</p>
-    </article>
+    <div class="you-beta"><span>BETA</span><p>Profile saving, media and account controls are still being tested. Don't add sensitive personal information during development.</p></div>
+</main>
 
-    <article class="section-card">
-        <h2>Privacy and safety</h2>
-        <p class="muted">Screenshot alerts are not supported in standard web browsers. Reporting, blocking, unmatching and account deletion need final server contracts before production UI can claim success.</p>
-        <div class="card-actions">
-            <a class="button-secondary" href="privacy_policy.php">Privacy policy</a>
-            <a class="button-secondary" href="community_guidelines.php">Guidelines</a>
-        </div>
-    </article>
-
-    <article class="section-card">
-        <h2>Account</h2>
-        <div class="card-actions">
-            <a class="button-secondary" href="logout.php">Log out</a>
-            <a class="button-danger" href="account_delete.php">Delete account</a>
-        </div>
-        <p class="field-help">Deletion requires password confirmation and then anonymises the account using the retention policy.</p>
-    </article>
-</section>
-<?php
-render_page_shell_end();
+<footer class="site-footer">
+    <span>For NUST students · 18+ only · Independent student project</span>
+    <span class="links"><a href="community_guidelines.php">Community rules</a> / <a href="privacy_policy.php">Safety &amp; privacy</a></span>
+</footer>
+<nav class="bottom-nav" aria-label="Mobile navigation">
+    <?php foreach ($navItems as $item): ?>
+        <a href="<?= e($item['href']) ?>" <?= $item['active'] ? 'class="active" aria-current="page"' : '' ?>>
+            <img src="<?= e(asset_path('preview/assets/icons/' . $item['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+            <span><?= e($item['label']) ?></span>
+        </a>
+    <?php endforeach; ?>
+</nav>
+<script src="<?= e(asset_path('js/app.js')) ?>"></script>
+<script src="<?= e(asset_path('js/you-profile.js')) ?>"></script>
+</body>
+</html>
