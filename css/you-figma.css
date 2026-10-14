@@ -160,7 +160,7 @@
 }
 @media(max-width:760px) {
  .page-you-figma .site-header{height:76px;}
- .page-you-figma .you-main{padding:28px 24px 150px;gap:28px;}
+ .page-you-figma .you-main{padding:28px 24px 32px;gap:28px;}
  .page-you-figma .you-intro h1{font-size:40px;}
  .page-you-figma .you-workspace{display:flex;flex-direction:column;gap:32px;}
  .page-you-figma .you-editor-column,.page-you-figma .you-sidebar{width:100%;}
@@ -173,10 +173,10 @@
  .page-you-figma .you-task__unavailable{white-space:normal;}
  .page-you-figma .you-beta{margin-bottom:4px;}
  .page-you-figma .notification-panel{position:fixed;top:76px;right:12px;width:calc(100vw - 24px);}
- .page-you-figma .site-footer{padding-bottom:135px;}
+ .page-you-figma .site-footer{padding-bottom:max(112px,calc(100px + env(safe-area-inset-bottom, 0px)));}
 }
 @media(max-width:380px) {
- .page-you-figma .you-main{padding:26px 16px 145px;}
+ .page-you-figma .you-main{padding:26px 16px 28px;}
  .page-you-figma .you-editor-card{padding:18px;}
  .page-you-figma .you-intro h1{font-size:36px;}
  .page-you-figma .you-photo-slots{gap:6px;}
@@ -216,11 +216,11 @@
   color: #c8b4b9;
 }
 @media (max-width: 760px) {
-  /* Keep focused form controls and anchor targets above the dock. */
-  html { scroll-padding-bottom: 135px; }
+  /* Give focused inputs and hash navigation a clear area above the dock. */
+  html { scroll-padding-bottom: 115px; }
   .page-you-figma .you-main {
     gap: 26px;
-    padding-bottom: max(170px, calc(130px + env(safe-area-inset-bottom, 0px)));
+    padding-bottom: 32px;
   }
   .page-you-figma .you-intro { gap: 8px; }
   .page-you-figma .you-intro h1 { font-size: clamp(35px, 9.4vw, 40px); }
@@ -249,6 +249,11 @@
     scroll-margin-top: 90px;
   }
   .page-you-figma .you-privacy-row--unavailable { align-items: flex-start; }
+  /* The footer supplies dock clearance; avoid a large blank band after BETA. */
+  .page-you-figma .you-settings-expander,
+  .page-you-figma :is(#profile-editor,#conversation-and-interests,#preferences,#account,#you-photos-title) {
+    scroll-margin-bottom: 112px;
+  }
   .page-you-figma .you-feature-status {
     font-size: 10px;
     padding: 4px 6px;
@@ -268,5 +273,6 @@
   .page-you-figma .you-editor-card { padding: 17px; }
   .page-you-figma .you-photo-slot { height: 92px; }
   .page-you-figma .you-checklist { padding: 18px; }
+  .page-you-figma .you-main { padding-bottom: 28px; }
   .page-you-figma .you-feature-status { white-space: normal; max-width: 70px; text-align: center; }
 }
