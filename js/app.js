@@ -374,7 +374,7 @@
   const initialiseConfessionComposer = () => {
     const openButton = document.querySelector('[data-confession-open]');
     const modal = document.querySelector('[data-confession-modal]');
-    const closeButton = document.querySelector('[data-confession-close]');
+    const closeButtons = modal instanceof HTMLElement ? modal.querySelectorAll('[data-confession-close]') : [];
 
     if (!(openButton instanceof HTMLButtonElement) || !(modal instanceof HTMLElement)) {
       return;
@@ -394,9 +394,17 @@
       }
     });
 
-    if (closeButton instanceof HTMLButtonElement) {
-      closeButton.addEventListener('click', closeModal);
-    }
+    closeButtons.forEach((closeButton) => {
+      if (closeButton instanceof HTMLButtonElement) {
+        closeButton.addEventListener('click', closeModal);
+      }
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !modal.hidden) {
