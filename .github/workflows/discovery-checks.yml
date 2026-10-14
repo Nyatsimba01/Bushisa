@@ -7,6 +7,10 @@ on:
       - 'discover.php'
       - 'php/discovery_feed.php'
       - 'php/discovery_cards.php'
+      - 'php/profile_personality.php'
+      - 'profile.php'
+      - 'database/migrations/20261014_profile_personality.sql'
+      - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
       - 'css/home-discovery-cards.css'
       - 'tests/discovery_cards_test.php'
@@ -21,6 +25,10 @@ on:
       - 'discover.php'
       - 'php/discovery_feed.php'
       - 'php/discovery_cards.php'
+      - 'php/profile_personality.php'
+      - 'profile.php'
+      - 'database/migrations/20261014_profile_personality.sql'
+      - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
       - 'css/home-discovery-cards.css'
       - 'tests/discovery_cards_test.php'
@@ -39,12 +47,17 @@ jobs:
         run: |
           php -l php/discovery_feed.php
           php -l php/discovery_cards.php
+          php -l php/profile_personality.php
+          php -l profile.php
+          php -l tests/profile_personality_test.php
           php -l php/frontend.php
           php -l tests/discovery_cards_test.php
           php -l api/discovery_feed.php
           php -l discover.php
       - name: Card rendering and output escaping
-        run: php tests/discovery_cards_test.php
+        run: |
+          php tests/discovery_cards_test.php
+          php tests/profile_personality_test.php
       - name: Browser JavaScript syntax check
         run: |
           node --check js/app.js
