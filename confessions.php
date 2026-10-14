@@ -64,7 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $anonHandle = trim((string) ($identity['anon_handle'] ?? ''));
                 $publicName = trim((string) ($identity['display_name'] ?? ''));
 
-                if ($anonHandle === '' || ($publicName !== '' && strcasecmp($anonHandle, $publicName) === 0)) {
+                $sameIdentity = $publicName !== ''
+                    && strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $anonHandle))
+                       === strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $publicName));
+                if ($anonHandle === '' || $sameIdentity) {
                     $error = 'Please choose a separate Confessions username in You before posting.';
                 } else {
                     try {
@@ -263,7 +266,10 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                             $handle = ltrim(trim((string) ($confession['anon_handle'] ?? '')), '@');
                             $accountDisplayName = trim((string) ($confession['account_display_name'] ?? ''));
                             // Do not reveal the matching public display name from an old account.
-                            if ($handle === '' || ($accountDisplayName !== '' && strcasecmp($handle, $accountDisplayName) === 0)) {
+                            $matchesPublicName = $accountDisplayName !== ''
+                                && strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $handle))
+                                   === strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $accountDisplayName));
+                            if ($handle === '' || $matchesPublicName) {
                                 $handle = 'anonymous';
                             }
                             $views = max(0, (int) ($confession['view_count'] ?? 0));
