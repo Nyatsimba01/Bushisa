@@ -26,6 +26,13 @@ $initial = function_exists('mb_substr')
     ? mb_strtoupper(mb_substr($firstName, 0, 1))
     : strtoupper(substr($firstName, 0, 1));
 $csrfToken = generate_csrf_token();
+$ownPersonality = bushisa_personality_read($pdo, $currentUserId);
+$hasProfileStory = trim((string) ($currentProfile['bio'] ?? '')) !== ''
+    || trim($ownPersonality['conversation_prompt']) !== ''
+    || $ownPersonality['interests'] !== [];
+$needsDiscoverySetup = $preferences === null;
+$showEmptyHome = $needsDiscoverySetup || $candidates === [];
+
 
 $matchColumnsStatement = $pdo->query('SHOW COLUMNS FROM matches');
 $matchColumns = $matchColumnsStatement !== false ? $matchColumnsStatement->fetchAll(PDO::FETCH_COLUMN) : [];
@@ -151,6 +158,65 @@ render_document_head('Home', $csrfToken, $currentUserId);
         <p>Your campus. Your kind of connection.</p>
     </div>
 
+    <?php if ($showEmptyHome): ?>
+    <section class="home-firstlook" aria-labelledby="home-firstlook-title">
+        <div class="home-firstlook__intro">
+            <span class="home-firstlook__eyebrow">
+                <img src="<?= e(asset_path('preview/assets/icons/sprout.svg')) ?>" alt="" aria-hidden="true">
+                YOUR NEXT CHAPTER
+            </span>
+            <div class="home-firstlook__art" aria-hidden="true">
+                <span class="home-firstlook__halo home-firstlook__halo--outer"></span>
+                <span class="home-firstlook__halo home-firstlook__halo--inner"></span>
+                <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="">
+            </div>
+            <h1 id="home-firstlook-title">
+                <?= $needsDiscoverySetup
+                    ? 'Every good story starts somewhere.'
+                    : 'Nothing new to discover just yet.' ?>
+            </h1>
+            <p class="home-firstlook__lead">
+                <?= $needsDiscoverySetup
+                    ? 'Make your profile yours and choose what matters to you. There’s plenty to explore in the meantime.'
+                    : 'There aren’t any eligible profiles for your preferences right now. Your story is still yours to shape, and other corners of Bushisa are here to explore.' ?>
+            </p>
+            <span class="home-firstlook__status">
+                <span class="home-firstlook__status-dot" aria-hidden="true"></span>
+                <?= $needsDiscoverySetup ? 'Your discovery preferences are not set up yet' : 'No eligible discovery profiles right now' ?>
+            </span>
+        </div>
+        <div class="home-firstlook__explore" aria-label="Explore Bushisa">
+            <a class="home-path home-path--featured" href="profile.php#conversation-and-interests">
+                <span class="home-path__top">
+                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/you.svg')) ?>" alt="" aria-hidden="true"></span>
+                    <span class="home-path__number">01</span>
+                </span>
+                <strong><?= $hasProfileStory ? 'Make your story even more you.' : 'Your story starts with you.' ?></strong>
+                <span><?= $hasProfileStory ? 'Update the details that make your profile personal.' : 'Add a bio, interests and a conversation starter.' ?></span>
+                <span class="home-path__link">Go to You <span aria-hidden="true">↗</span></span>
+            </a>
+            <a class="home-path" href="matches.php">
+                <span class="home-path__top">
+                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/nav-heart.svg')) ?>" alt="" aria-hidden="true"></span>
+                    <span class="home-path__number">02</span>
+                </span>
+                <strong>Find Match</strong>
+                <span>Explore how shared answers and compatibility work.</span>
+                <span class="home-path__link">Explore <span aria-hidden="true">↗</span></span>
+            </a>
+            <a class="home-path" href="confessions.php">
+                <span class="home-path__top">
+                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/confessions.svg')) ?>" alt="" aria-hidden="true"></span>
+                    <span class="home-path__number">03</span>
+                </span>
+                <strong>Confessions</strong>
+                <span>Discover the campus stories section.</span>
+                <span class="home-path__link">Take a look <span aria-hidden="true">↗</span></span>
+            </a>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <section class="chats" aria-labelledby="chats-title">
         <div class="section-head">
             <div class="head-with-pill">
@@ -213,13 +279,13 @@ render_document_head('Home', $csrfToken, $currentUserId);
             </div>
         </div>
 
-        <?php if ($preferences === null || $candidates === []): ?>
-            <div class="home-figma-empty" role="status">
-                <h3><?= $preferences === null ? 'Set your discovery preferences' : 'No discovery profiles right now' ?></h3>
-                <p><?= $preferences === null
-                        ? 'Choose your preferences to see eligible student profiles.'
-                        : 'There are no eligible profiles for your current preferences. You can update them or check back later.' ?></p>
-                <a class="soft-button" href="profile.php#preferences"><?= $preferences === null ? 'Set preferences' : 'Edit preferences' ?> →</a>
+        <?php if ($showEmptyHome): ?>
+            <div class="home-empty-summary" role="status">
+                <span class="home-empty-summary__mark" aria-hidden="true">♡</span>
+                <span><?= $needsDiscoverySetup
+                    ? 'Your discovery preferences are waiting to be set.'
+                    : 'You’re all caught up with eligible profiles for now.' ?></span>
+                <a href="profile.php#preferences"><?= $needsDiscoverySetup ? 'Set preferences' : 'Adjust preferences' ?> →</a>
             </div>
         <?php else: ?>
             <div class="suggestions-grid" data-discovery-grid>
@@ -230,6 +296,7 @@ render_document_head('Home', $csrfToken, $currentUserId);
             </div>
         <?php endif; ?>
 
+        <?php if (!$showEmptyHome): ?>
         <div class="feature-row<?= !isset($candidates[2]) ? ' feature-row--no-card' : '' ?>">
             <section class="story-panel" aria-labelledby="story-title">
                 <img class="story-icon" src="<?= e(asset_path('preview/assets/icons/sprout.svg')) ?>" alt="" aria-hidden="true">
@@ -247,6 +314,8 @@ render_document_head('Home', $csrfToken, $currentUserId);
                 <p>Liking each other creates a mutual match, not permission to message. Chat starts only when an invitation is accepted.</p>
             </section>
         </div>
+
+        <?php endif; ?>
 
         <?php if ($candidates !== []): ?>
             <div class="suggestions-grid home-continuation-grid" data-discovery-continuation>
