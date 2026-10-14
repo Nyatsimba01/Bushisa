@@ -99,6 +99,7 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php elseif (current_page_name() === 'matches.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/find-match-figma.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset_path('css/find-match-map.css')) ?>">
     <?php endif; ?>
 </head>
 <?php
