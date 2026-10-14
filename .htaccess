@@ -1,6 +1,9 @@
 RewriteEngine On
 
-# Force HTTPS
+# Production domains always redirect to HTTPS.
+# Local XAMPP deployments should remain accessible through HTTP.
+RewriteCond %{HTTP_HOST} !^localhost(:[0-9]+)?$ [NC]
+RewriteCond %{HTTP_HOST} !^127\\.0\\.0\\.1(:[0-9]+)?$ [NC]
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
