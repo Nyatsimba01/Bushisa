@@ -58,6 +58,7 @@
   let mode = 'discover';
   let activeZone = null;
   let openedPin = null;
+  let openedPerson = null;
 
   const tag = heading.querySelector('.fm-map-tag');
   if (tag) tag.textContent = 'Fictional demo';
@@ -108,6 +109,7 @@
     '<p class="fm-demo-intro" data-profile-intro></p>',
     '<div class="fm-demo-interests"><span>INTERESTS</span><strong data-profile-interests></strong></div>',
     '<p class="fm-demo-detail" data-profile-detail></p>',
+    '<button type="button" class="fm-demo-view-profile" data-view-full-profile>View Full Profile <span aria-hidden="true">→</span></button>',
     '<p class="fm-demo-disclaimer">Illustrative profile only · No live location or account actions</p>'
   ].join('');
   board.appendChild(card);
@@ -198,12 +200,14 @@
       if (restoreFocus && openedPin.isConnected) openedPin.focus();
     }
     openedPin = null;
+    openedPerson = null;
     updateStatus();
   }
 
   function showProfile(person, pin) {
     if (openedPin && openedPin !== pin) openedPin.setAttribute('aria-pressed', 'false');
     openedPin = pin;
+    openedPerson = person;
     pin.setAttribute('aria-pressed', 'true');
     applyPortrait(card.querySelector('[data-profile-avatar]'), person);
     card.querySelector('[data-profile-badge]').textContent =
@@ -283,6 +287,15 @@
   reset.addEventListener('click', () => {
     activeZone = null;
     renderPins();
+  });
+  card.querySelector('[data-view-full-profile]').addEventListener('click', () => {
+    if (!openedPerson) return;
+    const person = openedPerson;
+    const returnPin = openedPin;
+    closeCard(false);
+    document.dispatchEvent(new CustomEvent('bushisa:demo-profile', {
+      detail: { person, returnPin }
+    }));
   });
   closeButton.addEventListener('click', () => closeCard(true));
   handle.addEventListener('click', () => closeCard(true));
