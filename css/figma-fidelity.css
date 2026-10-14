@@ -75,3 +75,95 @@
     line-height: 1.2;
   }
 }
+
+
+/* Figma liquid-glass background ornaments: source nodes 
+ * Home desktop 12:4,12:5,12:6 / mobile 12:36,12:37
+ * Find Match desktop 12:22,12:23,12:24 / mobile 12:50,12:51
+ * Confessions desktop 12:17,12:18,12:19 / mobile 12:45,12:46,12:47
+ * You desktop 12:31–12:33 / mobile 12:59–12:61
+ *
+ * Recreate Figma's muted, oversized translucent glass ellipses;
+ * no arbitrary grid, neon stars or overlays on real profile photos.
+ * Page backgrounds are purely CSS and cannot block clicks or scrolling.
+ */
+.home-figma-app {
+  background-image:
+    radial-gradient(circle 210px at 90px 90px, rgba(248,237,226,.085) 0, rgba(248,237,226,.035) 48%, transparent 100%),
+    radial-gradient(circle 160px at calc(100% - 140px) 80px, rgba(248,237,226,.082) 0, rgba(248,237,226,.025) 55%, transparent 100%),
+    radial-gradient(circle 130px at calc(100% - 390px) 202px, rgba(248,237,226,.045) 0, transparent 100%);
+  background-repeat: no-repeat;
+}
+.page-match-figma {
+  background-image:
+    radial-gradient(circle 180px at 60px 60px, rgba(248,237,226,.095), rgba(248,237,226,.035) 54%, transparent 100%),
+    radial-gradient(circle 150px at calc(100% - 90px) 90px, rgba(248,237,226,.07), transparent 100%),
+    radial-gradient(circle 140px at calc(100% - 220px) 236px, rgba(248,237,226,.045), transparent 100%);
+  background-repeat: no-repeat;
+}
+.page-confessions-figma {
+  background-image:
+    radial-gradient(circle 210px at 90px 90px, rgba(248,237,226,.085), rgba(248,237,226,.028) 54%, transparent 100%),
+    radial-gradient(circle 180px at calc(100% - 120px) 100px, rgba(248,237,226,.055), transparent 100%),
+    radial-gradient(circle 160px at 80px 1020px, rgba(248,237,226,.058), transparent 100%);
+  background-repeat: no-repeat;
+}
+.page-you-figma {
+  background-image:
+    radial-gradient(circle 210px at 90px 90px, rgba(248,237,226,.075), rgba(248,237,226,.022) 55%, transparent 100%);
+  background-repeat: no-repeat;
+}
+/* The You design has concentric glass shapes, unlike the other three pages.
+   Keep the rings behind actual form controls, not over text fields. */
+.page-you-figma .you-main {
+  isolation: isolate;
+}
+.page-you-figma .you-main::before {
+  content:"";
+  position:absolute;
+  z-index:0;
+  pointer-events:none;
+  width:420px;
+  height:420px;
+  top:-212px;
+  left:-120px;
+  border-radius:50%;
+  border:1px solid rgba(248,237,226,.10);
+  background:radial-gradient(circle at 38% 38%,rgba(248,237,226,.09),rgba(248,237,226,.018) 68%,transparent 73%);
+  box-shadow:inset 0 0 0 60px rgba(248,237,226,.035), inset 0 0 0 61px rgba(248,237,226,.075);
+}
+.page-you-figma .you-main > * {
+  position:relative;
+  z-index:1;
+}
+@media (max-width: 700px) {
+  .home-figma-app {
+    background-image:
+      radial-gradient(circle 110px at 50px 70px,rgba(248,237,226,.09),transparent 100%),
+      radial-gradient(circle 90px at calc(100% - 50px) 510px,rgba(248,237,226,.052),transparent 100%);
+  }
+  .page-match-figma {
+    background-image:
+      radial-gradient(circle 110px at 50px 30px,rgba(248,237,226,.105),transparent 100%),
+      radial-gradient(circle 90px at calc(100% - 40px) 50px,rgba(248,237,226,.068),transparent 100%);
+  }
+  .page-confessions-figma {
+    background-image:
+      radial-gradient(circle 130px at 58px 58px,rgba(248,237,226,.095),transparent 100%),
+      radial-gradient(circle 110px at calc(100% - 60px) 70px,rgba(248,237,226,.07),transparent 100%),
+      radial-gradient(circle 100px at 60px 820px,rgba(248,237,226,.058),transparent 100%);
+  }
+  .page-you-figma {
+    background-image:radial-gradient(circle 150px at 70px 70px,rgba(248,237,226,.07),transparent 100%);
+  }
+  .page-you-figma .you-main::before {
+    width:300px;
+    height:300px;
+    top:-156px;
+    left:-80px;
+    box-shadow:inset 0 0 0 40px rgba(248,237,226,.035),inset 0 0 0 41px rgba(248,237,226,.08);
+  }
+}
+@media (prefers-contrast: more) {
+  .page-you-figma .you-main::before { opacity:.4; }
+}
