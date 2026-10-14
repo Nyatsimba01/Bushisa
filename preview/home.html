@@ -77,6 +77,10 @@
  </div></article>
 <section class="consent-panel"><p class="kicker">A MATCH IS JUST THE START</p><h3>A mutual yes. Then a hello.</h3><p>Liking each other creates a mutual match, not permission to message. Chat starts only when a chat invitation is accepted.</p></section>
 </div>
+<div class="suggestions-grid scroll-demo-cards" id="scroll-demo-cards" hidden aria-label="Additional fictional scrolling example cards"></div>
+<div class="scroll-demo-state" id="scroll-demo-loading" role="status" hidden>Loading more example cards…</div>
+<div class="scroll-demo-state" id="scroll-demo-end" role="status" hidden>End of the fictional profile examples.</div>
+<span id="scroll-demo-sentinel" class="scroll-demo-sentinel" aria-hidden="true" hidden></span>
 </section>
 <section class="caught-up"><h3><img src="assets/icons/caught-up.svg" class="" alt="" aria-hidden="true"> You’re caught up.</h3><p>Want to revisit someone or check your chats? Discovery is finite for now, so you can return to your matches without endless browsing.</p><div class="caught-up-actions"><button type="button" class="soft-button" data-preview-action="undo">Revisit someone</button><button type="button" class="soft-button" data-preview-action="chats">Check your chats</button></div></section>
 <section class="process-section"><h2>A connection, at your pace.</h2><div class="process-steps">
@@ -96,14 +100,17 @@
  const toast=document.getElementById('preview-toast');const note=document.getElementById('notice');const timer={id:null};const bell=document.querySelector('[data-preview-action="bell"]');
  function show(message){toast.textContent=message;toast.hidden=false;clearTimeout(timer.id);timer.id=setTimeout(()=>{toast.hidden=true},3400)}
  function closeNote(){note.hidden=true;bell.setAttribute('aria-expanded','false');bell.focus()}
- document.querySelectorAll('[data-preview-action]').forEach(button=>button.addEventListener('click',()=>{
+ document.addEventListener('click',event=>{
+  const button=event.target instanceof Element ? event.target.closest('[data-preview-action]') : null;
+  if(!(button instanceof HTMLButtonElement))return;
   const action=button.dataset.previewAction;
   if(action==='bell'){note.hidden=!note.hidden;bell.setAttribute('aria-expanded',String(!note.hidden));return}
   show('Figma preview only — '+(action==='like'?'likes and matches':action==='confess'?'confessions':action==='chats'?'messages':action==='account'?'profile settings':action+' actions')+' will be connected to the backend later.');
- }));
+ });
  document.getElementById('notice-close').addEventListener('click',closeNote);
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!note.hidden)closeNote()});
  document.querySelectorAll('[data-preview-link]').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();show('This is the Home design preview. Other screens are not connected yet.')}))
 })();
 </script>
+<script src="scroll-demo.js" defer></script>
 </body></html>
