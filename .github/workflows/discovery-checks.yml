@@ -17,6 +17,8 @@ on:
       - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
       - 'css/home-discovery-cards.css'
+      - 'css/home-real.css'
+      - 'js/home-real.js'
       - 'tests/discovery_cards_test.php'
       - 'api/discovery_feed.php'
       - 'js/app.js'
@@ -39,6 +41,8 @@ on:
       - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
       - 'css/home-discovery-cards.css'
+      - 'css/home-real.css'
+      - 'js/home-real.js'
       - 'tests/discovery_cards_test.php'
       - 'api/discovery_feed.php'
       - 'js/app.js'
@@ -73,4 +77,5 @@ jobs:
         run: |
           node --check js/app.js
           node --check js/discovery_feed.js
+          node --check js/home-real.js
           node --check preview/scroll-demo.js
