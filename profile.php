@@ -34,12 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_anon_handle'])) 
     $requestedHandle = isset($_POST['anon_handle']) && is_string($_POST['anon_handle'])
         ? ltrim(trim(str_replace("\0", '', $_POST['anon_handle'])), '@') : '';
     $publicName = trim((string) ($profile['display_name'] ?? ''));
+    $normalisedHandle = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $requestedHandle));
+    $normalisedPublicName = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $publicName));
 
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
         $error = 'Invalid form submission. Please try again.';
     } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,50}$/D', $requestedHandle)) {
         $error = 'Use 3–50 letters, numbers, underscores, dots or hyphens for your Confessions name.';
-    } elseif ($publicName !== '' && strcasecmp($requestedHandle, $publicName) === 0) {
+    } elseif ($normalisedPublicName !== '' && $normalisedHandle === $normalisedPublicName) {
         $error = 'Your Confessions name must be different from your public profile name.';
     } else {
         try {
@@ -518,7 +520,8 @@ render_document_head('You', $csrfToken, $userId);
                     $currentAnonHandle = trim((string) ($profile['anon_handle'] ?? ''));
                     $publicProfileName = trim((string) ($profile['display_name'] ?? ''));
                     $samePublicName = $currentAnonHandle !== '' && $publicProfileName !== ''
-                        && strcasecmp($currentAnonHandle, $publicProfileName) === 0;
+                        && strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $currentAnonHandle))
+                           === strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $publicProfileName));
                 ?>
                 <?php if ($samePublicName): ?>
                     <p class="you-anon-warning" role="status">Your current Confessions username matches your public profile name. Choose a different name before posting.</p>
