@@ -101,6 +101,7 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
         <link rel="stylesheet" href="<?= e(asset_path('css/find-match-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/find-match-map.css')) ?>">
     <?php endif; ?>
+    <link rel="stylesheet" href="<?= e(asset_path('css/figma-fidelity.css')) ?>">
 </head>
 <?php
 }
