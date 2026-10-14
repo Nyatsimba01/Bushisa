@@ -523,6 +523,11 @@ render_document_head('You', $csrfToken, $userId);
                 <?php if ($samePublicName): ?>
                     <p class="you-anon-warning" role="status">Your current Confessions username matches your public profile name. Choose a different name before posting.</p>
                 <?php endif; ?>
+                <?php if (isset($_POST['save_anon_handle']) && $error !== null): ?>
+                    <p class="you-anon-warning" role="alert"><?= e($error) ?></p>
+                <?php elseif (isset($_POST['save_anon_handle']) && $success !== null): ?>
+                    <p class="you-anon-help" role="status"><?= e($success) ?></p>
+                <?php endif; ?>
                 <form method="post" action="profile.php#confessions-identity" class="you-anon-form">
                     <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                     <input type="hidden" name="save_anon_handle" value="1">
