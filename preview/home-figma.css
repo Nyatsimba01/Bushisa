@@ -23,3 +23,13 @@
 }
 @media(max-width:360px){.main{padding-left:16px;padding-right:16px}.chats{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}.bottom-nav{left:8px;right:8px}.brand-title{font-size:25px}.header-inner{padding:0 16px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+
+/* Optional ?scrollDemo=1: extend cards after the source Figma composition. */
+.scroll-demo-cards { margin-top: 24px; }
+.scroll-demo-picture { background: radial-gradient(circle at 55% 32%, #754455 0%, #4a2434 35%, #302128 95%); display: grid; place-items: center; }
+.scroll-demo-initial { font: 400 64px 'Lora', Georgia, serif; color: rgba(244,181,152,.28); }
+.scroll-demo-state { margin: 16px 0 0; padding: 13px 18px; border-radius: 12px; background: #3b2931; color: #c8b4b9; font-size: 13px; text-align: center; }
+.scroll-demo-sentinel { display: block; height: 2px; }
+.scroll-demo-sentinel[hidden], .scroll-demo-state[hidden], .scroll-demo-cards[hidden], .caught-up[hidden] { display: none !important; }
+@media(max-width:700px) { .scroll-demo-cards { margin-top: 16px; } .scroll-demo-initial { font-size: 48px; } }
