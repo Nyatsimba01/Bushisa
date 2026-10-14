@@ -11,7 +11,7 @@
     button.addEventListener('click', () => {
       buttons.forEach(other => other.setAttribute('aria-pressed', String(other === button)));
       title.textContent = button.dataset.zoneName || 'Campus area';
-      description.textContent = 'No verified, opted-in profiles are available in this area yet. This is an illustrative campus area, not a live location.';
+      description.textContent = 'Profile markers are not enabled in this development build. This is an illustrative campus area, not a live location.';
     });
   });
 })();
