@@ -28,12 +28,16 @@ if ($page < 1) {
 }
 
 $perPage = 20;
+$sort = (($_GET['sort'] ?? 'latest') === 'trending') ? 'trending' : 'latest';
+$sortOrder = $sort === 'trending'
+    ? 'view_count DESC, c.created_at DESC, c.id DESC'
+    : 'c.created_at DESC, c.id DESC';
 $columnStatement = $pdo->query('SHOW COLUMNS FROM confessions');
 $confessionColumns = $columnStatement !== false ? $columnStatement->fetchAll(PDO::FETCH_COLUMN) : [];
 $usesUserContentSchema = in_array('user_id', $confessionColumns, true) && in_array('content', $confessionColumns, true);
 $usesAuthorBodySchema = in_array('author_id', $confessionColumns, true) && in_array('body', $confessionColumns, true);
 
-$countStatement = $pdo->query('SELECT COUNT(*) FROM confessions');
+$countStatement = $pdo->query('SELECT COUNT(*) FROM confessions WHERE is_flagged = 0');
 $totalConfessions = $countStatement !== false ? (int) $countStatement->fetchColumn() : 0;
 $total_pages = $totalConfessions > 0 ? (int) ceil($totalConfessions / $perPage) : 1;
 
@@ -107,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$page = min($page, $total_pages);
 $offset = ($page - 1) * $perPage;
 $confessionRuntimeColumns = operational_confession_columns($pdo);
 $handleSelect = operational_column_exists($pdo, 'confessions', 'anon_handle')
@@ -128,11 +133,12 @@ if ($usesUserContentSchema || $usesAuthorBodySchema) {
              LEFT JOIN confession_views cv ON cv.confession_id = c.id
              WHERE c.is_flagged = 0
              GROUP BY c.id, c.%1$s, c.created_at, c.is_flagged, anon_handle
-             ORDER BY view_count DESC, c.created_at DESC, c.id DESC
+             ORDER BY %4$s
              LIMIT :limit OFFSET :offset',
             $confessionRuntimeColumns['body'],
             $confessionRuntimeColumns['author'],
-            $handleSelect
+            $handleSelect,
+            $sortOrder
         )
     );
 } else {
@@ -148,72 +154,181 @@ if ($feedStatement !== false) {
 
 $csrfToken = generate_csrf_token();
 
-render_page_shell_start('confessions', 'Confessions', $csrfToken, $currentUserId, false, 'Anonymous posts from the Bushisa community');
+$profile = get_profile($pdo, $currentUserId);
+$profileName = trim((string) ($profile['display_name'] ?? ''));
+$initial = $profileName !== '' ? strtoupper(substr($profileName, 0, 1)) : 'B';
+$navItems = [
+    ['href' => 'discover.php', 'label' => 'Home', 'icon' => 'home', 'active' => false],
+    ['href' => 'matches.php', 'label' => 'Find Match', 'icon' => 'nav-heart', 'active' => false],
+    ['href' => 'confessions.php', 'label' => 'Confessions', 'icon' => 'confessions', 'active' => true],
+    ['href' => 'profile.php', 'label' => 'You', 'icon' => 'you', 'active' => false],
+];
+$unreadCount = 0;
+try {
+    if (operational_table_exists($pdo, 'notifications')) {
+        $notificationStatement = $pdo->prepare('SELECT COUNT(*) FROM notifications WHERE recipient_id = :id AND read_at IS NULL');
+        $notificationStatement->execute([':id' => $currentUserId]);
+        $unreadCount = (int) $notificationStatement->fetchColumn();
+    }
+} catch (Throwable $exception) {
+    error_log('Confessions notification count unavailable: ' . $exception->getMessage());
+}
+render_document_head('Confessions', $csrfToken, $currentUserId);
 ?>
-<?php render_flash($error, $success); ?>
-
-<section class="empty-state">
-    <h2>Trending confessions</h2>
-    <p>The feed is ordered by deduplicated view count, then newest confession. Anonymous handles remain noninteractive.</p>
-</section>
-
-<section class="confessions-feed" aria-labelledby="confessions-title">
-    <h2 class="section-title" id="confessions-title">Anonymous feed</h2>
-    <?php if ($confessions === []): ?>
-        <article class="empty-state">
-            <h2>No confessions yet</h2>
-            <p>Be the first to share anonymously. Do not include details that identify you or someone else.</p>
-        </article>
-    <?php else: ?>
-        <?php foreach ($confessions as $confession): ?>
-            <?php
-            $handle = (string) ($confession['anon_handle'] ?? 'anonymous');
-            $body = (string) ($confession['body'] ?? '');
-            ?>
-            <article class="confession-card">
-                <div class="confession-card__meta">
-                    <strong>@<?= e($handle) ?></strong>
-                    <span><?= e((int) ($confession['view_count'] ?? 0)) ?> views</span>
-                    <time datetime="<?= e($confession['created_at'] ?? '') ?>"><?= e(format_time_ago((string) ($confession['created_at'] ?? ''))) ?></time>
-                </div>
-                <p class="confession-card__body"><?= e($body) ?></p>
-                <div class="card-actions">
-                    <button class="button-secondary" type="button" disabled>Reference unavailable</button>
-                    <a class="button-secondary" href="community_guidelines.php">Report</a>
-                </div>
-            </article>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</section>
-
-<?php if ($total_pages > 1): ?>
-    <nav class="pagination" aria-label="Confession pages">
-        <?php if ($page > 1): ?>
-            <a class="button-secondary" href="confessions.php?page=<?= e($page - 1) ?>">Previous</a>
-        <?php endif; ?>
-        <span class="muted">Page <?= e($page) ?> of <?= e($total_pages) ?></span>
-        <?php if ($page < $total_pages): ?>
-            <a class="button-secondary" href="confessions.php?page=<?= e($page + 1) ?>">Next</a>
-        <?php endif; ?>
-    </nav>
-<?php endif; ?>
-
-<button class="confession-fab" type="button" aria-label="Write confession" data-confession-open>+</button>
-
-<section class="confession-modal" id="write-confession" role="dialog" aria-modal="true" aria-labelledby="write-confession-title" data-confession-modal hidden>
-    <h2 id="write-confession-title">Write confession</h2>
-    <p class="field-help">Your anonymous handle is shown, but your real profile must remain private. Avoid identifying details.</p>
-    <form class="form-grid" method="post" action="confessions.php">
-        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
-        <label class="field">
-            <span>Confession</span>
-            <textarea name="body" maxlength="500" required placeholder="Share what is on your mind..."></textarea>
-        </label>
-        <div class="card-actions">
-            <button class="confession-modal__submit" type="submit">Post anonymously</button>
-            <button class="button-secondary" type="button" data-confession-close>Cancel</button>
+<body class="page-confessions-figma bushisa-app" id="top">
+<header class="site-header">
+    <div class="header-inner">
+        <a href="discover.php" class="brand" aria-label="Bushisa Home">
+            <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="" aria-hidden="true">
+            <span class="brand-title">Bushisa</span>
+            <span class="brand-subtitle">NUST CONNECTIONS</span>
+        </a>
+        <nav class="desktop-nav" aria-label="Main navigation">
+            <?php foreach ($navItems as $item): ?>
+                <a href="<?= e($item['href']) ?>" <?= $item['active'] ? 'class="active" aria-current="page"' : '' ?>>
+                    <img src="<?= e(asset_path('preview/assets/icons/' . $item['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+                    <span><?= e($item['label']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+        <div class="header-actions">
+            <button class="round-button notification-bell" type="button" data-notification-bell
+                aria-controls="notificationPanel" aria-expanded="false" aria-label="Open notifications">
+                <img src="<?= e(asset_path('preview/assets/icons/bell.svg')) ?>" alt="" aria-hidden="true">
+                <?php if ($unreadCount > 0): ?>
+                    <span class="unread-count"><?= e($unreadCount > 9 ? '9+' : (string) $unreadCount) ?></span>
+                <?php endif; ?>
+            </button>
+            <a class="round-button account-letter" href="profile.php" aria-label="Your profile"><?= e($initial) ?></a>
         </div>
-    </form>
+    </div>
+</header>
+<?php render_notification_panel(); ?>
+<main id="main" class="cf-main">
+    <header class="cf-intro">
+        <div class="cf-intro__copy">
+            <p class="cf-eyebrow">THE OTHER SIDE OF CAMPUS</p>
+            <h1>Confessions</h1>
+            <p>A small space for campus thoughts. Keep it kind, keep it anonymous.</p>
+        </div>
+        <button type="button" class="cf-post-button" data-confession-open aria-label="Post a confession">
+            <span class="cf-post-button__label">Post a confession</span>
+            <span class="cf-post-button__plus" aria-hidden="true">+</span>
+        </button>
+    </header>
+    <?php render_flash(null, $success); ?>
+    <div class="cf-layout">
+        <section class="cf-feed" aria-label="Anonymous confession feed">
+            <div class="cf-toolbar">
+                <nav class="cf-tabs" aria-label="Sort confessions">
+                    <a class="cf-tab<?= $sort === 'latest' ? ' is-current' : '' ?>" href="confessions.php?sort=latest" <?= $sort === 'latest' ? 'aria-current="page"' : '' ?>>Latest</a>
+                    <a class="cf-tab<?= $sort === 'trending' ? ' is-current' : '' ?>" href="confessions.php?sort=trending" <?= $sort === 'trending' ? 'aria-current="page"' : '' ?>>Trending</a>
+                </nav>
+                <p class="cf-post-count"><?= e((string) $totalConfessions) ?> <?= $totalConfessions === 1 ? 'confession' : 'confessions' ?></p>
+            </div>
+            <aside class="cf-guidance">
+                <div>
+                    <h2>Keep it kind. Respect mention settings.</h2>
+                    <p>Mention only opted-in students. No private details, contact information or harassment.</p>
+                </div>
+            </aside>
+            <?php if ($confessions === []): ?>
+                <div class="cf-empty">
+                    <span class="cf-empty__symbol" aria-hidden="true">✧</span>
+                    <h2>Every campus has a story.</h2>
+                    <p>It's a little quiet here for now. When someone shares a thought, it'll appear here. Posts should be anonymous and respectful.</p>
+                </div>
+            <?php else: ?>
+                <div class="cf-list">
+                    <?php foreach ($confessions as $confession): ?>
+                        <?php
+                            $handle = ltrim(trim((string) ($confession['anon_handle'] ?? 'anonymous')), '@');
+                            $handle = $handle === '' ? 'anonymous' : $handle;
+                            $views = max(0, (int) ($confession['view_count'] ?? 0));
+                        ?>
+                        <article class="cf-card">
+                            <div class="cf-card__byline">
+                                <span class="cf-card__avatar" aria-hidden="true"><img src="<?= e(asset_path('preview/assets/icons/confessions.svg')) ?>" alt=""></span>
+                                <div class="cf-card__author">
+                                    <strong>@<?= e($handle) ?></strong>
+                                    <time datetime="<?= e((string) ($confession['created_at'] ?? '')) ?>"><?= e(format_time_ago((string) ($confession['created_at'] ?? ''))) ?></time>
+                                </div>
+                                <span class="cf-card__quote" aria-hidden="true">“</span>
+                            </div>
+                            <div class="cf-bubble">
+                                <p class="cf-bubble__body"><?= e((string) ($confession['body'] ?? '')) ?></p>
+                                <div class="cf-bubble__actions">
+                                    <span class="cf-bubble__views"><?= e((string) $views) ?> <?= $views === 1 ? 'view' : 'views' ?></span>
+                                    <div class="cf-bubble__links">
+                                        <a href="community_guidelines.php" title="Reporting and safety guidance">Report help</a>
+                                        <button class="cf-bubble__soon" type="button" disabled title="Reactions are being tested">♡ Like soon</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            <?php if ($total_pages > 1): ?>
+                <nav class="cf-pagination" aria-label="Confession pages">
+                    <?php if ($page > 1): ?>
+                        <a href="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) ($page - 1)) ?>">← Previous</a>
+                    <?php endif; ?>
+                    <span>Page <?= e((string) $page) ?> of <?= e((string) $total_pages) ?></span>
+                    <?php if ($page < $total_pages): ?>
+                        <a href="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) ($page + 1)) ?>">Next →</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+            <div class="cf-feed-end">
+                <h2>You're all caught up.</h2>
+                <p>That's everything for now. The next thought can take its time.</p>
+            </div>
+        </section>
+        <aside class="cf-aside" aria-label="Community guidance">
+            <h2>Behind every post is a person.</h2>
+            <p>Keep personal information private, respect boundaries, and remember that anonymity is not a reason to be unkind.</p>
+            <a href="community_guidelines.php">Community rules →</a>
+        </aside>
+    </div>
+    <div class="cf-beta">
+        <strong>BETA</strong>
+        <span>This is a development build. Reactions, reporting and some safety controls are still being tested. Use only fictional test content until verification and moderation are ready.</span>
+    </div>
+</main>
+<footer class="site-footer cf-footer">
+    <span>For NUST students · 18+ only · Independent student project</span>
+    <span class="links"><a href="community_guidelines.php">Community rules</a> / <a href="privacy_policy.php">Safety &amp; privacy</a></span>
+</footer>
+<nav class="bottom-nav" aria-label="Mobile navigation">
+    <?php foreach ($navItems as $item): ?>
+        <a href="<?= e($item['href']) ?>" <?= $item['active'] ? 'class="active" aria-current="page"' : '' ?>>
+            <img src="<?= e(asset_path('preview/assets/icons/' . $item['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+            <span><?= e($item['label']) ?></span>
+        </a>
+    <?php endforeach; ?>
+</nav>
+<section class="cf-modal" id="write-confession" role="dialog" aria-modal="true"
+         aria-labelledby="write-confession-title" data-confession-modal <?= $error === null ? 'hidden' : '' ?>>
+    <div class="cf-composer">
+        <div class="cf-composer__top">
+            <h2 id="write-confession-title">A thought worth sharing?</h2>
+            <button type="button" class="cf-composer__close" data-confession-close aria-label="Close composer">×</button>
+        </div>
+        <p>Posts show your anonymous handle, not your real profile. Leave out names, contact details and identifying information.</p>
+        <?php render_flash($error, null); ?>
+        <form method="post" action="confessions.php?sort=<?= e($sort) ?>">
+            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+            <label for="cf-body">Your confession</label>
+            <textarea id="cf-body" name="body" maxlength="500" required placeholder="What's on your mind?"><?= e((string) ($_POST['body'] ?? '')) ?></textarea>
+            <p class="cf-composer__help">Up to 500 characters · Only share what is safe to make public.</p>
+            <div class="cf-composer__actions">
+                <button type="button" class="cf-composer__cancel" data-confession-close>Cancel</button>
+                <button type="submit" class="cf-composer__submit">Post anonymously →</button>
+            </div>
+        </form>
+    </div>
 </section>
-<?php
-render_page_shell_end();
+<script src="<?= e(asset_path('js/app.js')) ?>"></script>
+</body>
+</html>
