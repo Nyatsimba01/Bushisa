@@ -147,7 +147,7 @@
       if (!response.ok || payload.success !== true) {
         throw new Error(typeof payload.error === 'string' ? payload.error : 'Unable to save your answers.');
       }
-      if (step === groups.length - 1) showComplete();
+      if (step === groups.length - 1) window.location.assign('matches.php');
       else {
         step += 1;
         display();
