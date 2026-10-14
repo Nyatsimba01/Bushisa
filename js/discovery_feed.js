@@ -3,7 +3,7 @@
 // Automatically append eligible server-provided profiles to the existing Figma cards.
 // The server decides eligibility, order, and pagination; the browser never invents matches.
 (() => {
-  const grid = document.querySelector('[data-discovery-grid]');
+  const grid = document.querySelector('[data-discovery-continuation]') || document.querySelector('[data-discovery-grid]');
   const pagination = document.querySelector('[data-discovery-pagination]');
   if (!(grid instanceof HTMLElement) || !(pagination instanceof HTMLElement)) {
     return;
@@ -20,7 +20,7 @@
   let pausedAfterError = false;
   let observer = null;
   const seen = new Set(
-    Array.from(grid.querySelectorAll('[data-candidate-id]'))
+    Array.from(document.querySelectorAll('[data-candidate-id]'))
       .map((item) => item.getAttribute('data-candidate-id'))
       .filter(Boolean)
   );
