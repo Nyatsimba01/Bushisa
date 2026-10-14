@@ -90,6 +90,9 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
         <link rel="stylesheet" href="<?= e(asset_path('css/home-discovery-cards.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/home-real.css')) ?>">
+    <?php elseif (current_page_name() === 'profile.php'): ?>
+        <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset_path('css/you-figma.css')) ?>">
     <?php endif; ?>
 </head>
 <?php
