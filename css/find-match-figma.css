@@ -153,3 +153,7 @@
  .page-match-figma .fm-followup-body{padding:14px;}
  .page-match-figma .fm-extra-choices{grid-template-columns:1fr;}
 }
+
+.page-match-figma .fm-clear-extra{align-self:flex-start;margin-top:8px;padding:8px 0;border:0;background:transparent;color:#f4b598;font:500 12px/1.4 Inter,Arial,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.page-match-figma .fm-clear-extra:hover{color:#ffc6ae;}
+.page-match-figma .fm-clear-extra:focus-visible{outline:2px solid #f4b598;outline-offset:3px;}
