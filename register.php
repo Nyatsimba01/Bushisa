@@ -154,6 +154,4 @@ render_auth_start('Create account', $csrfToken);
     <p class="auth-switch">Already have an account? <a href="login.php">Sign in</a></p>
 </section>
 <?php
-render_auth_end();
-?>
-<script src="<?= e(asset_path('js/confessions-emoji.js')) ?>"></script>
+render_auth_end(['js/confessions-emoji.js']);
