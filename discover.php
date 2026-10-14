@@ -295,8 +295,8 @@ render_document_head('Home', $csrfToken, $currentUserId);
                     </a>
                 </div>
             </section>
-            <?php endif; ?>
-ass="suggestions-grid" data-discovery-grid>
+            <?php else: ?>
+            <div class="suggestions-grid" data-discovery-grid>
                 <?= bushisa_render_discovery_cards(array_slice($candidates, 0, 2)) ?>
                 <?php if (isset($candidates[2])): ?>
                     <div class="mobile-third-card"><?= bushisa_render_discovery_card($candidates[2]) ?></div>
