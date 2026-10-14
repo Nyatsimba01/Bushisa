@@ -87,10 +87,9 @@ function dashboard_column_exists(PDO $pdo, string $table, string $column): bool
         return false;
     }
 
-    $statement = $pdo->prepare('SHOW COLUMNS FROM ' . $table . ' LIKE :column_name');
-    $statement->execute([':column_name' => $column]);
-
-    return $statement->fetch(PDO::FETCH_ASSOC) !== false;
+    // SHOW COLUMNS ... LIKE does not support bound placeholders reliably on
+    // MariaDB with native PDO prepares. Query information_schema instead.
+    return operational_column_exists($pdo, $table, $column);
 }
 
 render_auth_start('Admin Dashboard');
