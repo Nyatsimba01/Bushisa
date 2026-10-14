@@ -202,6 +202,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Seeing how things unfold"<?= $isChecked('connection_pace','Seeing how things unfold') ?>><span class="fm-option-copy"><strong>Seeing how things unfold</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Making plans when ready"<?= $isChecked('connection_pace','Making plans when ready') ?>><span class="fm-option-copy"><strong>Making plans when ready</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
             </div>
@@ -253,6 +254,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="An activity together"<?= $isChecked('hangout_style','An activity together') ?>><span class="fm-option-copy"><strong>An activity together</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="A bit of everything"<?= $isChecked('hangout_style','A bit of everything') ?>><span class="fm-option-copy"><strong>A bit of everything</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
             </div>
@@ -298,6 +300,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 <p class="fm-optional-help">Local or international. You can leave this blank.</p>
 <input type="text" id="fm-football-team" class="fm-extra-input" data-answer-key="football_team" data-optional-answer maxlength="60" autocomplete="off" value="<?= e($savedAnswers['football_team'] ?? '') ?>" placeholder="Your team (optional)">
 </div>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
 
@@ -312,6 +315,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Jazz"<?= $isChecked('music_styles','Jazz') ?>><span class="fm-option-copy"><strong>Jazz</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Other"<?= $isChecked('music_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
 
@@ -325,6 +329,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Comics"<?= $isChecked('reading_styles','Comics') ?>><span class="fm-option-copy"><strong>Comics</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Other"<?= $isChecked('reading_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
 
@@ -338,6 +343,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Party games"<?= $isChecked('gaming_styles','Party games') ?>><span class="fm-option-copy"><strong>Party games</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Other"<?= $isChecked('gaming_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
 
@@ -350,6 +356,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Making things"<?= $isChecked('creative_styles','Making things') ?>><span class="fm-option-copy"><strong>Making things</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Enjoying art"<?= $isChecked('creative_styles','Enjoying art') ?>><span class="fm-option-copy"><strong>Enjoying art</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
 
@@ -362,6 +369,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Live music"<?= $isChecked('outing_styles','Live music') ?>><span class="fm-option-copy"><strong>Live music</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Quiet outings"<?= $isChecked('outing_styles','Quiet outings') ?>><span class="fm-option-copy"><strong>Quiet outings</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
             </div>
@@ -395,6 +403,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="radio" name="planning_style" data-answer-key="planning_style" data-optional-answer value="Keeping plans flexible"<?= $isChecked('planning_style','Keeping plans flexible') ?>><span class="fm-option-copy"><strong>Keeping plans flexible</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="radio" name="planning_style" data-answer-key="planning_style" data-optional-answer value="A mix of both"<?= $isChecked('planning_style','A mix of both') ?>><span class="fm-option-copy"><strong>A mix of both</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
             </div>
