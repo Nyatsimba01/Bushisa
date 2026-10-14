@@ -1,0 +1,26 @@
+name: Find Match syntax checks
+
+on:
+  push:
+    branches:
+      - figma-integration
+    paths:
+      - 'matches.php'
+      - 'php/frontend.php'
+      - 'js/find-match.js'
+      - 'css/find-match-figma.css'
+      - '.github/workflows/find-match-checks.yml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP syntax
+        run: |
+          php -l matches.php
+          php -l php/frontend.php
+          php -l api/find_match.php
+      - name: Validate Find Match JavaScript syntax
+        run: node --check js/find-match.js
