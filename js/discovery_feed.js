@@ -54,7 +54,7 @@
     const photoPath = String(candidate.profile_photo_path || '').trim();
     if (photoPath) {
       const img = make('img', 'home-photo');
-      img.src = photoPath.startsWith('http') ? photoPath : photoPath.replace(/^\/+/, '');
+      img.src = (photoPath.startsWith('https://') || photoPath.startsWith('http://')) ? photoPath : photoPath.replace(/^\/+/, '');
       img.alt = name + ' profile photo';
       img.loading = 'lazy';
       img.decoding = 'async';
