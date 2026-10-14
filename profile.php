@@ -13,6 +13,7 @@ require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/frontend.php';
 require_once __DIR__ . '/php/profile_personality.php';
+require_once __DIR__ . '/php/confessions_identity.php';
 
 require_login();
 
@@ -32,16 +33,14 @@ $personalityDetails = bushisa_personality_read($pdo, $userId);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_anon_handle'])) {
     $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
     $requestedHandle = isset($_POST['anon_handle']) && is_string($_POST['anon_handle'])
-        ? ltrim(trim(str_replace("\0", '', $_POST['anon_handle'])), '@') : '';
+        ? bushisa_clean_confessions_handle($_POST['anon_handle']) : '';
     $publicName = trim((string) ($profile['display_name'] ?? ''));
-    $normalisedHandle = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $requestedHandle));
-    $normalisedPublicName = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $publicName));
 
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
         $error = 'Invalid form submission. Please try again.';
-    } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,50}$/D', $requestedHandle)) {
-        $error = 'Use 3–50 letters, numbers, underscores, dots or hyphens for your Confessions name.';
-    } elseif ($normalisedPublicName !== '' && $normalisedHandle === $normalisedPublicName) {
+    } elseif (($usernameError = bushisa_validate_confessions_handle($requestedHandle)) !== null) {
+        $error = $usernameError;
+    } elseif (bushisa_confessions_handle_matches_public($requestedHandle, $publicName)) {
         $error = 'Your Confessions name must be different from your public profile name.';
     } else {
         try {
@@ -79,7 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_anon_handle'])) 
                 $pdo->rollBack();
             }
             log_to_file('Anonymous handle update failed for user ' . $userId . ': ' . $exception->getMessage(), 'ERROR');
-            $error = 'Unable to save your Confessions username right now.';
+            $error = $exception instanceof PDOException && (string) $exception->getCode() === '23000'
+                ? 'That Confessions username is already taken. Choose another.'
+                : 'Unable to save your Confessions username right now.';
         }
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personality'])) {
@@ -519,9 +520,8 @@ render_document_head('You', $csrfToken, $userId);
                 <?php
                     $currentAnonHandle = trim((string) ($profile['anon_handle'] ?? ''));
                     $publicProfileName = trim((string) ($profile['display_name'] ?? ''));
-                    $samePublicName = $currentAnonHandle !== '' && $publicProfileName !== ''
-                        && strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $currentAnonHandle))
-                           === strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $publicProfileName));
+                    $samePublicName = $currentAnonHandle !== ''
+                        && bushisa_confessions_handle_matches_public($currentAnonHandle, $publicProfileName);
                 ?>
                 <?php if ($samePublicName): ?>
                     <p class="you-anon-warning" role="status">Your current Confessions username matches your public profile name. Choose a different name before posting.</p>
@@ -538,13 +538,21 @@ render_document_head('You', $csrfToken, $userId);
                         <span>Confessions username</span>
                         <span class="you-anon-input"><span aria-hidden="true">@</span>
                             <input id="you-anon-handle" type="text" name="anon_handle" minlength="3" maxlength="50"
-                                   pattern="[A-Za-z0-9_.-]{3,50}" autocapitalize="none" autocomplete="off"
-                                   spellcheck="false" required
+                                   autocapitalize="none" autocomplete="off" spellcheck="false" required
                                    value="<?= e(isset($_POST['save_anon_handle']) && isset($_POST['anon_handle']) && is_string($_POST['anon_handle']) && $error !== null ? ltrim(trim($_POST['anon_handle']), '@') : $currentAnonHandle) ?>"
                                    placeholder="quiet_spark">
                         </span>
-                        <small>Use 3–50 letters, numbers, dots, underscores or hyphens. Avoid real names, student IDs or contact details.</small>
+                        <small>Use at least 3 letters or numbers, optional dots, underscores or hyphens, and up to 2 emojis. Every username must be unique. Avoid personal details.</small>
                     </label>
+                    <div class="anon-emoji-picker" aria-label="Optional emojis for your Confessions username">
+                        <span>Make it yours:</span>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="🌸" aria-label="Add cherry blossom emoji">🌸</button>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="💜" aria-label="Add purple heart emoji">💜</button>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="✨" aria-label="Add sparkle emoji">✨</button>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="🌙" aria-label="Add moon emoji">🌙</button>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="🦋" aria-label="Add butterfly emoji">🦋</button>
+                        <button type="button" data-emoji-target="you-anon-handle" data-emoji="🎮" aria-label="Add game controller emoji">🎮</button>
+                    </div>
                     <button class="you-save-button" type="submit">Save Confessions username <span aria-hidden="true">✓</span></button>
                 </form>
                 <p class="you-anon-note">Changing this name also updates the name shown on your earlier posts, but it cannot change screenshots others may already have. Moderators can still link posts to the account for safety.</p>
@@ -577,5 +585,6 @@ render_document_head('You', $csrfToken, $userId);
 </nav>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
 <script src="<?= e(asset_path('js/you-profile.js')) ?>"></script>
+<script src="<?= e(asset_path('js/confessions-emoji.js')) ?>"></script>
 </body>
 </html>
