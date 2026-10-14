@@ -108,15 +108,15 @@ render_auth_start('Create account', $csrfToken);
                 <span>Anonymous handle</span>
                 <input id="register-anon-handle" type="text" name="anon_handle" value="<?= e($posted('anon_handle')) ?>" minlength="3" maxlength="50" autocapitalize="none" spellcheck="false" required placeholder="quiet_spark🌸">
                 <p class="field-help">This name appears on Confessions only. Use at least 3 letters or numbers and up to 2 emojis. It must be unique and different from your public name.</p>
-                <div class="anon-emoji-picker" aria-label="Optional emojis for your Confessions username">
+            </label>
+            <div class="anon-emoji-picker" aria-label="Optional emojis for your Confessions username">
                     <span>Pick an emoji:</span>
                     <button type="button" data-emoji-target="register-anon-handle" data-emoji="🌸" aria-label="Add cherry blossom">🌸</button>
                     <button type="button" data-emoji-target="register-anon-handle" data-emoji="💜" aria-label="Add purple heart">💜</button>
                     <button type="button" data-emoji-target="register-anon-handle" data-emoji="✨" aria-label="Add sparkles">✨</button>
                     <button type="button" data-emoji-target="register-anon-handle" data-emoji="🌙" aria-label="Add moon">🌙</button>
                     <button type="button" data-emoji-target="register-anon-handle" data-emoji="🦋" aria-label="Add butterfly">🦋</button>
-                </div>
-            </label>
+            </div>
 
             <label class="field">
                 <span>Gender</span>
