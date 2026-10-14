@@ -278,7 +278,9 @@ render_document_head('Home', $csrfToken, $currentUserId);
             <?php endif; ?>
         </div>
         <?php endif; ?>
-        <div class="chats-bottom"><span class="private-pass">Passing stays private. Conversations require consent.</span></div>
+        <?php if ($establishedMatches !== [] || $pendingCount > 0): ?>
+            <div class="chats-bottom"><span class="private-pass">Passing stays private. Conversations require consent.</span></div>
+        <?php endif; ?>
     </section>
 
     <section class="suggestions" aria-labelledby="suggested-title">
