@@ -177,6 +177,74 @@
 }
 
 
+
+/* Concise empty chat row: preserve the Figma heading without fake avatars. */
+.home-figma-app .home-quiet-chats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 12px 15px;
+  border-radius: 15px;
+  border: 1px solid #57404a;
+  background: rgba(59, 41, 49, .58);
+}
+.home-figma-app .home-quiet-chats__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #4a2434;
+}
+.home-figma-app .home-quiet-chats__icon img {
+  width: 19px;
+  height: 19px;
+}
+.home-figma-app .home-quiet-chats p {
+  margin: 0;
+  color: #d7bec4;
+  font: 400 12px/1.5 Inter, Arial, sans-serif;
+}
+.home-figma-app .home-quiet-chats a {
+  margin-left: auto;
+  white-space: nowrap;
+  color: #f4b598;
+  text-decoration: none;
+  font: 600 12px/1.5 Inter, Arial, sans-serif;
+}
+.home-figma-app .home-quiet-chats a:hover { text-decoration: underline; }
+@media(max-width: 700px) {
+  .home-figma-app .home-quiet-chats {
+    padding: 10px 12px;
+    gap: 9px;
+    min-height: 52px;
+  }
+  .home-figma-app .home-quiet-chats__icon {
+    width: 28px;
+    height: 28px;
+  }
+  .home-figma-app .home-quiet-chats__icon img {
+    width: 17px;
+    height: 17px;
+  }
+  .home-figma-app .home-quiet-chats p { font-size: 11px; }
+  .home-figma-app .home-quiet-chats a {
+    font-size: 11px;
+    white-space: normal;
+    text-align: right;
+  }
+}
+@media (max-width: 360px) {
+  .home-figma-app .home-quiet-chats {
+    flex-wrap: wrap;
+  }
+  .home-figma-app .home-quiet-chats a {
+    margin-left: 37px;
+  }
+}
+
 /*
  * Figma-aligned empty Home journey: no simulated members, no fake live search.
  * This replaces only the empty data state. Populated feeds keep Figma's grid.
@@ -184,14 +252,14 @@
 .home-figma-app .home-firstlook {
   display: grid;
   grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-  gap: 32px;
+  gap: 22px;
   position: relative;
   overflow: hidden;
   background: linear-gradient(118deg, #34202b 0%, #2a1b23 55%, #302128 100%);
   border: 1px solid #58404b;
-  border-radius: 24px;
-  padding: 32px;
-  min-height: 380px;
+  border-radius: 22px;
+  padding: 24px;
+  min-height: 300px;
   isolation: isolate;
 }
 .home-figma-app .home-firstlook__intro {
@@ -211,9 +279,9 @@
 }
 .home-figma-app .home-firstlook__eyebrow img { width: 18px; height: 18px; }
 .home-figma-app .home-firstlook__art {
-  width: 114px;
-  height: 95px;
-  margin: 8px 0;
+  width: 100px;
+  height: 65px;
+  margin: 4px 0;
   position: relative;
   display: grid;
   place-items: center;
@@ -235,17 +303,17 @@
   filter: drop-shadow(0 2px 15px rgba(244,181,152,.24));
 }
 .home-figma-app .home-firstlook__intro h1 {
-  font: 400 31px/1.22 Lora, Georgia, serif;
+  font: 400 29px/1.2 Lora, Georgia, serif;
   letter-spacing: -.01em;
   color: #fff0e6;
   max-width: 460px;
-  margin: 6px 0 14px;
+  margin: 4px 0 10px;
 }
 .home-figma-app .home-firstlook__lead {
-  font: 400 13px/1.7 Inter, Arial, sans-serif;
+  font: 400 12px/1.6 Inter, Arial, sans-serif;
   color: #d7bec4;
   max-width: 440px;
-  margin: 0 0 21px;
+  margin: 0 0 14px;
 }
 .home-figma-app .home-firstlook__status {
   display: inline-flex;
@@ -269,9 +337,9 @@
 .home-figma-app .home-firstlook__explore {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: minmax(150px, auto) minmax(145px, auto);
+  grid-template-rows: minmax(130px, auto) minmax(115px, auto);
   align-items: stretch;
-  gap: 12px;
+  gap: 10px;
 }
 .home-figma-app .home-path {
   min-width: 0;
@@ -281,9 +349,9 @@
   gap: 7px;
   background: rgba(59,41,49,.95);
   border: 1px solid #57404a;
-  border-radius: 18px;
+  border-radius: 16px;
   text-decoration: none;
-  padding: 16px 18px;
+  padding: 12px 15px;
   color: #f8ede2;
   transition: background .2s ease, border-color .2s ease, transform .2s ease;
 }
@@ -309,9 +377,9 @@
   margin-bottom: 2px;
 }
 .home-figma-app .home-path__icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 31px;
+  height: 31px;
+  border-radius: 11px;
   background: rgba(244,181,152,.12);
   display: grid;
   place-items: center;
@@ -325,7 +393,7 @@
   color: #bc9aa6;
 }
 .home-figma-app .home-path strong {
-  font: 400 19px/1.26 Lora, Georgia, serif;
+  font: 400 18px/1.24 Lora, Georgia, serif;
   color: #fff0e6;
 }
 .home-figma-app .home-path > span:not(.home-path__top):not(.home-path__link) {
@@ -345,9 +413,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 62px;
+  min-height: 52px;
   border-radius: 14px;
-  padding: 13px 16px;
+  padding: 10px 14px;
   background: rgba(59,41,49,.75);
   color: #d7bec4;
   border: 1px solid #57404a;
@@ -368,15 +436,15 @@
 @media(max-width: 900px) and (min-width: 701px) {
   .home-figma-app .home-firstlook {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 26px;
+    gap: 18px;
+    padding: 23px;
   }
 }
 @media (max-width: 700px) {
   .home-figma-app .home-firstlook {
     display: block;
-    margin: 16px 0 22px;
-    padding: 22px 18px;
+    margin: 12px 0 18px;
+    padding: 18px 16px;
     border-radius: 20px;
     min-height: 0;
   }
@@ -388,11 +456,11 @@
   .home-figma-app .home-firstlook__halo--outer { width: 85px; height: 62px; }
   .home-figma-app .home-firstlook__halo--inner { width: 62px; height: 46px; }
   .home-figma-app .home-firstlook__art > img { width: 28px; height: 28px; }
-  .home-figma-app .home-firstlook__intro h1 { font-size: 25px; margin: 8px 0 12px; }
-  .home-figma-app .home-firstlook__lead { font-size: 12px; margin-bottom: 16px; }
+  .home-figma-app .home-firstlook__intro h1 { font-size: 24px; margin: 6px 0 9px; }
+  .home-figma-app .home-firstlook__lead { font-size: 12px; margin-bottom: 12px; }
   .home-figma-app .home-firstlook__status { font-size: 10px; }
   .home-figma-app .home-firstlook__explore {
-    margin-top: 18px;
+    margin-top: 14px;
     grid-template-columns: repeat(2, minmax(0,1fr));
     grid-template-rows: auto;
     gap: 9px;
