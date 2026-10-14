@@ -265,7 +265,7 @@ render_document_head('You', $csrfToken, $userId);
                         <span class="you-avatar you-avatar--initial" aria-hidden="true"><?= e($profileInitial) ?></span>
                     <?php endif; ?>
                     <div>
-                        <h2><?= e($profileName !== '' ? $profileName : 'Your profile') ?></h2>
+                        <h2><?= str_replace(['_', '-'], ['_<wbr>', '-<wbr>'], e($profileName !== '' ? $profileName : 'Your profile')) ?></h2>
                         <p><?= e($profile['faculty'] ?? 'Faculty not set') ?> · <?= e($profile['year_of_study'] ?? 'Year not set') ?></p>
                     </div>
                 </div>
@@ -286,11 +286,11 @@ render_document_head('You', $csrfToken, $userId);
                                 <span>Main photo</span>
                                 <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" aria-label="Choose a main profile photo">
                             </label>
-                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Second photo, not yet available">
-                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
+                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Second photo slot, coming soon">
+                                <span class="you-photo-plus" aria-hidden="true">—</span><span>Coming soon</span>
                             </div>
-                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Third photo, not yet available">
-                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
+                            <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Third photo slot, coming soon">
+                                <span class="you-photo-plus" aria-hidden="true">—</span><span>Coming soon</span>
                             </div>
                         </div>
                         <p class="you-photo-meta"><?= e(number_format((float) $photoBytes / 1048576, 2)) ?> MB used of 5 MB. Main photo <?= $isPhotoSet ? 'added' : 'not added' ?>.</p>
@@ -434,11 +434,11 @@ render_document_head('You', $csrfToken, $userId);
 
             <section class="you-privacy" aria-labelledby="you-privacy-title">
                 <h2 id="you-privacy-title">Privacy &amp; account</h2>
-                <div class="you-privacy-row"><span class="you-privacy-icon" aria-hidden="true">◉</span>
-                    <div><strong>Profile visibility</strong><p>Review who can see your profile.</p></div><span class="you-task__unavailable">In testing</span>
+                <div class="you-privacy-row you-privacy-row--unavailable"><span class="you-privacy-icon" aria-hidden="true">◉</span>
+                    <div><strong>Profile visibility</strong><p>Visibility controls are not available yet.</p></div><span class="you-feature-status">Coming soon</span>
                 </div>
-                <div class="you-privacy-row"><span class="you-privacy-icon" aria-hidden="true">Ⅱ</span>
-                    <div><strong>Pause profile</strong><p>Hide from new discovery without deleting your account.</p></div><span class="you-task__unavailable">In testing</span>
+                <div class="you-privacy-row you-privacy-row--unavailable"><span class="you-privacy-icon" aria-hidden="true">Ⅱ</span>
+                    <div><strong>Pause profile</strong><p>Temporarily hiding your profile is not available yet.</p></div><span class="you-feature-status">Coming soon</span>
                 </div>
                 <a class="you-privacy-row" href="community_guidelines.php"><span class="you-privacy-icon" aria-hidden="true">♧</span>
                     <div><strong>Blocking &amp; reporting</strong><p>Read safety and community guidance.</p></div><span aria-hidden="true">›</span>
