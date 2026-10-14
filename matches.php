@@ -155,7 +155,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 </header>
 <?php render_notification_panel(); ?>
 
-<main class="fm-main" data-find-match id="main">
+<main class="fm-main" <?= $showMatchingMap ? '' : 'data-find-match' ?> id="main">
     <header class="fm-intro">
         <span class="fm-eyebrow">LESS GUESSING. MORE CONNECTION.</span>
         <?php if ($showMatchingMap): ?>
@@ -188,7 +188,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                     <button type="button" class="fm-map-zone" data-zone-name="Teaching areas" style="--zone-x:28%;--zone-y:58%" aria-pressed="false">Teaching areas</button>
                     <div class="fm-map-status" role="status" aria-live="polite">
                         <strong data-zone-title>It's a little quiet around campus for now.</strong>
-                        <p data-zone-description>There are no verified, opted-in profiles on this map yet. Explore the areas above while the discovery feature is being prepared.</p>
+                        <p data-zone-description>Profile markers are not enabled in this development build. Explore the broad areas while discovery is being prepared.</p>
                     </div>
                 </div>
                 <p class="fm-map-caption">✧ This is a concept map, not a live location service. It does not request GPS access or show anyone's whereabouts.</p>
@@ -203,7 +203,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                     <div><dt>Your vibe</dt><dd><?= e($savedAnswers['social_activity'] ?? 'Not set') ?></dd></div>
                     <div><dt>Shared interests</dt><dd><?= e($savedAnswers['interests'] ?? 'Not set') ?></dd></div>
                 </dl>
-                <a class="fm-map-edit" href="profile.php#matching-answers">Change my answers →</a>
+                <a class="fm-map-edit" href="matches.php?edit=1">Change my answers →</a>
                 <p class="fm-map-safety">Real profile markers and profile cards are not enabled yet. Verified 18+ eligibility, consent and coarse-area sharing are required before activating discovery. Your exact location is never requested here.</p>
             </aside>
         </div>
@@ -622,8 +622,10 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
     <?php endforeach; ?>
 </nav>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
+<?php if (!$showMatchingMap): ?>
 <script src="<?= e(asset_path('js/find-match.js')) ?>"></script>
 <script src="<?= e(asset_path('js/find-match-delight.js')) ?>"></script>
+<?php endif; ?>
 <script src="<?= e(asset_path('js/find-match-map.js')) ?>"></script>
 </body>
 </html>
