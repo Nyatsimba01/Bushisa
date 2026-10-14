@@ -445,8 +445,12 @@
           throw new Error(payload.error ?? 'Could not save your choice.');
         }
 
-        if (card instanceof HTMLElement) {
-          card.remove();
+        // Figma uses a compact desktop third card and a separate mobile
+        // representation of the same candidate. Retire both on a swipe.
+        for (const duplicate of document.querySelectorAll('[data-candidate-id]')) {
+          if (duplicate instanceof HTMLElement && duplicate.dataset.candidateId === targetId) {
+            duplicate.remove();
+          }
         }
         const didMatch = payload.match === true || payload.matched === true;
         showToast(
