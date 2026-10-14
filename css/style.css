@@ -1187,3 +1187,40 @@ button:disabled {
 .anon-emoji-picker > button:focus-visible {
   outline:2px solid #f4b598;outline-offset:2px;
 }
+
+
+/* Moderator-only reporting queue: preserve normal narrow auth cards but make
+   this review workspace practical on desktop and readable on phones. */
+.auth-shell .reports-review-card {
+  width:min(100%,960px);
+  background:#302128;border:1px solid #57404a;color:#f8ede2;
+}
+.reports-review-card .auth-card__lead {
+  max-width:690px;color:#c8b4b9;
+}
+.reports-review-card > .card-actions{
+  margin:15px 0 20px;gap:8px;
+}
+.reports-review-card .card-actions a[aria-current="page"]{
+  border-color:#f4b598;color:#21151a;background:#f4b598;
+}
+.reports-review-card .section-card {
+  background:#3b2931;border-color:#674653;
+  color:#f8ede2;overflow-wrap:anywhere;
+}
+.reports-review-card .section-card h2 {font:400 24px/1.25 Lora,Georgia,serif;}
+.reports-review-card .reports-review-post {
+  padding:16px;border:1px solid #674653;border-radius:14px;
+  background:#21151a;margin:15px 0;
+}
+.reports-review-card .reports-review-post strong{color:#f4b598;font-size:12px}
+.reports-review-card .reports-review-post p{font-size:14px;line-height:1.7}
+.reports-review-card form{display:inline-flex;}
+.reports-review-card form button{min-height:39px}
+.reports-review-card .form-grid{gap:17px;}
+@media(max-width:700px){
+  .auth-shell .reports-review-card{padding:20px 16px;}
+  .reports-review-card .section-card{padding:17px 13px;}
+  .reports-review-card .section-card h2{font-size:20px}
+  .reports-review-card .card-actions{gap:7px}
+}
