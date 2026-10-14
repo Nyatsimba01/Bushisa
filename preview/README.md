@@ -44,3 +44,22 @@ The original design has its own Desktop (1280px) and Mobile (390px) frames. Use 
 - Exercise pagination with more than six eligible test accounts, excluded matches/blocks/swipes, plus the last page and failed requests.
 - Confirm local login sessions and age eligibility, then integrate Kyle's newer verification code; that integration is out of scope here.
 - The PHP Home page is still an earlier Figma visual integration. This milestone adds real scrolling without claiming that the whole PHP screen is pixel-identical to the static design preview.
+
+
+## Real PHP card-component checkpoint
+
+The first discovery page (`discover.php`) and the infinite-scroll API (`api/discovery_feed.php`) now **render their cards with the same PHP function**, `php/discovery_cards.php`. Styling is scoped to Home in `css/home-discovery-cards.css`, preserving the Figma 320px desktop photo area and 160px mobile photo area, typography, interests/tag row and action layout.
+
+You can verify those real PHP cards **without MySQL or login** by opening:
+
+`http://localhost/Bushisa-Figma/preview/php-card-check.php`
+
+This separate PHP fixture page uses fictional Naledi/Tafadzwa portraits from Figma and a photo-free example. Sample one includes a sample conversation prompt, answer and interests; the second and third demonstrate how the renderer handles data that the database does not yet store. No swipes are submitted from the fixture.
+
+**Data contract:** The current backend supports the real student's name, computed age, faculty, year of study, bio and profile photo. It does **not** currently store the Figma conversation prompt/answer or interest tags. The renderer accepts those optional fields when a verified source is connected, but does not infer or fabricate them today. Faculty/year tags are labelled with academic icons instead. The current API returns escaped HTML made by that renderer rather than client-created cards.
+
+**Feature status:** Main Like and Pass keep their existing swipe endpoint. Photo likes, answer likes, bookmarks and profile-specific confessions have no backend contracts yet and appear visibly disabled; they do not pretend to save anything.
+
+The `?scrollDemo=1` fictional mock now includes example conversation prompts, tags and the same visual interaction slots as the original Figma cards. It remains completely separate from the actual database.
+
+The two repository SQL schemas are incompatible alternatives; do not import either over an existing populated database without a backup.
