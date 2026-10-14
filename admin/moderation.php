@@ -8,16 +8,14 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../php/csrf.php';
 require_once __DIR__ . '/../php/sanitize.php';
 require_once __DIR__ . '/../php/function.php';
+require_once __DIR__ . '/../php/admin_access.php';
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/moderation.php';
 require_once __DIR__ . '/../php/logger.php';
 require_once __DIR__ . '/../php/frontend.php';
 
 require_login();
-
-if (!is_moderator()) {
-    redirect('/discover.php');
-}
+bushisa_require_moderator($pdo);
 
 $adminId = get_current_user_id();
 $error = null;
