@@ -627,5 +627,6 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 <script src="<?= e(asset_path('js/find-match-delight.js')) ?>"></script>
 <?php endif; ?>
 <script src="<?= e(asset_path('js/find-match-map.js')) ?>"></script>
+<script src="<?= e(asset_path('js/find-match-full-profile.js')) ?>"></script>
 </body>
 </html>
