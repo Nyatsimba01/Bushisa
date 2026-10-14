@@ -25,71 +25,21 @@
       .filter(Boolean)
   );
 
-  const make = (tag, className, content) => {
-    const element = document.createElement(tag);
-    if (className) element.className = className;
-    if (content !== undefined) element.textContent = String(content);
-    return element;
-  };
+  // The first batch and later batches are rendered by php/discovery_cards.php.
+  // Parse only markup from our authenticated same-origin API and deduplicate IDs.
+  const appendServerCards = (html) => {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const fragment = document.createDocumentFragment();
 
-  const makeButton = (candidate, direction, text, label) => {
-    const button = make('button', 'discover-card__action ' + (direction === 'like'
-      ? 'discover-card__action--like home-like' : 'home-pass'), text);
-    button.type = 'button';
-    button.dataset.swipeTarget = String(candidate.user_id);
-    button.dataset.swipeDirection = direction;
-    button.setAttribute('aria-label', label + ' ' + candidate.display_name);
-    button.title = label;
-    return button;
-  };
-
-  const makeCard = (candidate) => {
-    const name = String(candidate.display_name || 'Student');
-    const age = Number(candidate.age);
-    const faculty = String(candidate.faculty || 'NUST');
-    const article = make('article', 'profile-card');
-    article.dataset.candidateId = String(candidate.user_id);
-
-    const photo = make('div', 'profile-card__image');
-    const photoPath = String(candidate.profile_photo_path || '').trim();
-    if (photoPath) {
-      const img = make('img', 'home-photo');
-      img.src = (photoPath.startsWith('https://') || photoPath.startsWith('http://')) ? photoPath : photoPath.replace(/^\/+/, '');
-      img.alt = name + ' profile photo';
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.addEventListener('error', () => {
-        img.replaceWith(make('span', 'home-photo avatar--fallback', name.charAt(0).toUpperCase()));
-      }, { once: true });
-      photo.append(img);
-    } else {
-      photo.append(make('span', 'home-photo avatar--fallback', name.charAt(0).toUpperCase()));
+    for (const card of template.content.querySelectorAll('.figma-profile-card[data-candidate-id]')) {
+      const id = card.getAttribute('data-candidate-id');
+      if (!id || !/^[0-9]+$/.test(id) || seen.has(id)) continue;
+      seen.add(id);
+      fragment.append(card);
     }
 
-    const caption = make('div', 'home-photo-overlay');
-    caption.append(
-      make('h3', 'profile-card__name', name + (Number.isFinite(age) && age >= 18 ? ', ' + age : '')),
-      make('p', '', faculty + ' · NUST')
-    );
-    photo.append(caption);
-
-    const body = make('div', 'profile-card__body');
-    const prompt = make('div', 'home-conversation-prompt');
-    prompt.append(
-      make('p', 'home-eyebrow', 'ABOUT ME'),
-      make('p', 'profile-card__bio', String(candidate.bio || 'This student has not added a bio yet.'))
-    );
-    const actions = make('div', 'card-actions home-card-actions');
-    actions.append(
-      makeButton({...candidate, display_name: name}, 'pass', '×', 'Pass on'),
-      makeButton({...candidate, display_name: name}, 'like', '♡', 'Like')
-    );
-    const report = make('a', 'home-report', 'Safety & reporting');
-    report.href = 'community_guidelines.php';
-    actions.append(report);
-    body.append(prompt, actions);
-    article.append(photo, body);
-    return article;
+    grid.append(fragment);
   };
 
   const updateStatus = () => {
@@ -123,7 +73,7 @@
       }
       if (!response.ok) throw new Error('Could not load more profiles');
       const data = await response.json();
-      if (!Array.isArray(data.profiles) || typeof data.has_more !== 'boolean') {
+      if (typeof data.html !== 'string' || typeof data.has_more !== 'boolean') {
         throw new Error('Unexpected discovery response');
       }
 
@@ -134,14 +84,7 @@
         throw new Error('Invalid next profile cursor');
       }
 
-      const fragment = document.createDocumentFragment();
-      for (const item of data.profiles) {
-        const id = Number(item.user_id);
-        if (!Number.isSafeInteger(id) || id <= cursor || seen.has(String(id))) continue;
-        seen.add(String(id));
-        fragment.append(makeCard(item));
-      }
-      grid.append(fragment);
+      appendServerCards(data.html);
       hasMore = data.has_more;
       if (hasMore) cursor = next;
     } catch (error) {
