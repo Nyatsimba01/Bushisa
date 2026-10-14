@@ -19,7 +19,9 @@ require_login();
 ensure_operational_schema($pdo);
 
 $currentUserId = (int) $_SESSION['user_id'];
-$allowedQuestions = ['intent', 'interests', 'social_activity', 'communication_style', 'availability'];
+$coreQuestions = ['intent', 'interests', 'social_activity', 'communication_style', 'availability'];
+$optionalQuestions = ['connection_pace', 'hangout_style', 'sports', 'sport_style', 'football_team', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles', 'planning_style'];
+$allowedQuestions = array_merge($coreQuestions, $optionalQuestions);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rawBody = file_get_contents('php://input');
@@ -38,21 +40,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $answers = isset($payload['answers']) && is_array($payload['answers']) ? $payload['answers'] : $payload;
+    // Persist the extra topics alongside existing answers; no migration required.
+    // An empty optional answer deletes an obsolete follow-up after a topic is deselected.
+    $upsert = $pdo->prepare(
+        'INSERT INTO find_match_answers (user_id, question_key, answer_value)
+         VALUES (:user_id, :question_key, :answer_value)
+         ON DUPLICATE KEY UPDATE answer_value = VALUES(answer_value)'
+    );
+    $remove = $pdo->prepare('DELETE FROM find_match_answers WHERE user_id = :user_id AND question_key = :question_key');
+
     foreach ($allowedQuestions as $question) {
-        if (!isset($answers[$question]) || !is_string($answers[$question]) || trim($answers[$question]) === '') {
+        if (!array_key_exists($question, $answers)) {
             continue;
         }
-
-        $answer = function_exists('mb_substr')
-            ? mb_substr(trim(str_replace("\0", '', $answers[$question])), 0, 120)
-            : substr(trim(str_replace("\0", '', $answers[$question])), 0, 120);
-
-        $statement = $pdo->prepare(
-            'INSERT INTO find_match_answers (user_id, question_key, answer_value)
-             VALUES (:user_id, :question_key, :answer_value)
-             ON DUPLICATE KEY UPDATE answer_value = VALUES(answer_value)'
-        );
-        $statement->execute([
+        if (!is_string($answers[$question])) {
+            json_response(['error' => 'Invalid questionnaire answer'], 422);
+        }
+        $answer = trim(str_replace("\0", '', $answers[$question]));
+        $length = function_exists('mb_strlen') ? mb_strlen($answer, 'UTF-8') : strlen($answer);
+        if ($length > 120) {
+            json_response(['error' => 'Please shorten your answer (120 characters maximum).'], 422);
+        }
+        if ($answer === '') {
+            if (in_array($question, $optionalQuestions, true)) {
+                $remove->execute([':user_id' => $currentUserId, ':question_key' => $question]);
+            }
+            continue;
+        }
+        $upsert->execute([
             ':user_id' => $currentUserId,
             ':question_key' => $question,
             ':answer_value' => $answer,
