@@ -81,6 +81,21 @@ try {
     error_log('Find Match questionnaire prefilling unavailable: ' . $exception->getMessage());
 }
 
+/*
+ * A complete set of the five core answer keys is the persisted onboarding
+ * state. Old accounts that already completed the questionnaire work without
+ * a database migration or a session-only completion flag.
+ */
+$requiredMatchingAnswers = ['intent', 'social_activity', 'communication_style', 'interests', 'availability'];
+$hasCompletedMatching = true;
+foreach ($requiredMatchingAnswers as $requiredMatchingKey) {
+    if (trim((string) ($savedAnswers[$requiredMatchingKey] ?? '')) === '') {
+        $hasCompletedMatching = false;
+        break;
+    }
+}
+$showMatchingMap = $hasCompletedMatching && (($_GET['edit'] ?? '') !== '1');
+
 $profile = get_profile($pdo, $currentUserId);
 $profileName = trim((string) ($profile['display_name'] ?? ''));
 $profileInitial = $profileName !== '' ? strtoupper(substr($profileName, 0, 1)) : 'B';
@@ -143,10 +158,56 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 <main class="fm-main" data-find-match id="main">
     <header class="fm-intro">
         <span class="fm-eyebrow">LESS GUESSING. MORE CONNECTION.</span>
-        <h1>Find someone on your wavelength</h1>
-        <p>A few thoughtful answers to help you find common ground. Start with what you’re looking for.</p>
+        <?php if ($showMatchingMap): ?>
+            <h1>Find your kind of connection</h1>
+            <p>Your story is saved. Discover the campus, at your own pace.</p>
+        <?php else: ?>
+            <h1>Find someone on your wavelength</h1>
+            <p>A few thoughtful answers to help you find common ground. Start with what you’re looking for.</p>
+        <?php endif; ?>
     </header>
 
+
+    <?php if ($showMatchingMap): ?>
+        <div class="fm-map-layout">
+            <section class="fm-map-panel" aria-labelledby="fm-map-title">
+                <div class="fm-map-heading">
+                    <div>
+                        <h2 id="fm-map-title">Your campus, your connections.</h2>
+                        <p>Explore broad campus areas. When verified profiles become available, this will be the place to discover them.</p>
+                    </div>
+                    <span class="fm-map-tag">Campus preview</span>
+                </div>
+                <div class="fm-map-stage" data-fm-map aria-label="Illustrative campus area map. No people or precise locations are shown.">
+                    <div class="fm-map-grid" aria-hidden="true"></div>
+                    <div class="fm-map-ring" aria-hidden="true"></div>
+                    <div class="fm-map-road" aria-hidden="true"></div>
+                    <button type="button" class="fm-map-zone" data-zone-name="Study spaces" style="--zone-x:24%;--zone-y:24%" aria-pressed="false">Study spaces</button>
+                    <button type="button" class="fm-map-zone" data-zone-name="Campus commons" style="--zone-x:72%;--zone-y:20%" aria-pressed="false">Campus commons</button>
+                    <button type="button" class="fm-map-zone" data-zone-name="Library area" style="--zone-x:67%;--zone-y:50%" aria-pressed="false">Library area</button>
+                    <button type="button" class="fm-map-zone" data-zone-name="Teaching areas" style="--zone-x:28%;--zone-y:58%" aria-pressed="false">Teaching areas</button>
+                    <div class="fm-map-status" role="status" aria-live="polite">
+                        <strong data-zone-title>It's a little quiet around campus for now.</strong>
+                        <p data-zone-description>There are no verified, opted-in profiles on this map yet. Explore the areas above while the discovery feature is being prepared.</p>
+                    </div>
+                </div>
+                <p class="fm-map-caption">✧ This is a concept map, not a live location service. It does not request GPS access or show anyone's whereabouts.</p>
+            </section>
+
+            <aside class="fm-map-summary" aria-label="Your matching preferences">
+                <span class="fm-map-eyebrow">THE DETAILS THAT MAKE YOU, YOU</span>
+                <h2>You've found your starting point.</h2>
+                <p>Your questionnaire is saved, and you can update it whenever you like.</p>
+                <dl>
+                    <div><dt>Looking for</dt><dd><?= e($savedAnswers['intent'] ?? 'Not set') ?></dd></div>
+                    <div><dt>Your vibe</dt><dd><?= e($savedAnswers['social_activity'] ?? 'Not set') ?></dd></div>
+                    <div><dt>Shared interests</dt><dd><?= e($savedAnswers['interests'] ?? 'Not set') ?></dd></div>
+                </dl>
+                <a class="fm-map-edit" href="profile.php#matching-answers">Change my answers →</a>
+                <p class="fm-map-safety">Real profile markers and profile cards are not enabled yet. Verified 18+ eligibility, consent and coarse-area sharing are required before activating discovery. Your exact location is never requested here.</p>
+            </aside>
+        </div>
+    <?php else: ?>
     <div class="fm-layout">
         <section class="fm-questionnaire" aria-labelledby="fm-question-title" data-match-flow-title>
             <div class="fm-progress" aria-label="Questionnaire progress">
@@ -521,6 +582,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
         <strong>BETA</strong>
         <span>Matching and chat are still in testing. This questionnaire saves your answers; verified compatibility results are not available yet.</span>
     </div>
+    <?php endif; ?>
 
     <?php if ($matches !== []): ?>
         <details class="fm-existing">
@@ -544,7 +606,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             </div>
         </details>
     <?php endif; ?>
-    <noscript><p class="fm-error">JavaScript is required to complete the step-by-step questionnaire. Your existing account information is unchanged.</p></noscript>
+    <?php if (!$showMatchingMap): ?><noscript><p class="fm-error">JavaScript is required to complete the step-by-step questionnaire. Your existing account information is unchanged.</p></noscript><?php endif; ?>
 </main>
 
 <footer class="site-footer fm-footer">
@@ -562,5 +624,6 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
 <script src="<?= e(asset_path('js/find-match.js')) ?>"></script>
 <script src="<?= e(asset_path('js/find-match-delight.js')) ?>"></script>
+<script src="<?= e(asset_path('js/find-match-map.js')) ?>"></script>
 </body>
 </html>
