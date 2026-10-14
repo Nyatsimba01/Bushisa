@@ -116,3 +116,17 @@ js/home-real.js
 Keep the previously downloaded `preview/home-figma.css`, `css/home-discovery-cards.css`, and `preview/assets/icons/` files. Do not replace `config/db.php`, `uploads/`, or import either base database schema. Start Apache and MySQL; sign in at `http://127.0.0.1/Bushisa-Figma/login.php` and open `http://127.0.0.1/Bushisa-Figma/discover.php`.
 
 The PHP syntax and JavaScript syntax checks in GitHub Actions cover source validity, **not** a pixel-perfect or end-to-end MySQL result. Inspect desktop at 1280px and mobile at 390px in Chrome DevTools and address any remaining differences against Figma.
+
+
+## Figma Home: meaningful first impression when discovery is empty
+
+The authenticated `discover.php` Home now has a dedicated visual **empty-data journey** using the original Figma palette, typography, heart/sprout imagery and desktop/mobile navigation:
+
+- When there are no preferences, it says **“Every good story starts somewhere.”** and points toward profile setup, Find Match and Confessions.
+- When preferences exist but no eligible profiles match, it says **“Nothing new to discover just yet.”** A simple, accurate status line and links help people explore without pretending a background search is happening.
+- The large older empty-profile card and duplicated story/consent row are replaced with a compact status line while empty. The populated Figma two-card + third-card layout, real Like/Pass and infinite scroll remain unchanged.
+- The links are non-blocking: Home stays available from desktop and mobile navigation; no returning user is automatically redirected when a feed is empty.
+- The You tile is context-aware: it offers profile setup when the user's bio, saved prompt and interests are all blank; otherwise it offers refinement. No database changes are needed.
+- Visual QA is still required; passing source checks is not a browser screenshot comparison.
+
+**XAMPP upgrade from the previous branch checkpoint:** copy only `discover.php` and `css/home-real.css` from the newest `figma-integration` ZIP into the same paths of your existing `C:\xampp\htdocs\Bushisa-Figma` folder. Keep `config/db.php`, `uploads/` and the MySQL database unchanged. Sign in at `http://127.0.0.1/Bushisa-Figma/login.php`, visit `discover.php`, and hard-refresh with **Ctrl+Shift+R**. Check desktop at 1280px and mobile at 390px.
