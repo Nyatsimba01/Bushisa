@@ -164,65 +164,6 @@ render_document_head('Home', $csrfToken, $currentUserId);
         <p>Your campus. Your kind of connection.</p>
     </div>
 
-    <?php if ($showEmptyHome): ?>
-    <section class="home-firstlook" aria-labelledby="home-firstlook-title">
-        <div class="home-firstlook__intro">
-            <span class="home-firstlook__eyebrow">
-                <img src="<?= e(asset_path('preview/assets/icons/sprout.svg')) ?>" alt="" aria-hidden="true">
-                YOUR NEXT CHAPTER
-            </span>
-            <div class="home-firstlook__art" aria-hidden="true">
-                <span class="home-firstlook__halo home-firstlook__halo--outer"></span>
-                <span class="home-firstlook__halo home-firstlook__halo--inner"></span>
-                <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="">
-            </div>
-            <h1 id="home-firstlook-title">
-                <?= $needsDiscoverySetup
-                    ? 'Every good story starts somewhere.'
-                    : 'Nothing new to discover just yet.' ?>
-            </h1>
-            <p class="home-firstlook__lead">
-                <?= $needsDiscoverySetup
-                    ? 'Set up your preferences and make your profile yours. There’s more to explore along the way.'
-                    : 'No eligible profiles match your preferences right now. In the meantime, you can explore more of Bushisa.' ?>
-            </p>
-            <span class="home-firstlook__status">
-                <span class="home-firstlook__status-dot" aria-hidden="true"></span>
-                <?= $needsDiscoverySetup ? 'Start with your discovery preferences' : 'Explore at your own pace' ?>
-            </span>
-        </div>
-        <div class="home-firstlook__explore" aria-label="Explore Bushisa">
-            <a class="home-path home-path--featured" href="profile.php#conversation-and-interests">
-                <span class="home-path__top">
-                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/you.svg')) ?>" alt="" aria-hidden="true"></span>
-                    <span class="home-path__number">01</span>
-                </span>
-                <strong><?= $hasProfileStory ? 'Make your story even more you.' : 'Your story starts with you.' ?></strong>
-                <span><?= $hasProfileStory ? 'Update the details that make your profile personal.' : 'Add a bio, interests and a conversation starter.' ?></span>
-                <span class="home-path__link">Go to You <span aria-hidden="true">↗</span></span>
-            </a>
-            <a class="home-path" href="matches.php">
-                <span class="home-path__top">
-                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/nav-heart.svg')) ?>" alt="" aria-hidden="true"></span>
-                    <span class="home-path__number">02</span>
-                </span>
-                <strong>Find Match</strong>
-                <span>Explore how shared answers and compatibility work.</span>
-                <span class="home-path__link">Explore <span aria-hidden="true">↗</span></span>
-            </a>
-            <a class="home-path" href="confessions.php">
-                <span class="home-path__top">
-                    <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/confessions.svg')) ?>" alt="" aria-hidden="true"></span>
-                    <span class="home-path__number">03</span>
-                </span>
-                <strong>Confessions</strong>
-                <span>Discover the campus stories section.</span>
-                <span class="home-path__link">Take a look <span aria-hidden="true">↗</span></span>
-            </a>
-        </div>
-    </section>
-    <?php endif; ?>
-
     <section class="chats" aria-labelledby="chats-title">
         <div class="section-head">
             <div class="head-with-pill">
@@ -297,16 +238,65 @@ render_document_head('Home', $csrfToken, $currentUserId);
             </div>
         </div>
 
-        <?php if ($showEmptyHome): ?>
-            <div class="home-empty-summary" role="status">
-                <span class="home-empty-summary__mark" aria-hidden="true">♡</span>
-                <span><?= $needsDiscoverySetup
-                    ? 'Your discovery preferences are waiting to be set.'
-                    : 'No eligible profiles available for your preferences right now.' ?></span>
-                <a href="profile.php#preferences"><?= $needsDiscoverySetup ? 'Set preferences' : 'Adjust preferences' ?> →</a>
-            </div>
-        <?php else: ?>
-            <div class="suggestions-grid" data-discovery-grid>
+            <?php if ($showEmptyHome): ?>
+            <section class="home-firstlook" aria-labelledby="home-firstlook-title">
+                <div class="home-firstlook__intro">
+                    <span class="home-firstlook__eyebrow">
+                        <img src="<?= e(asset_path('preview/assets/icons/sprout.svg')) ?>" alt="" aria-hidden="true">
+                        YOUR NEXT CHAPTER
+                    </span>
+                    <div class="home-firstlook__art" aria-hidden="true">
+                        <span class="home-firstlook__halo home-firstlook__halo--outer"></span>
+                        <span class="home-firstlook__halo home-firstlook__halo--inner"></span>
+                        <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="">
+                    </div>
+                    <h3 id="home-firstlook-title">
+                        <?= $needsDiscoverySetup
+                            ? 'Every good story starts somewhere.'
+                            : 'Nothing new to discover just yet.' ?>
+                    </h3>
+                    <p class="home-firstlook__lead">
+                        <?= $needsDiscoverySetup
+                            ? 'Set up your preferences and make your profile yours. There’s more to explore along the way.'
+                            : 'No eligible profiles match your preferences right now. In the meantime, you can explore more of Bushisa.' ?>
+                    </p>
+                    <span class="home-firstlook__status">
+                        <span class="home-firstlook__status-dot" aria-hidden="true"></span>
+                        <?= $needsDiscoverySetup ? 'Start with your discovery preferences' : 'Explore at your own pace' ?>
+                    </span>
+                </div>
+                <div class="home-firstlook__explore" aria-label="Explore Bushisa">
+                    <a class="home-path home-path--featured" href="profile.php#conversation-and-interests">
+                        <span class="home-path__top">
+                            <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/you.svg')) ?>" alt="" aria-hidden="true"></span>
+                            <span class="home-path__number">01</span>
+                        </span>
+                        <strong><?= $hasProfileStory ? 'Make your story even more you.' : 'Your story starts with you.' ?></strong>
+                        <span><?= $hasProfileStory ? 'Update the details that make your profile personal.' : 'Add a bio, interests and a conversation starter.' ?></span>
+                        <span class="home-path__link">Go to You <span aria-hidden="true">↗</span></span>
+                    </a>
+                    <a class="home-path" href="matches.php">
+                        <span class="home-path__top">
+                            <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/nav-heart.svg')) ?>" alt="" aria-hidden="true"></span>
+                            <span class="home-path__number">02</span>
+                        </span>
+                        <strong>Find Match</strong>
+                        <span>Explore how shared answers and compatibility work.</span>
+                        <span class="home-path__link">Explore <span aria-hidden="true">↗</span></span>
+                    </a>
+                    <a class="home-path" href="confessions.php">
+                        <span class="home-path__top">
+                            <span class="home-path__icon"><img src="<?= e(asset_path('preview/assets/icons/confessions.svg')) ?>" alt="" aria-hidden="true"></span>
+                            <span class="home-path__number">03</span>
+                        </span>
+                        <strong>Confessions</strong>
+                        <span>Discover the campus stories section.</span>
+                        <span class="home-path__link">Take a look <span aria-hidden="true">↗</span></span>
+                    </a>
+                </div>
+            </section>
+            <?php endif; ?>
+ass="suggestions-grid" data-discovery-grid>
                 <?= bushisa_render_discovery_cards(array_slice($candidates, 0, 2)) ?>
                 <?php if (isset($candidates[2])): ?>
                     <div class="mobile-third-card"><?= bushisa_render_discovery_card($candidates[2]) ?></div>
