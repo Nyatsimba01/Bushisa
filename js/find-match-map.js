@@ -112,7 +112,53 @@
   ].join('');
   board.appendChild(card);
 
+  // On small screens, move this same card to the document body so the map's
+  // overflow clipping cannot hide the bottom sheet. Desktop stays in-map.
+  const mobileSheet = window.matchMedia('(max-width: 700px)');
+  const backdrop = document.createElement('div');
+  backdrop.className = 'fm-demo-sheet-backdrop';
+  backdrop.hidden = true;
+  backdrop.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(backdrop);
+
+  const handle = document.createElement('button');
+  handle.type = 'button';
+  handle.className = 'fm-demo-sheet-handle';
+  handle.setAttribute('aria-label', 'Close profile preview');
+  handle.innerHTML = '<span class="fm-demo-grip" aria-hidden="true"></span><span>Swipe down to close</span>';
+  card.prepend(handle);
+  let priorBodyOverflow = null;
+
+  function unlockBackground() {
+    if (priorBodyOverflow !== null) {
+      document.body.style.overflow = priorBodyOverflow;
+      priorBodyOverflow = null;
+    }
+  }
+
+  function lockBackground() {
+    if (priorBodyOverflow === null) {
+      priorBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function syncCardPlacement() {
+    const smallScreen = mobileSheet.matches;
+    if (smallScreen && card.parentNode !== document.body) document.body.appendChild(card);
+    if (!smallScreen && card.parentNode !== board) board.appendChild(card);
+    card.classList.toggle('is-mobile-sheet', smallScreen);
+    card.setAttribute('role', smallScreen ? 'dialog' : 'region');
+    if (smallScreen) card.setAttribute('aria-modal', 'true');
+    else card.removeAttribute('aria-modal');
+    backdrop.hidden = !smallScreen || card.hidden;
+    if (smallScreen && !card.hidden) lockBackground();
+    else unlockBackground();
+  }
+
   const cardTitle = card.querySelector('[data-profile-name]');
+  cardTitle.id = 'fm-demo-profile-title';
+  card.setAttribute('aria-labelledby', cardTitle.id);
   const closeButton = card.querySelector('[data-profile-close]');
   const markerButtons = new Map();
 
@@ -145,6 +191,8 @@
 
   function closeCard(restoreFocus = false) {
     card.hidden = true;
+    backdrop.hidden = true;
+    unlockBackground();
     if (openedPin) {
       openedPin.setAttribute('aria-pressed', 'false');
       if (restoreFocus && openedPin.isConnected) openedPin.focus();
@@ -165,8 +213,15 @@
     card.querySelector('[data-profile-intro]').textContent = person.description;
     card.querySelector('[data-profile-interests]').textContent = person.interests;
     card.querySelector('[data-profile-detail]').textContent = person.detail;
+    syncCardPlacement();
     card.hidden = false;
     status.hidden = true;
+    if (mobileSheet.matches) {
+      backdrop.hidden = false;
+      lockBackground();
+      card.scrollTop = 0;
+      cardTitle.focus({ preventScroll: true });
+    }
   }
 
   function makePin(person) {
@@ -230,9 +285,51 @@
     renderPins();
   });
   closeButton.addEventListener('click', () => closeCard(true));
+  handle.addEventListener('click', () => closeCard(true));
+  backdrop.addEventListener('click', () => closeCard(true));
+
+  // A downward gesture from the top of the sheet dismisses it. Gesture
+  // detection never runs on desktop and does not block normal touch scrolling.
+  let touchOrigin = null;
+  card.addEventListener('touchstart', event => {
+    if (!mobileSheet.matches || event.touches.length !== 1 || card.scrollTop > 1) return;
+    touchOrigin = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  }, { passive: true });
+  card.addEventListener('touchend', event => {
+    if (!touchOrigin || !mobileSheet.matches) return;
+    const touch = event.changedTouches[0];
+    const dy = touch.clientY - touchOrigin.y;
+    const dx = Math.abs(touch.clientX - touchOrigin.x);
+    touchOrigin = null;
+    if (dy > 75 && dy > dx * 1.4 && card.scrollTop <= 1) closeCard(true);
+  }, { passive: true });
+  card.addEventListener('touchcancel', () => { touchOrigin = null; }, { passive: true });
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !card.hidden) closeCard(true);
+    if (card.hidden) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeCard(true);
+      return;
+    }
+    if (event.key !== 'Tab' || !mobileSheet.matches) return;
+    const controls = [handle, closeButton];
+    const first = controls[0], last = controls[controls.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === cardTitle)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 
+  if (typeof mobileSheet.addEventListener === 'function') {
+    mobileSheet.addEventListener('change', syncCardPlacement);
+  } else if (typeof mobileSheet.addListener === 'function') {
+    mobileSheet.addListener(syncCardPlacement);
+  }
+
+  syncCardPlacement();
   renderPins();
 })();
