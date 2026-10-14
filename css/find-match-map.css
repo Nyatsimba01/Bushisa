@@ -162,3 +162,68 @@
 @media(prefers-reduced-motion:reduce){
  .page-match-figma .fm-demo-pin{transition:none}
 }
+
+
+/* Phone map preview: tappable avatar pins open an accessible bottom sheet.
+   Demo-only UI: no GPS, student profiles, or live whereabouts. */
+.page-match-figma .fm-demo-sheet-backdrop{
+  position:fixed;inset:0;z-index:1999;
+  background:rgba(18,9,17,.72);backdrop-filter:blur(3px)
+}
+.page-match-figma .fm-demo-sheet-backdrop[hidden]{display:none}
+.page-match-figma .fm-demo-sheet-handle{display:none}
+
+@keyframes fmDemoSheetRise{
+  from{transform:translateY(100%);opacity:.7}
+  to{transform:translateY(0);opacity:1}
+}
+@media(max-width:700px){
+  .page-match-figma .fm-demo-profile.is-mobile-sheet{
+    position:fixed;z-index:2000;
+    left:0;right:0;bottom:0;top:auto;
+    width:100%;max-width:none;max-height:76vh;max-height:76dvh;
+    margin:0;padding:8px 20px calc(18px + env(safe-area-inset-bottom,0px));
+    overflow-y:auto;overscroll-behavior:contain;
+    border:1px solid #c59094;border-bottom:0;
+    border-radius:25px 25px 0 0;
+    background:linear-gradient(160deg,#3a2634 0%,#281c25 72%);
+    box-shadow:0 -16px 58px rgba(12,5,12,.67);
+    animation:fmDemoSheetRise .25s ease-out;
+  }
+  .page-match-figma .fm-demo-sheet-handle{
+    display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:6px;
+    width:100%;min-height:40px;padding:2px 0 9px;
+    border:0;background:transparent;
+    color:#edbba9;cursor:pointer;
+    font:600 10px/1.2 Inter,Arial,sans-serif;
+    touch-action:none;
+  }
+  .page-match-figma .fm-demo-grip{
+    width:46px;height:5px;border-radius:10px;background:#c28d9f
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-profile-top{
+    gap:12px;margin-top:3px
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-portrait-large{
+    width:60px;height:60px
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-person h3{
+    font-size:26px
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-intro{
+    font-size:13px;line-height:1.55;margin-top:15px
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-detail{
+    font-size:12px;line-height:1.55;margin-top:10px
+  }
+  .page-match-figma .fm-demo-profile.is-mobile-sheet .fm-demo-disclaimer{
+    margin-top:15px;padding-top:12px
+  }
+  .page-match-figma .fm-demo-sheet-handle:focus-visible{
+    outline:3px solid #fff0d2;outline-offset:-2px
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .page-match-figma .fm-demo-profile.is-mobile-sheet{animation:none}
+}
