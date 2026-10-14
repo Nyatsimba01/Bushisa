@@ -106,7 +106,8 @@ render_auth_start('Create account', $csrfToken);
 
             <label class="field">
                 <span>Anonymous handle</span>
-                <input type="text" name="anon_handle" value="<?= e($posted('anon_handle')) ?>" maxlength="50" autocapitalize="none" spellcheck="false" required placeholder="quiet_spark">
+                <input type="text" name="anon_handle" value="<?= e($posted('anon_handle')) ?>" minlength="3" maxlength="50" pattern="[A-Za-z0-9_.-]{3,50}" autocapitalize="none" spellcheck="false" required placeholder="quiet_spark">
+                <p class="field-help">This name appears on Confessions only. Choose something different from your public display name, without personal details.</p>
             </label>
 
             <label class="field">
