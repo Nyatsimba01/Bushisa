@@ -302,7 +302,7 @@
   object-fit: contain;
   filter: drop-shadow(0 2px 15px rgba(244,181,152,.24));
 }
-.home-figma-app .home-firstlook__intro h1 {
+.home-figma-app .home-firstlook__intro h3 {
   font: 400 29px/1.2 Lora, Georgia, serif;
   letter-spacing: -.01em;
   color: #fff0e6;
@@ -456,7 +456,7 @@
   .home-figma-app .home-firstlook__halo--outer { width: 85px; height: 62px; }
   .home-figma-app .home-firstlook__halo--inner { width: 62px; height: 46px; }
   .home-figma-app .home-firstlook__art > img { width: 28px; height: 28px; }
-  .home-figma-app .home-firstlook__intro h1 { font-size: 24px; margin: 6px 0 9px; }
+  .home-figma-app .home-firstlook__intro h3 { font-size: 24px; margin: 6px 0 9px; }
   .home-figma-app .home-firstlook__lead { font-size: 12px; margin-bottom: 12px; }
   .home-figma-app .home-firstlook__status { font-size: 10px; }
   .home-figma-app .home-firstlook__explore {
