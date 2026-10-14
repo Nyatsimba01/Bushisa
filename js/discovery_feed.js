@@ -127,6 +127,13 @@
         throw new Error('Unexpected discovery response');
       }
 
+      // Validate the cursor before touching the visible feed. A partial
+      // append followed by an invalid cursor would otherwise be hard to retry.
+      const next = data.has_more ? Number(data.next_cursor) : null;
+      if (data.has_more && (!Number.isSafeInteger(next) || next <= cursor)) {
+        throw new Error('Invalid next profile cursor');
+      }
+
       const fragment = document.createDocumentFragment();
       for (const item of data.profiles) {
         const id = Number(item.user_id);
@@ -136,13 +143,7 @@
       }
       grid.append(fragment);
       hasMore = data.has_more;
-      if (hasMore) {
-        const next = Number(data.next_cursor);
-        if (!Number.isSafeInteger(next) || next <= cursor) {
-          throw new Error('Invalid next profile cursor');
-        }
-        cursor = next;
-      }
+      if (hasMore) cursor = next;
     } catch (error) {
       pausedAfterError = true;
       if (errorBox) errorBox.querySelector('button')?.focus({ preventScroll: true });
