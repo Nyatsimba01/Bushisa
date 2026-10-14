@@ -28,7 +28,11 @@ function asset_path(string $path): string
     $absolute = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
     $version = is_file($absolute) ? (string) filemtime($absolute) : '1';
     $scriptDirectory = trim(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))), '/.');
-    $prefix = in_array($scriptDirectory, ['admin', 'public'], true) ? '../' : '';
+    // SCRIPT_NAME includes the project's URL folder (e.g.
+    // /Bushisa-Figma/admin/dashboard.php). Inspect the final segment so
+    // CSS/JS links always resolve from nested admin and public pages.
+    $directoryName = basename($scriptDirectory);
+    $prefix = in_array($directoryName, ['admin', 'public'], true) ? '../' : '';
 
     return $prefix . $path . '?v=' . rawurlencode($version);
 }
