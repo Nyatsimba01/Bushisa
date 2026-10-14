@@ -14,7 +14,7 @@
   offer.innerHTML =
     '<div class="fm-detail-offer-copy">' +
       '<span class="fm-detail-offer-sparkle" aria-hidden="true">✧</span>' +
-      '<span><strong>Make it yours</strong><small data-offer-copy>A few optional details about what you enjoy.</small></span>' +
+      '<span><strong data-offer-title>Make it yours</strong><small data-offer-copy>A few optional details about what you enjoy.</small></span>' +
     '</div>' +
     '<div class="fm-detail-offer-actions">' +
       '<button type="button" class="fm-offer-skip" data-offer-skip>Not now</button>' +
@@ -46,6 +46,7 @@
   const heading = dialog.querySelector('#fm-detail-title');
   const themeProgress = dialog.querySelector('[data-detail-progress]');
   const nextTheme = dialog.querySelector('[data-detail-next]');
+  const promptTitle = offer.querySelector('[data-offer-title]');
   const promptText = offer.querySelector('[data-offer-copy]');
   let activeDetail = null;
   let anchor = null;
@@ -70,16 +71,92 @@
       .replace(/\s*Optional\s*/i, '').trim();
   }
 
+  // Personalize the small invitation from choices on the active step.
+  // This is display text only; the original answers and saving API are unchanged.
+  function selectedValues(group, key) {
+    return Array.from(group.querySelectorAll('input[data-answer-key]'))
+      .filter(input => input.dataset.answerKey === key && input.checked &&
+        !input.closest('[data-conditional]'))
+      .map(input => input.value);
+  }
+
+  function invitationFor(group, themes) {
+    const step = Number(group.dataset.step);
+    const first = key => selectedValues(group, key)[0] || '';
+    if (step === 0) {
+      const intent = first('intent');
+      const messages = {
+        'Something serious': ['Your pace, your way', 'You chose something serious. What pace feels comfortable? One little extra, or skip.'],
+        'Casual dating': ['Your pace, your call', 'You chose casual dating. How do you prefer getting to know someone? Totally optional.'],
+        'Friendship first': ['Start with a hello', 'Friendship first feels right to you. Share your preferred pace, or keep going.'],
+        'Still exploring': ['Room to explore', 'Still figuring it out? Share what feels comfortable, or skip the extra.']
+      };
+      if (messages[intent]) return { title: messages[intent][0], copy: messages[intent][1] };
+    }
+    if (step === 1) {
+      const social = first('social_activity');
+      const messages = {
+        'Quiet moments': ['Your quieter side?', 'Quiet moments are your vibe. What does a good hangout or first hello look like?'],
+        'Somewhere in the middle': ['A little of both?', 'A balance sounds like you. Tell us what spending time together feels like, or skip.'],
+        'Always up for an activity': ['Always up for something?', 'You chose an active vibe. What kind of time together sounds most like you?']
+      };
+      if (messages[social]) return { title: messages[social][0], copy: messages[social][1] };
+      const communication = first('communication_style');
+      if (communication) return {
+        title: 'Your way of connecting',
+        copy: communication + ' feels right to you. Want to add what makes a good first hello?'
+      };
+    }
+    if (step === 2) {
+      const interests = selectedValues(group, 'interests');
+      if (interests.length > 1) {
+        const firstTwo = interests.slice(0, 2);
+        return {
+          title: 'More on your interests?',
+          copy: firstTwo.join(' + ') + (interests.length > 2 ? ' and more' : '') +
+            ' made your list. Add a little detail about any of them, or skip.'
+        };
+      }
+      const messages = {
+        'Sport': ['Your sporty side?', 'You chose sport. Which sports do you enjoy? You can even share a favourite team.'],
+        'Music': ['More on your music?', 'You chose music. What kind of sounds are on repeat for you?'],
+        'Reading': ['Your next great read?', 'You chose reading. What kinds of stories do you enjoy?'],
+        'Photography': ['Behind your lens?', 'You chose photography. What do you most enjoy creating or capturing?'],
+        'Art': ['Your creative side?', 'You chose art. Tell us a little more about what you like making or enjoying.'],
+        'Gaming': ['Your gaming side?', 'You chose gaming. What kinds of games do you come back to?'],
+        'Campus events': ['Your campus side?', 'Campus events caught your eye. What would you enjoy going to?'],
+        'Travel': ['Places and possibilities?', 'You chose travel. What kind of outing sounds like you?'],
+        'Food & cooking': ['What’s on your menu?', 'You chose food and cooking. What do you enjoy trying or making?'],
+        'Films & series': ['On your watchlist?', 'You chose films and series. What genres do you enjoy?'],
+        'Technology': ['Your curious side?', 'You chose technology. What kinds of ideas excite you?'],
+        'Community': ['Your community side?', 'You chose community. How do you enjoy getting involved?']
+      };
+      if (messages[interests[0]]) return { title: messages[interests[0]][0], copy: messages[interests[0]][1] };
+    }
+    if (step === 3) {
+      const availability = first('availability');
+      if (availability) return {
+        title: 'Plans that feel like you',
+        copy: availability + ' works for you. Do you prefer planning ahead or keeping it flexible?'
+      };
+    }
+    const names = themes.slice(0, 2).map(themeName);
+    return {
+      title: 'Make it yours',
+      copy: names.join(' + ') + (themes.length > 2 ? ' and more' : '') +
+        ' · Add a little detail, or skip.'
+    };
+  }
+
   function refreshOffer() {
     const group = currentStep();
     const themes = eligibleThemes();
     const show = !!group && themes.length > 0 && group !== dismissedStep && !dialog.open;
     offer.hidden = !show;
     if (!show) return;
-    const names = themes.slice(0, 2).map(themeName);
-    promptText.textContent = names.join(' + ') +
-      (themes.length > 2 ? ' and more' : '') +
-      ' · Add a few fun details, or skip.';
+    const invitation = invitationFor(group, themes);
+    promptTitle.textContent = invitation.title;
+    promptText.textContent = invitation.copy;
   }
 
   function restoreDetail() {
