@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/profile_personality.php';
+
 /**
  * Shared, stable discovery pagination for the Home page and its API.
  *
@@ -38,12 +40,23 @@ function bushisa_discovery_batch(PDO $pdo, int $viewerId, ?array $preferences, ?
     // Existing block helper checks both directions and initializes its table.
     $blocked = get_blocked_user_ids($pdo, $viewerId);
 
+    // Existing installations work before this optional migration is applied.
+    $withPersonality = bushisa_personality_available($pdo);
+    $detailsSelect = $withPersonality
+        ? 'pp.prompt_text AS conversation_prompt, pp.answer_text AS conversation_answer, pp.interests_json'
+        : "'' AS conversation_prompt, '' AS conversation_answer, '[]' AS interests_json";
+    $detailsJoin = $withPersonality
+        ? 'LEFT JOIN bushisa_profile_personality pp ON pp.user_id = p.user_id'
+        : '';
+
     $sql = <<<SQL
 SELECT p.user_id, p.display_name, p.bio, p.faculty, p.year_of_study,
        p.profile_photo_path,
-       TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age
+       TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age,
+       {$detailsSelect}
 FROM profiles p
 INNER JOIN users u ON u.id = p.user_id
+{$detailsJoin}
 WHERE p.user_id <> :viewer_id
   AND u.is_suspended = 0
   AND p.gender = :gender
@@ -101,5 +114,5 @@ SQL;
     $last = $profiles === [] ? null : $profiles[count($profiles) - 1];
     $nextCursor = $hasMore && $last !== null ? (int) $last['user_id'] : null;
 
-    return ['profiles' => $profiles, 'has_more' => $hasMore, 'next_cursor' => $nextCursor];
+    return ['profiles' => bushisa_personality_decode_candidate_rows($profiles), 'has_more' => $hasMore, 'next_cursor' => $nextCursor];
 }
