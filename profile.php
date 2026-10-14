@@ -12,6 +12,7 @@ require_once __DIR__ . '/php/upload_validator.php';
 require_once __DIR__ . '/php/logger.php';
 require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/frontend.php';
+require_once __DIR__ . '/php/profile_personality.php';
 
 require_login();
 
@@ -22,8 +23,34 @@ $csrfToken = null;
 $profile = get_profile($pdo, $userId);
 $preferences = get_preferences($pdo, $userId);
 $user = find_user_by_id($pdo, $userId);
+$personalityEnabled = bushisa_personality_available($pdo);
+$personalityDetails = bushisa_personality_read($pdo, $userId);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personality'])) {
+    $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+    if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
+        $error = 'Invalid form submission. Please try again.';
+    } elseif (!$personalityEnabled) {
+        $error = 'The optional profile details table has not been installed yet.';
+    } else {
+        try {
+            $details = bushisa_personality_validate($_POST);
+            $pdo->beginTransaction();
+            bushisa_personality_save($pdo, $userId, $details);
+            $pdo->commit();
+            $personalityDetails = $details;
+            $success = 'Your conversation prompt and interests have been saved.';
+        } catch (InvalidArgumentException $exception) {
+            $error = $exception->getMessage();
+        } catch (Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            log_to_file('Profile details update failed for user ' . $userId . ': ' . $exception->getMessage(), 'ERROR');
+            $error = 'Unable to save conversation details right now.';
+        }
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
 
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
@@ -252,6 +279,50 @@ render_page_shell_start('you', 'You', $csrfToken, $userId, false, 'Profile, priv
         </label>
 
         <button class="button" type="submit">Save profile</button>
+    </form>
+</section>
+
+<section class="section-card" id="conversation-and-interests" aria-labelledby="conversation-title">
+    <h2 id="conversation-title">Conversation prompt and interests</h2>
+    <p class="muted">These details appear on your discovery card in the original Figma layout. Share only information you want other eligible students to see.</p>
+
+    <?php if (!$personalityEnabled): ?>
+        <p class="field-help" role="status">
+            This feature is waiting for the non-destructive database migration
+            <code>database/migrations/20261014_profile_personality.sql</code>.
+            Your existing profile still works as before.
+        </p>
+    <?php endif; ?>
+
+    <form class="form-grid" method="post" action="profile.php#conversation-and-interests">
+        <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+        <input type="hidden" name="save_personality" value="1">
+
+        <label class="field">
+            <span>Conversation starter question</span>
+            <textarea name="conversation_prompt" maxlength="160" rows="2"
+                placeholder="What little thing improves your day on campus?" <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_prompt']) ?></textarea>
+            <p class="field-help">Optional, up to 160 characters.</p>
+        </label>
+
+        <label class="field">
+            <span>Your answer</span>
+            <textarea name="conversation_answer" maxlength="240" rows="3"
+                placeholder="Write a short answer in your own words." <?= !$personalityEnabled ? 'disabled' : '' ?>><?= e($personalityDetails['conversation_answer']) ?></textarea>
+            <p class="field-help">Optional, up to 240 characters. A question is needed before an answer can be saved.</p>
+        </label>
+
+        <label class="field">
+            <span>Interests</span>
+            <input type="text" name="interests" maxlength="350"
+                value="<?= e(implode(', ', $personalityDetails['interests'])) ?>"
+                placeholder="Reading, Guitar, Coffee" <?= !$personalityEnabled ? 'disabled' : '' ?>>
+            <p class="field-help">Up to five interests, separated by commas. Each may contain up to 40 characters.</p>
+        </label>
+
+        <button class="button" type="submit" <?= !$personalityEnabled ? 'disabled' : '' ?>>
+            Save conversation details
+        </button>
     </form>
 </section>
 
