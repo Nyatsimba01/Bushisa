@@ -6,15 +6,13 @@ require_once __DIR__ . '/../php/security_headers.php';
 require_once __DIR__ . '/../php/session_manager.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../php/function.php';
+require_once __DIR__ . '/../php/admin_access.php';
 require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/moderation.php';
 require_once __DIR__ . '/../php/frontend.php';
 
 require_login();
-
-if (!is_moderator()) {
-    redirect('/discover.php');
-}
+bushisa_require_moderator($pdo);
 
 $total_users = dashboard_count($pdo, 'SELECT COUNT(*) FROM users');
 $active_users = dashboard_count_active_users($pdo);
