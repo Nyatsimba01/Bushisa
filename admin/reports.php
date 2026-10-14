@@ -156,7 +156,7 @@ $csrfToken = generate_csrf_token();
 
 render_auth_start('Reports', $csrfToken);
 ?>
-<section class="auth-card" aria-labelledby="reports-title">
+<section class="auth-card reports-review-card" aria-labelledby="reports-title">
     <span class="brand-mark" aria-hidden="true">B</span>
     <h1 id="reports-title">Safety reports</h1>
     <p class="auth-card__lead">Private moderator queue. Read the post and reason before taking action. Reports do not automatically remove content.</p>
@@ -184,7 +184,7 @@ render_auth_start('Reports', $csrfToken);
                     <?php if ($isConfession): ?>
                         <p class="muted">Post #<?= e($report['reported_confession_id'] ?? $report['confession_id'] ?? $report['target_id'] ?? '?') ?></p>
                         <?php if ($report['reported_confession_id'] !== null): ?>
-                            <div class="section-card">
+                            <div class="section-card reports-review-post">
                                 <strong>Reported post content</strong>
                                 <p style="overflow-wrap:anywhere;white-space:pre-wrap"><?= e((string) ($report['confession_body'] ?? '')) ?></p>
                                 <?php if ((int) ($report['confession_is_flagged'] ?? 0) === 1): ?>
