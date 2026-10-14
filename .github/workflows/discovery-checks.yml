@@ -18,6 +18,8 @@ on:
       - 'php/frontend.php'
       - 'css/home-discovery-cards.css'
       - 'css/home-real.css'
+      - 'css/you-figma.css'
+      - 'js/you-profile.js'
       - 'js/home-real.js'
       - 'tests/discovery_cards_test.php'
       - 'api/discovery_feed.php'
@@ -78,4 +80,5 @@ jobs:
           node --check js/app.js
           node --check js/discovery_feed.js
           node --check js/home-real.js
+          node --check js/you-profile.js
           node --check preview/scroll-demo.js
