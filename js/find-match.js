@@ -100,6 +100,19 @@
     updateSelected();
     if (error) error.textContent = '';
   }));
+  root.querySelectorAll('[data-clear-extra]').forEach(button => {
+    button.addEventListener('click', () => {
+      const section = button.closest('.fm-followups');
+      if (!section) return;
+      section.querySelectorAll('input[data-optional-answer]').forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+        else input.value = '';
+      });
+      updateConditional();
+      if (error) error.textContent = '';
+    });
+  });
+
   back?.addEventListener('click', () => {
     if (saving || step === 0) return;
     step -= 1;
