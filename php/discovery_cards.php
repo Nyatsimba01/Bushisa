@@ -61,16 +61,6 @@ function bushisa_render_discovery_card(array $candidate): string
                 <div class="figma-photo-fallback" role="img" aria-label="No profile photo provided"><?= e($fallbackInitial) ?></div>
             <?php endif; ?>
 
-            <?php if ($photo !== null): ?>
-                <!-- Screenshot deterrent, NOT screenshot prevention.
-                     Keep the real photo visible; never imply it cannot be captured. -->
-                <div class="home-photo-watermark" aria-hidden="true">
-                    <span>BUSHISA · PRIVATE VIEW · DO NOT SHARE</span>
-                    <span>BUSHISA · PRIVATE VIEW · DO NOT SHARE</span>
-                    <span>BUSHISA · PRIVATE VIEW · DO NOT SHARE</span>
-                </div>
-            <?php endif; ?>
-
             <button class="overlay-action" type="button" disabled title="Photo likes are coming later" aria-label="Photo likes are not available yet">
                 <?= bushisa_discovery_card_icon('camera') ?> Like photo
             </button>
