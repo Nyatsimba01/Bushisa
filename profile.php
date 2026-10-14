@@ -509,8 +509,20 @@ render_document_head('You', $csrfToken, $userId);
                     <div><strong>Blocking &amp; reporting</strong><p>Read safety and community guidance.</p></div><span aria-hidden="true">›</span>
                 </a>
                 <a class="you-privacy-row" href="#account"><span class="you-privacy-icon" aria-hidden="true">⚙</span>
-                    <div><strong>Account settings</strong><p>Account details and deletion options.</p></div><span aria-hidden="true">›</span>
+                    <div><strong>Account &amp; notifications</strong><p>View your student email and available account settings below.</p></div><span aria-hidden="true">›</span>
                 </a>
+                <div class="you-account-shortcuts" id="account-actions" aria-label="Account actions">
+                    <a class="you-account-link you-account-link--logout" href="logout.php">
+                        <span class="you-account-icon" aria-hidden="true">↪</span>
+                        <span class="you-account-link-copy"><strong>Log out</strong><small>Sign out of your Bushisa account</small></span>
+                        <span class="you-account-arrow" aria-hidden="true">→</span>
+                    </a>
+                    <a class="you-account-link you-account-link--delete" href="account_delete.php">
+                        <span class="you-account-icon" aria-hidden="true">×</span>
+                        <span class="you-account-link-copy"><strong>Delete account</strong><small>Opens a separate password-confirmation page</small></span>
+                        <span class="you-account-arrow" aria-hidden="true">→</span>
+                    </a>
+                </div>
                 <p class="you-privacy-note">Some privacy and safety controls are still being integrated.</p>
             </section>
             <section class="you-anon-card" id="confessions-identity" aria-labelledby="you-anon-title">
@@ -562,7 +574,7 @@ render_document_head('You', $csrfToken, $userId);
                 <div class="you-settings-inner">
                     <label class="you-field"><span>Student email (read-only)</span><input type="email" value="<?= e($user['email'] ?? $user['student_email'] ?? '') ?>" readonly></label>
                     <p class="you-muted">Notification preferences are still in testing. No browser push permissions are requested here.</p>
-                    <div class="you-account-actions"><a href="privacy_policy.php">Privacy policy</a><a href="logout.php">Log out</a><a href="account_delete.php">Delete account</a></div>
+                    <div class="you-account-actions"><a href="privacy_policy.php">Privacy policy</a><a href="#account-actions">View account actions ↑</a></div>
                 </div>
             </details>
         </aside>
