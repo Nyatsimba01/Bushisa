@@ -21,7 +21,7 @@ For a meaningful comparison with the source Figma frames, use **1280px viewport 
 
 ### Not yet complete
 
-The site has not been verified against a browser screenshot **after these changes**. Pixel-level visual differences may remain, and Figma's desktop/mobile mockups intentionally show different sample prompts. The PHP application (`../discover.php`) is still an earlier integration version and has **not** been updated with this complete HTML structure.
+The site has not been verified against a browser screenshot **after these changes**. Pixel-level visual differences may remain, and Figma's desktop/mobile mockups intentionally show different sample prompts. The authenticated PHP Home now uses this shared Figma composition, with real database-backed profiles and chats. Pixel-level comparison against a local browser screenshot is still outstanding.
 
 The live hosted site and Kyle's email-verification backend remain untouched. Before connecting real users, resolve the repository's incompatible base SQL schemas and test age eligibility, identity verification, matching and message consent. Do not run `database/bushisa.sql` on an existing populated database without a backup: it includes `DROP TABLE` commands.
 
@@ -43,7 +43,7 @@ The original design has its own Desktop (1280px) and Mobile (390px) frames. Use 
 - Confirm the local database schema matches the selected source schema; don't import destructive SQL over real data.
 - Exercise pagination with more than six eligible test accounts, excluded matches/blocks/swipes, plus the last page and failed requests.
 - Confirm local login sessions and age eligibility, then integrate Kyle's newer verification code; that integration is out of scope here.
-- The PHP Home page is still an earlier Figma visual integration. This milestone adds real scrolling without claiming that the whole PHP screen is pixel-identical to the static design preview.
+- The PHP Home page now uses the Figma Home layout. It still needs a full browser screenshot comparison in a logged-in test environment before we can call it visually finished.
 
 
 ## Real PHP card-component checkpoint
@@ -56,7 +56,7 @@ You can verify those real PHP cards **without MySQL or login** by opening:
 
 This separate PHP fixture page uses fictional Naledi/Tafadzwa portraits from Figma and a photo-free example. Sample one includes a sample conversation prompt, answer and interests; the second and third demonstrate how the renderer handles data that the database does not yet store. No swipes are submitted from the fixture.
 
-**Data contract:** The current backend supports the real student's name, computed age, faculty, year of study, bio and profile photo. It does **not** currently store the Figma conversation prompt/answer or interest tags. The renderer accepts those optional fields when a verified source is connected, but does not infer or fabricate them today. Faculty/year tags are labelled with academic icons instead. The current API returns escaped HTML made by that renderer rather than client-created cards.
+**Data contract:** The current backend supports the real student's name, computed age, faculty, year of study, bio and profile photo. The opt-in development migration adds prompt/answer and interests to a separate table, so eligible discovery records can now include them. The renderer never fabricates values when a user hasn't saved any. Faculty/year tags are labelled with academic icons instead. The current API returns escaped HTML made by that renderer rather than client-created cards.
 
 **Feature status:** Main Like and Pass keep their existing swipe endpoint. Photo likes, answer likes, bookmarks and profile-specific confessions have no backend contracts yet and appear visibly disabled; they do not pretend to save anything.
 
@@ -86,3 +86,33 @@ PHP-only helper tests (no live database required):
 `php tests/discovery_cards_test.php`
 
 **Note:** The settings form is an interim backend integration in the existing PHP Profile page; a full faithful Figma You/Profile page is a separate design-implementation milestone. Do not confuse the real PHP screens with the static `preview/home.html` design fixtures.
+
+
+## Authenticated Figma Home integration
+
+`../discover.php` now uses the **same Figma desktop and mobile composition** as `home.html`: original navigation icons, brand, notification/account actions, chat avatars, requests indicator, suggested cards, the story/third-card/consent row (desktop), caught-up panel, process section, beta bar and mobile bottom navigation.
+
+- The Home-specific CSS is `../css/home-real.css`, layered after `home-figma.css` and `../css/home-discovery-cards.css`. Changing other pages' shell is out of scope.
+- Real chat avatars, incoming message-request counts, and notifications come from the local database. When there are none, the page shows a compact genuine empty state—not fictional accounts.
+- Eligible profiles come from `../php/discovery_feed.php`. The third card is presented as a compact feature-row card on desktop and a full single-column card on mobile. Both representations refer to the same candidate; a Like/Pass hides both.
+- Additional profiles append **after** the desktop feature row and use the same escaped PHP card component. Existing server-side eligibility, blocking and cursor logic is preserved.
+- When no candidate is eligible, an in-layout empty state replaces the cards. The page **must not** insert Naledi, Tafadzwa or other Figma sample people in the authenticated page.
+- Failing profile images get a Figma-styled initial fallback in `../js/home-real.js`.
+- Figma-only controls that still lack backend support remain disabled; do not present simulated likes/bookmarks/answers as working features.
+
+### Updating XAMPP safely
+
+From the newest `figma-integration` branch, copy these updated files into your existing **separate** `C:\xampp\htdocs\Bushisa-Figma` folder:
+
+```
+discover.php
+php/frontend.php
+css/home-real.css
+js/discovery_feed.js
+js/app.js
+js/home-real.js
+```
+
+Keep the previously downloaded `preview/home-figma.css`, `css/home-discovery-cards.css`, and `preview/assets/icons/` files. Do not replace `config/db.php`, `uploads/`, or import either base database schema. Start Apache and MySQL; sign in at `http://127.0.0.1/Bushisa-Figma/login.php` and open `http://127.0.0.1/Bushisa-Figma/discover.php`.
+
+The PHP syntax and JavaScript syntax checks in GitHub Actions cover source validity, **not** a pixel-perfect or end-to-end MySQL result. Inspect desktop at 1280px and mobile at 390px in Chrome DevTools and address any remaining differences against Figma.
