@@ -26,6 +26,35 @@
     refreshPromptChips();
   }
 
+  // A fixed Figma navigation dock can obscure the bottom of focused controls.
+  // Nudge only the active editor into the clear area; leave ordinary scroll alone.
+  const dock = document.querySelector('.bottom-nav');
+  const mobileScreen = window.matchMedia('(max-width: 760px)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.addEventListener('focusin', (event) => {
+    const control = event.target;
+    if (!(control instanceof HTMLElement) || !control.closest('.you-main')) return;
+    if (!control.matches('input:not([type="hidden"]):not([type="file"]), textarea, select, button')) return;
+    if (!(dock instanceof HTMLElement) || !mobileScreen.matches) return;
+
+    requestAnimationFrame(() => {
+      if (!control.isConnected || document.activeElement !== control) return;
+      if (window.getComputedStyle(dock).display === 'none') return;
+
+      const field = control.getBoundingClientRect();
+      const nav = dock.getBoundingClientRect();
+      const desiredBottom = nav.top - 14;
+      const overlap = field.bottom - desiredBottom;
+      if (overlap > 0 && field.top < nav.top) {
+        window.scrollBy({
+          top: Math.ceil(overlap),
+          behavior: reducedMotion.matches ? 'auto' : 'smooth'
+        });
+      }
+    });
+  });
+
   // Graceful fallback when an uploaded image path is missing in the local setup.
   for (const image of document.querySelectorAll('.you-avatar:not(.you-avatar--initial), .you-photo-slot__preview')) {
     if (!(image instanceof HTMLImageElement)) continue;
