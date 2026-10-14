@@ -86,6 +86,9 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php endif; ?>
     <title><?= e($title) ?> | Bushisa</title>
     <link rel="stylesheet" href="<?= e(asset_path('css/style.css')) ?>">
+    <?php if (current_page_name() === 'dashboard.php' && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin'): ?>
+        <link rel="stylesheet" href="<?= e(asset_path('css/admin-dashboard.css')) ?>">
+    <?php endif; ?>
     <?php if (current_page_name() === 'discover.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('css/home-discovery-cards.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
