@@ -102,7 +102,7 @@ try {
 }
 $isChecked = static function (string $key, string $value) use ($savedAnswers): string {
     $stored = (string) ($savedAnswers[$key] ?? '');
-    if (in_array($key, ['interests', 'sports', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles'], true)) {
+    if (in_array($key, ['interests', 'sports', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles', 'food_styles', 'screen_styles', 'tech_styles', 'community_styles'], true)) {
         return in_array($value, array_map('trim', explode(',', $stored)), true) ? ' checked' : '';
     }
     return $stored === $value ? ' checked' : '';
@@ -257,6 +257,29 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
  <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
+
+                <details class="fm-followups" data-conditional data-when-key="communication_style" data-when-values="Messages first|Face-to-face|A bit of both" hidden>
+                    <summary>Breaking the ice <span class="fm-optional-tag">Optional</span></summary>
+                    <div class="fm-followup-body">
+                        <p class="fm-followup-question">What makes a first conversation easier?</p>
+                        <fieldset class="fm-choices fm-extra-choices" aria-label="Conversation starters">
+                            <?php foreach ([
+                                'A shared hobby',
+                                'A funny story',
+                                'Campus life',
+                                'A thoughtful question',
+                                'Whatever comes naturally',
+                            ] as $topic): ?>
+                                <label class="fm-option">
+                                    <input type="radio" name="conversation_opener" data-answer-key="conversation_opener" data-optional-answer value="<?= e($topic) ?>"<?= $isChecked('conversation_opener', $topic) ?>>
+                                    <span class="fm-option-copy"><strong><?= e($topic) ?></strong></span>
+                                    <span class="fm-select-indicator" aria-hidden="true"></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </fieldset>
+                        <button type="button" class="fm-clear-extra" data-clear-extra>Clear this optional answer</button>
+                    </div>
+                </details>
             </div>
 
             <div class="fm-step" data-step="2" hidden>
@@ -266,7 +289,8 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                 </div>
                 <fieldset class="fm-choices fm-interests" aria-label="Shared interests">
                     <?php foreach ([
-                        'Music', 'Reading', 'Photography', 'Sport', 'Art', 'Gaming', 'Campus events', 'Travel'
+                        'Music', 'Reading', 'Photography', 'Sport', 'Art', 'Gaming', 'Campus events', 'Travel',
+                        'Food & cooking', 'Films & series', 'Technology', 'Community'
                     ] as $interest): ?>
                         <label class="fm-option">
                             <input type="checkbox" name="interests[]" data-answer-key="interests" value="<?= e($interest) ?>"<?= $isChecked('interests',$interest) ?>>
@@ -276,7 +300,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         </label>
                     <?php endforeach; ?>
                 </fieldset>
-                <p class="fm-optional-help">Want to share a little more? These topics appear based on your interests; all are optional.</p>
+                <p class="fm-optional-help">Want to go a little deeper? Expand any theme that interests you, or continue with the four steps. Every extra question is optional.</p>
                 
 <details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Sport" hidden>
  <summary>Sports <span class="fm-optional-tag">Optional</span></summary>
@@ -372,6 +396,59 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
  <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
+
+                <?php
+                // Extra themes are optional and appear only after the matching interest is selected.
+                // They use the existing answer table, without changing the four Figma steps.
+                $extraInterestThemes = [
+                    [
+                        'interest' => 'Food & cooking',
+                        'heading' => 'Food and cooking',
+                        'question' => 'What do you enjoy around food?',
+                        'key' => 'food_styles',
+                        'options' => ['Trying new cafés', 'Home cooking', 'Local dishes', 'Baking', 'Street food', 'New recipes'],
+                    ],
+                    [
+                        'interest' => 'Films & series',
+                        'heading' => 'Films and series',
+                        'question' => 'What would you enjoy watching?',
+                        'key' => 'screen_styles',
+                        'options' => ['Comedy', 'Drama', 'Documentaries', 'Animation', 'Science fiction', 'Mystery'],
+                    ],
+                    [
+                        'interest' => 'Technology',
+                        'heading' => 'Technology and ideas',
+                        'question' => 'What catches your interest?',
+                        'key' => 'tech_styles',
+                        'options' => ['Building apps', 'Design', 'AI', 'Gadgets', 'Problem solving', 'Learning to code'],
+                    ],
+                    [
+                        'interest' => 'Community',
+                        'heading' => 'Community and campus',
+                        'question' => 'How do you like getting involved?',
+                        'key' => 'community_styles',
+                        'options' => ['Volunteering', 'Student clubs', 'Mentoring', 'Campus projects', 'Community outreach'],
+                    ],
+                ];
+                ?>
+                <?php foreach ($extraInterestThemes as $theme): ?>
+                    <details class="fm-followups" data-conditional data-when-key="interests" data-when-values="<?= e($theme['interest']) ?>" hidden>
+                        <summary><?= e($theme['heading']) ?> <span class="fm-optional-tag">Optional</span></summary>
+                        <div class="fm-followup-body">
+                            <p class="fm-followup-question"><?= e($theme['question']) ?></p>
+                            <fieldset class="fm-choices fm-extra-choices" aria-label="<?= e($theme['heading']) ?>">
+                                <?php foreach ($theme['options'] as $option): ?>
+                                    <label class="fm-option">
+                                        <input type="checkbox" name="<?= e($theme['key']) ?>[]" data-answer-key="<?= e($theme['key']) ?>" data-optional-answer value="<?= e($option) ?>"<?= $isChecked($theme['key'], $option) ?>>
+                                        <span class="fm-option-copy"><strong><?= e($option) ?></strong></span>
+                                        <span class="fm-select-indicator" aria-hidden="true"></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </fieldset>
+                            <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
+                        </div>
+                    </details>
+                <?php endforeach; ?>
             </div>
 
             <div class="fm-step" data-step="3" hidden>
