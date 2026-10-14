@@ -151,6 +151,19 @@ function register_user(PDO $pdo, array $data): array
         ];
     }
 
+    // Reject handles that expose the public profile name, including versions
+    // separated by underscores, hyphens, spaces or dots.
+    $normalisedHandle = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $anonHandle));
+    $normalisedPublicName = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $displayName));
+    if ($normalisedPublicName !== '' && $normalisedHandle === $normalisedPublicName) {
+        return [
+            'success' => false,
+            'error' => 'Choose a Confessions username that is different from your public display name.',
+            'message' => null,
+            'redirect' => null,
+        ];
+    }
+
     $gender = clean_enum($gender, ['male', 'female']) ?? '';
     if ($gender === '') {
         return [
