@@ -130,3 +130,29 @@ The authenticated `discover.php` Home now has a dedicated visual **empty-data jo
 - Visual QA is still required; passing source checks is not a browser screenshot comparison.
 
 **XAMPP upgrade from the previous branch checkpoint:** copy only `discover.php` and `css/home-real.css` from the newest `figma-integration` ZIP into the same paths of your existing `C:\xampp\htdocs\Bushisa-Figma` folder. Keep `config/db.php`, `uploads/` and the MySQL database unchanged. Sign in at `http://127.0.0.1/Bushisa-Figma/login.php`, visit `discover.php`, and hard-refresh with **Ctrl+Shift+R**. Check desktop at 1280px and mobile at 390px.
+
+
+## Figma You/Profile integration — PHP development page
+
+`profile.php` now follows the **You/Profile desktop and mobile Figma frames** (`4:3002`, `4:3400`), with Home's same brand/header/nav and mobile bottom dock. The two-column desktop workspace and stacked mobile design use `css/you-figma.css` layered over `preview/home-figma.css`.
+
+**Already connected:** existing PHP profile updates (display name, bio, faculty, year of study and one main-photo upload), optional conversation prompt/answer + comma-separated interests, discovery preference updates, read-only student email, logout and the existing account deletion destination. The optional prompt form only enables when `bushisa_profile_personality` exists. Profile changes still use CSRF and the original PHP persistence functions.
+
+**Not yet supported or verified:** genuine student/age verification, photo slots 2 and 3, a second conversation answer, pause/visibility controls and notification preferences. The Figma checklist marks them as pending rather than showing fabricated completion. Age restrictions must be enforced in registration, authentication and discovery before real launch.
+
+The Figma prompt-choice chips fill the real **single** conversation question field; they don't create additional stored prompts. Client-side choices use `js/you-profile.js` without simulated saving.
+
+### Update the existing XAMPP development checkout
+
+From the latest `figma-integration` branch ZIP, copy **only these four updated/new files** to the corresponding places inside `C:\xampp\htdocs\Bushisa-Figma`:
+
+```
+profile.php
+php/frontend.php
+css/you-figma.css
+js/you-profile.js
+```
+
+The updated page reuses the previously installed `preview/home-figma.css` and `preview/assets/icons/`. **Do not replace** `config/db.php`, your `uploads/` directory or the database. Log in through `http://127.0.0.1/Bushisa-Figma/login.php`, open `http://127.0.0.1/Bushisa-Figma/profile.php`, and hard refresh.
+
+Check that the profile editor, checklist and privacy section follow the desktop Figma frame; on mobile 390x844 they should stack with the floating bottom navigation. Save only fictional development information and refresh to confirm persistence. Photo upload and preferences need independent manual tests before calling them complete; GitHub PHP/JS lint is not a substitute for a local functional test.
