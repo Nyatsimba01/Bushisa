@@ -108,33 +108,20 @@
     radial-gradient(circle 160px at 80px 1020px, rgba(248,237,226,.058), transparent 100%);
   background-repeat: no-repeat;
 }
+/* Figma You has 420px/300px concentric glass ellipses at (-120,-120).
+   Attach these subtle rings to the PAGE (not .you-main), so they sit behind
+   the header rather than crossing the "A little more you" heading. */
 .page-you-figma {
   background-image:
-    radial-gradient(circle 210px at 90px 90px, rgba(248,237,226,.075), rgba(248,237,226,.022) 55%, transparent 100%);
+    radial-gradient(circle 210px at 90px 90px,
+      transparent 68%, rgba(248,237,226,.032) 69%,
+      rgba(248,237,226,.022) 73%, transparent 76%),
+    radial-gradient(circle 150px at 90px 90px,
+      rgba(248,237,226,.014) 0%, rgba(248,237,226,.012) 87%,
+      rgba(248,237,226,.026) 94%, transparent 100%),
+    radial-gradient(circle 210px at 90px 90px,
+      rgba(248,237,226,.024), transparent 100%);
   background-repeat: no-repeat;
-}
-/* The You design has concentric glass shapes, unlike the other three pages.
-   Keep the rings behind actual form controls, not over text fields. */
-.page-you-figma .you-main {
-  isolation: isolate;
-}
-.page-you-figma .you-main::before {
-  content:"";
-  position:absolute;
-  z-index:0;
-  pointer-events:none;
-  width:420px;
-  height:420px;
-  top:-212px;
-  left:-120px;
-  border-radius:50%;
-  border:1px solid rgba(248,237,226,.10);
-  background:radial-gradient(circle at 38% 38%,rgba(248,237,226,.09),rgba(248,237,226,.018) 68%,transparent 73%);
-  box-shadow:inset 0 0 0 60px rgba(248,237,226,.035), inset 0 0 0 61px rgba(248,237,226,.075);
-}
-.page-you-figma .you-main > * {
-  position:relative;
-  z-index:1;
 }
 @media (max-width: 700px) {
   .home-figma-app {
@@ -153,17 +140,15 @@
       radial-gradient(circle 110px at calc(100% - 60px) 70px,rgba(248,237,226,.07),transparent 100%),
       radial-gradient(circle 100px at 60px 820px,rgba(248,237,226,.058),transparent 100%);
   }
+  /* Mobile Figma: 300px outer ring, 220px inner, both at (-80,-80). */
   .page-you-figma {
-    background-image:radial-gradient(circle 150px at 70px 70px,rgba(248,237,226,.07),transparent 100%);
+    background-image:
+      radial-gradient(circle 150px at 70px 70px,
+        transparent 69%, rgba(248,237,226,.027) 70%,
+        rgba(248,237,226,.018) 73%, transparent 76%),
+      radial-gradient(circle 110px at 70px 70px,
+        rgba(248,237,226,.012) 0%,rgba(248,237,226,.018) 93%,transparent 100%),
+      radial-gradient(circle 150px at 70px 70px,
+        rgba(248,237,226,.024),transparent 100%);
   }
-  .page-you-figma .you-main::before {
-    width:300px;
-    height:300px;
-    top:-156px;
-    left:-80px;
-    box-shadow:inset 0 0 0 40px rgba(248,237,226,.035),inset 0 0 0 41px rgba(248,237,226,.08);
-  }
-}
-@media (prefers-contrast: more) {
-  .page-you-figma .you-main::before { opacity:.4; }
 }
