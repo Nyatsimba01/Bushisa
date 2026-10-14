@@ -63,3 +63,26 @@ This separate PHP fixture page uses fictional Naledi/Tafadzwa portraits from Fig
 The `?scrollDemo=1` fictional mock now includes example conversation prompts, tags and the same visual interaction slots as the original Figma cards. It remains completely separate from the actual database.
 
 The two repository SQL schemas are incompatible alternatives; do not import either over an existing populated database without a backup.
+
+
+## Optional real conversation prompt and interests persistence
+
+The authenticated PHP `profile.php` page now includes a separate **Conversation prompt and interests** form, protected by the existing CSRF token. It saves an optional question (160 characters), answer (240 characters) and up to five comma-separated interests (40 characters each).
+
+### Safe setup in a development database
+
+1. Back up your current MySQL database and confirm which schema your local Bushisa installation uses.
+2. Start Apache and MySQL in XAMPP.
+3. In phpMyAdmin, select the **existing Bushisa development database** (normally `bushisa_db`, but check `config/db.php`).
+4. Use phpMyAdmin's **SQL** tab to run **only** `database/migrations/20261014_profile_personality.sql`. It creates one new table using `CREATE TABLE IF NOT EXISTS`; it never drops or replaces existing tables.
+5. Open the authenticated `profile.php#conversation-and-interests` page and save an example prompt and interests. They will appear on the real `discover.php` cards when another eligible account discovers that user.
+
+**Until the migration has been applied**, the form is explicitly disabled, and the Home feed continues rendering profile bios and genuine academic tags. Database page views do not create tables or change schema.
+
+The first six cards and automatically loaded later cards now use the **same optional LEFT JOIN** to `bushisa_profile_personality` when present. No fictional prompt or tags are invented for database users. This schema table is intentionally kept separate from `users` and `profiles` because this repository has two incompatible older base SQL schemas and Kyle's newer integration still needs reconciliation.
+
+PHP-only helper tests (no live database required):
+`php tests/profile_personality_test.php`
+`php tests/discovery_cards_test.php`
+
+**Note:** The settings form is an interim backend integration in the existing PHP Profile page; a full faithful Figma You/Profile page is a separate design-implementation milestone. Do not confuse the real PHP screens with the static `preview/home.html` design fixtures.
