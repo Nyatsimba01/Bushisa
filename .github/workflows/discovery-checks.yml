@@ -9,6 +9,10 @@ on:
       - 'php/discovery_cards.php'
       - 'php/profile_personality.php'
       - 'profile.php'
+      - 'login.php'
+      - 'php/session_manager.php'
+      - 'php/security_headers.php'
+      - '.htaccess'
       - 'database/migrations/20261014_profile_personality.sql'
       - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
@@ -27,6 +31,10 @@ on:
       - 'php/discovery_cards.php'
       - 'php/profile_personality.php'
       - 'profile.php'
+      - 'login.php'
+      - 'php/session_manager.php'
+      - 'php/security_headers.php'
+      - '.htaccess'
       - 'database/migrations/20261014_profile_personality.sql'
       - 'tests/profile_personality_test.php'
       - 'php/frontend.php'
@@ -49,6 +57,9 @@ jobs:
           php -l php/discovery_cards.php
           php -l php/profile_personality.php
           php -l profile.php
+          php -l login.php
+          php -l php/session_manager.php
+          php -l php/security_headers.php
           php -l tests/profile_personality_test.php
           php -l php/frontend.php
           php -l tests/discovery_cards_test.php
