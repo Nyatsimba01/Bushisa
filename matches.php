@@ -102,7 +102,7 @@ try {
 }
 $isChecked = static function (string $key, string $value) use ($savedAnswers): string {
     $stored = (string) ($savedAnswers[$key] ?? '');
-    if ($key === 'interests') {
+    if (in_array($key, ['interests', 'sports', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles'], true)) {
         return in_array($value, array_map('trim', explode(',', $stored)), true) ? ' checked' : '';
     }
     return $stored === $value ? ' checked' : '';
@@ -193,6 +193,17 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         <span class="fm-select-indicator" aria-hidden="true"></span>
                     </label>
                 </fieldset>
+                
+<details class="fm-followups" data-conditional data-when-key="intent" data-when-values="Something serious|Casual dating|Friendship first|Still exploring" hidden>
+ <summary>Your pace <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">What feels comfortable when getting to know someone?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="connection pace">
+  <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Taking my time"<?= $isChecked('connection_pace','Taking my time') ?>><span class="fm-option-copy"><strong>Taking my time</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Seeing how things unfold"<?= $isChecked('connection_pace','Seeing how things unfold') ?>><span class="fm-option-copy"><strong>Seeing how things unfold</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Making plans when ready"<?= $isChecked('connection_pace','Making plans when ready') ?>><span class="fm-option-copy"><strong>Making plans when ready</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
             </div>
 
             <div class="fm-step" data-step="1" hidden>
@@ -232,6 +243,18 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         </label>
                     <?php endforeach; ?>
                 </fieldset>
+                
+<details class="fm-followups" data-conditional data-when-key="social_activity" data-when-values="Quiet moments|Somewhere in the middle|Always up for an activity" hidden>
+ <summary>Shared time <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">How do you most enjoy spending time with others?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="hangout style">
+  <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="One-on-one chats"<?= $isChecked('hangout_style','One-on-one chats') ?>><span class="fm-option-copy"><strong>One-on-one chats</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="Small groups"<?= $isChecked('hangout_style','Small groups') ?>><span class="fm-option-copy"><strong>Small groups</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="An activity together"<?= $isChecked('hangout_style','An activity together') ?>><span class="fm-option-copy"><strong>An activity together</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="hangout_style" data-answer-key="hangout_style" data-optional-answer value="A bit of everything"<?= $isChecked('hangout_style','A bit of everything') ?>><span class="fm-option-copy"><strong>A bit of everything</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
             </div>
 
             <div class="fm-step" data-step="2" hidden>
@@ -251,6 +274,96 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         </label>
                     <?php endforeach; ?>
                 </fieldset>
+                <p class="fm-optional-help">Want to share a little more? These topics appear based on your interests; all are optional.</p>
+                
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Sport" hidden>
+ <summary>Sports <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">Which sports do you enjoy?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="sports">
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Football"<?= $isChecked('sports','Football') ?>><span class="fm-option-copy"><strong>Football</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Basketball"<?= $isChecked('sports','Basketball') ?>><span class="fm-option-copy"><strong>Basketball</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Cricket"<?= $isChecked('sports','Cricket') ?>><span class="fm-option-copy"><strong>Cricket</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Rugby"<?= $isChecked('sports','Rugby') ?>><span class="fm-option-copy"><strong>Rugby</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Tennis"<?= $isChecked('sports','Tennis') ?>><span class="fm-option-copy"><strong>Tennis</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Athletics"<?= $isChecked('sports','Athletics') ?>><span class="fm-option-copy"><strong>Athletics</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="sports[]" data-answer-key="sports" data-optional-answer value="Other"<?= $isChecked('sports','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+<div class="fm-mini-question"><p class="fm-followup-question">Do you prefer playing or watching?</p><fieldset class="fm-choices fm-extra-choices" aria-label="sport style">
+  <label class="fm-option"><input type="radio" name="sport_style" data-answer-key="sport_style" data-optional-answer value="Playing"<?= $isChecked('sport_style','Playing') ?>><span class="fm-option-copy"><strong>Playing</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="sport_style" data-answer-key="sport_style" data-optional-answer value="Watching"<?= $isChecked('sport_style','Watching') ?>><span class="fm-option-copy"><strong>Watching</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="sport_style" data-answer-key="sport_style" data-optional-answer value="Both"<?= $isChecked('sport_style','Both') ?>><span class="fm-option-copy"><strong>Both</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset></div>
+<div class="fm-mini-question" data-conditional data-when-key="sports" data-when-values="Football" hidden>
+<label for="fm-football-team" class="fm-followup-question">Which football team do you support?</label>
+<p class="fm-optional-help">Local or international. You can leave this blank.</p>
+<input type="text" id="fm-football-team" class="fm-extra-input" data-answer-key="football_team" data-optional-answer maxlength="60" autocomplete="off" value="<?= e($savedAnswers['football_team'] ?? '') ?>" placeholder="Your team (optional)">
+</div>
+ </div>
+</details>
+
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Music" hidden>
+ <summary>Music <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">What sounds do you enjoy?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="music styles">
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Amapiano"<?= $isChecked('music_styles','Amapiano') ?>><span class="fm-option-copy"><strong>Amapiano</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Afrobeats"<?= $isChecked('music_styles','Afrobeats') ?>><span class="fm-option-copy"><strong>Afrobeats</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Hip-hop"<?= $isChecked('music_styles','Hip-hop') ?>><span class="fm-option-copy"><strong>Hip-hop</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Gospel"<?= $isChecked('music_styles','Gospel') ?>><span class="fm-option-copy"><strong>Gospel</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Jazz"<?= $isChecked('music_styles','Jazz') ?>><span class="fm-option-copy"><strong>Jazz</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="music_styles[]" data-answer-key="music_styles" data-optional-answer value="Other"<?= $isChecked('music_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
+
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Reading" hidden>
+ <summary>Books and stories <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">What are you most likely to read?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="reading styles">
+  <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Fiction"<?= $isChecked('reading_styles','Fiction') ?>><span class="fm-option-copy"><strong>Fiction</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Non-fiction"<?= $isChecked('reading_styles','Non-fiction') ?>><span class="fm-option-copy"><strong>Non-fiction</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Poetry"<?= $isChecked('reading_styles','Poetry') ?>><span class="fm-option-copy"><strong>Poetry</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Comics"<?= $isChecked('reading_styles','Comics') ?>><span class="fm-option-copy"><strong>Comics</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="reading_styles[]" data-answer-key="reading_styles" data-optional-answer value="Other"<?= $isChecked('reading_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
+
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Gaming" hidden>
+ <summary>Gaming <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">What games do you enjoy?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="gaming styles">
+  <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Video games"<?= $isChecked('gaming_styles','Video games') ?>><span class="fm-option-copy"><strong>Video games</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Mobile games"<?= $isChecked('gaming_styles','Mobile games') ?>><span class="fm-option-copy"><strong>Mobile games</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Board games"<?= $isChecked('gaming_styles','Board games') ?>><span class="fm-option-copy"><strong>Board games</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Party games"<?= $isChecked('gaming_styles','Party games') ?>><span class="fm-option-copy"><strong>Party games</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="gaming_styles[]" data-answer-key="gaming_styles" data-optional-answer value="Other"<?= $isChecked('gaming_styles','Other') ?>><span class="fm-option-copy"><strong>Other</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
+
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Art|Photography" hidden>
+ <summary>Creative interests <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">Which creative activities interest you?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="creative styles">
+  <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Drawing and design"<?= $isChecked('creative_styles','Drawing and design') ?>><span class="fm-option-copy"><strong>Drawing and design</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Taking photos"<?= $isChecked('creative_styles','Taking photos') ?>><span class="fm-option-copy"><strong>Taking photos</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Making things"<?= $isChecked('creative_styles','Making things') ?>><span class="fm-option-copy"><strong>Making things</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="creative_styles[]" data-answer-key="creative_styles" data-optional-answer value="Enjoying art"<?= $isChecked('creative_styles','Enjoying art') ?>><span class="fm-option-copy"><strong>Enjoying art</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
+
+<details class="fm-followups" data-conditional data-when-key="interests" data-when-values="Campus events|Travel" hidden>
+ <summary>Things to do <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">Which outings sound interesting?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="outing styles">
+  <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Campus events"<?= $isChecked('outing_styles','Campus events') ?>><span class="fm-option-copy"><strong>Campus events</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Day trips"<?= $isChecked('outing_styles','Day trips') ?>><span class="fm-option-copy"><strong>Day trips</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Live music"<?= $isChecked('outing_styles','Live music') ?>><span class="fm-option-copy"><strong>Live music</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="checkbox" name="outing_styles[]" data-answer-key="outing_styles" data-optional-answer value="Quiet outings"<?= $isChecked('outing_styles','Quiet outings') ?>><span class="fm-option-copy"><strong>Quiet outings</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
             </div>
 
             <div class="fm-step" data-step="3" hidden>
@@ -273,6 +386,17 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         </label>
                     <?php endforeach; ?>
                 </fieldset>
+                
+<details class="fm-followups" data-conditional data-when-key="availability" data-when-values="Between lectures|Weekday evenings|Weekends|It varies" hidden>
+ <summary>Making plans <span class="fm-optional-tag">Optional</span></summary>
+ <div class="fm-followup-body"><p class="fm-followup-question">How do you like to arrange time with people?</p>
+ <fieldset class="fm-choices fm-extra-choices" aria-label="planning style">
+  <label class="fm-option"><input type="radio" name="planning_style" data-answer-key="planning_style" data-optional-answer value="Planning ahead"<?= $isChecked('planning_style','Planning ahead') ?>><span class="fm-option-copy"><strong>Planning ahead</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="planning_style" data-answer-key="planning_style" data-optional-answer value="Keeping plans flexible"<?= $isChecked('planning_style','Keeping plans flexible') ?>><span class="fm-option-copy"><strong>Keeping plans flexible</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+  <label class="fm-option"><input type="radio" name="planning_style" data-answer-key="planning_style" data-optional-answer value="A mix of both"<?= $isChecked('planning_style','A mix of both') ?>><span class="fm-option-copy"><strong>A mix of both</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
+</fieldset>
+ </div>
+</details>
             </div>
 
             <p class="fm-error" data-match-error role="alert"></p>
