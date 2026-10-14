@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600&display=swap');
 /* Bushisa Admin Dashboard · implementation of editable Figma node 76:2.
    Deliberately scoped: student-facing pages are not affected. */
 body.bushisa-admin-dashboard{--adm-bg:#21151a;--adm-side:#1d1319;--adm-card:#302128;--adm-raised:#3b2931;--adm-line:#57404a;--adm-cream:#f8ede2;--adm-muted:#c8b4b9;--adm-peach:#f4b598;--adm-soft:#9f8a93;--adm-green:#9ec4af;background:var(--adm-bg);background-image:none;color:var(--adm-cream);font:400 14px/1.5 Inter,Arial,sans-serif;margin:0;letter-spacing:0}
