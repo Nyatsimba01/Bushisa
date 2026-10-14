@@ -26,7 +26,61 @@ $user = find_user_by_id($pdo, $userId);
 $personalityEnabled = bushisa_personality_available($pdo);
 $personalityDetails = bushisa_personality_read($pdo, $userId);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personality'])) {
+// Confessions uses a separate display identity. This POST action deliberately
+// avoids the general profile form so changing a handle cannot overwrite photos,
+// biography or discovery preferences.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_anon_handle'])) {
+    $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+    $requestedHandle = isset($_POST['anon_handle']) && is_string($_POST['anon_handle'])
+        ? ltrim(trim(str_replace("\0", '', $_POST['anon_handle'])), '@') : '';
+    $publicName = trim((string) ($profile['display_name'] ?? ''));
+
+    if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
+        $error = 'Invalid form submission. Please try again.';
+    } elseif (!preg_match('/^[A-Za-z0-9_.-]{3,50}$/D', $requestedHandle)) {
+        $error = 'Use 3–50 letters, numbers, underscores, dots or hyphens for your Confessions name.';
+    } elseif ($publicName !== '' && strcasecmp($requestedHandle, $publicName) === 0) {
+        $error = 'Your Confessions name must be different from your public profile name.';
+    } else {
+        try {
+            $otherHandle = $pdo->prepare(
+                'SELECT user_id FROM profiles
+                 WHERE LOWER(anon_handle) = LOWER(:handle) AND user_id <> :user_id LIMIT 1'
+            );
+            $otherHandle->execute([':handle' => $requestedHandle, ':user_id' => $userId]);
+            if ($otherHandle->fetchColumn() !== false) {
+                $error = 'That Confessions name is already in use. Try another.';
+            } else {
+                $pdo->beginTransaction();
+                $setHandle = $pdo->prepare(
+                    'UPDATE profiles SET anon_handle = :handle WHERE user_id = :user_id'
+                );
+                $setHandle->execute([':handle' => $requestedHandle, ':user_id' => $userId]);
+
+                // Legacy confession rows may keep their own handle snapshot.
+                // Update those too, so old and new posts show the same pseudonym.
+                if (operational_column_exists($pdo, 'confessions', 'anon_handle')) {
+                    $authorColumn = operational_confession_columns($pdo)['author'];
+                    $setPostHandles = $pdo->prepare(
+                        'UPDATE confessions SET anon_handle = :handle WHERE ' . $authorColumn . ' = :user_id'
+                    );
+                    $setPostHandles->execute([':handle' => $requestedHandle, ':user_id' => $userId]);
+                }
+
+                $pdo->commit();
+                $profile = get_profile($pdo, $userId);
+                $success = 'Your separate Confessions username has been saved.';
+                log_action($pdo, $userId, 'confessions_handle_updated', $_SERVER['REMOTE_ADDR'] ?? null);
+            }
+        } catch (Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            log_to_file('Anonymous handle update failed for user ' . $userId . ': ' . $exception->getMessage(), 'ERROR');
+            $error = 'Unable to save your Confessions username right now.';
+        }
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personality'])) {
     $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
         $error = 'Invalid form submission. Please try again.';
@@ -455,6 +509,37 @@ render_document_head('You', $csrfToken, $userId);
                     <div><strong>Account settings</strong><p>Account details and deletion options.</p></div><span aria-hidden="true">›</span>
                 </a>
                 <p class="you-privacy-note">Some privacy and safety controls are still being integrated.</p>
+            </section>
+            <section class="you-anon-card" id="confessions-identity" aria-labelledby="you-anon-title">
+                <p class="you-anon-kicker">CONFESSIONS IDENTITY</p>
+                <h2 id="you-anon-title">Your anonymous username</h2>
+                <p class="you-anon-help">Choose the name other students see beside your Confessions posts. It is separate from your Home and You profile name.</p>
+                <?php
+                    $currentAnonHandle = trim((string) ($profile['anon_handle'] ?? ''));
+                    $publicProfileName = trim((string) ($profile['display_name'] ?? ''));
+                    $samePublicName = $currentAnonHandle !== '' && $publicProfileName !== ''
+                        && strcasecmp($currentAnonHandle, $publicProfileName) === 0;
+                ?>
+                <?php if ($samePublicName): ?>
+                    <p class="you-anon-warning" role="status">Your current Confessions username matches your public profile name. Choose a different name before posting.</p>
+                <?php endif; ?>
+                <form method="post" action="profile.php#confessions-identity" class="you-anon-form">
+                    <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                    <input type="hidden" name="save_anon_handle" value="1">
+                    <label class="you-field" for="you-anon-handle">
+                        <span>Confessions username</span>
+                        <span class="you-anon-input"><span aria-hidden="true">@</span>
+                            <input id="you-anon-handle" type="text" name="anon_handle" minlength="3" maxlength="50"
+                                   pattern="[A-Za-z0-9_.-]{3,50}" autocapitalize="none" autocomplete="off"
+                                   spellcheck="false" required
+                                   value="<?= e(isset($_POST['save_anon_handle']) && isset($_POST['anon_handle']) && is_string($_POST['anon_handle']) && $error !== null ? ltrim(trim($_POST['anon_handle']), '@') : $currentAnonHandle) ?>"
+                                   placeholder="quiet_spark">
+                        </span>
+                        <small>Use 3–50 letters, numbers, dots, underscores or hyphens. Avoid real names, student IDs or contact details.</small>
+                    </label>
+                    <button class="you-save-button" type="submit">Save Confessions username <span aria-hidden="true">✓</span></button>
+                </form>
+                <p class="you-anon-note">Changing this name also updates the name shown on your earlier posts, but it cannot change screenshots others may already have. Moderators can still link posts to the account for safety.</p>
             </section>
             <details class="you-settings-expander" id="account">
                 <summary>Account &amp; notifications <span>See available controls</span></summary>
