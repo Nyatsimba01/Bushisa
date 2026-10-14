@@ -1,0 +1,127 @@
+/*
+ * Confessions — Figma desktop 4:2828 and mobile 4:3234.
+ * The common site header, navigation icons and typography come from
+ * preview/home-figma.css. The PHP database remains authoritative.
+ */
+.page-confessions-figma{background:#21151a;color:#f8ede2;min-height:100vh;}
+.page-confessions-figma .site-header{height:92px;}
+.page-confessions-figma .header-inner{max-width:1280px;}
+.page-confessions-figma .notification-panel{z-index:95;top:84px;bottom:auto;width:min(390px,calc(100vw - 28px));}
+.page-confessions-figma .notification-panel[hidden]{display:none;}
+.page-confessions-figma .cf-main{width:100%;max-width:1280px;margin:0 auto;padding:44px 80px 48px;display:flex;flex-direction:column;gap:36px;}
+.page-confessions-figma .cf-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.page-confessions-figma .cf-intro__copy{min-width:0;}
+.page-confessions-figma .cf-eyebrow{color:#f4b598;font:600 11px/1.3 Inter,Arial,sans-serif;letter-spacing:.045em;margin:0 0 12px;}
+.page-confessions-figma .cf-intro h1{font:400 52px/1.16 Lora,Georgia,serif;color:#f8ede2;margin:0 0 12px;letter-spacing:-.02em;}
+.page-confessions-figma .cf-intro__copy>p:last-child{font:400 16px/1.55 Inter,Arial,sans-serif;color:#c8b4b9;margin:0;}
+.page-confessions-figma .cf-post-button{flex:0 0 auto;display:inline-flex;justify-content:center;align-items:center;gap:12px;min-height:48px;padding:12px 20px;border:1px solid #f8ede2;background:#f4b598;color:#361d27;border-radius:10px;box-shadow:0 10px 24px -8px #f4b59844;font:600 14px/1.2 Inter,Arial,sans-serif;cursor:pointer;}
+.page-confessions-figma .cf-post-button:hover{background:#ffc7ae;}
+.page-confessions-figma .cf-post-button__plus{font-size:23px;line-height:15px;font-weight:400;}
+.page-confessions-figma .cf-layout{display:grid;grid-template-columns:minmax(0,770px) minmax(245px,310px);gap:40px;align-items:start;}
+.page-confessions-figma .cf-feed{min-width:0;display:flex;flex-direction:column;gap:22px;}
+.page-confessions-figma .cf-toolbar{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;border:1px solid #57404a;border-radius:14px;background:#302128;}
+.page-confessions-figma .cf-tabs{display:inline-flex;gap:6px;padding:5px;border-radius:100px;background:#302128;}
+.page-confessions-figma .cf-tab{display:inline-flex;min-height:40px;align-items:center;justify-content:center;padding:10px 18px;border-radius:100px;font:500 13px/1.3 Inter,Arial,sans-serif;color:#c8b4b9;text-decoration:none;}
+.page-confessions-figma .cf-tab:hover{color:#f8ede2;}
+.page-confessions-figma .cf-tab.is-current{background:#3b2931;color:#f4b598;font-weight:600;}
+.page-confessions-figma .cf-post-count{color:#c8b4b9;font:400 12px/1.4 Inter,Arial,sans-serif;margin:0;white-space:nowrap;}
+.page-confessions-figma .cf-guidance{border:1px solid #57404a;border-radius:18px;background:#4a2434;padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+.page-confessions-figma .cf-guidance h2{font:400 16px/1.35 Lora,Georgia,serif;color:#f8ede2;margin:0;}
+.page-confessions-figma .cf-guidance p{font:400 13px/1.55 Inter,Arial,sans-serif;color:#e4c5b5;margin:0;}
+.page-confessions-figma .cf-list{display:flex;flex-direction:column;gap:20px;}
+.page-confessions-figma .cf-card{background:#302128;border:1px solid #57404a;border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:0 14px 30px -12px #0005;min-width:0;}
+.page-confessions-figma .cf-card__byline{display:flex;align-items:center;gap:12px;min-width:0;}
+.page-confessions-figma .cf-card__avatar{height:40px;width:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:50%;background:#4a2434;}
+.page-confessions-figma .cf-card__avatar img{width:19px;height:19px;}
+.page-confessions-figma .cf-card__author{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.page-confessions-figma .cf-card__author strong{font-size:13px;color:#f8ede2;overflow-wrap:anywhere;font-weight:600;}
+.page-confessions-figma .cf-card__author time{font-size:12px;color:#c8b4b9;}
+.page-confessions-figma .cf-card__quote{margin-left:auto;align-self:start;color:#dcb4a4;font:400 35px/.9 Georgia,serif;}
+.page-confessions-figma .cf-bubble{border:1px solid #e8d4cc;border-radius:18px 18px 18px 6px;background:#f8ede2;padding:20px;color:#361d27;min-width:0;}
+.page-confessions-figma .cf-bubble__body{font:400 clamp(22px,2.6vw,34px)/1.35 Lora,Georgia,serif;color:#361d27;margin:0 0 14px;white-space:pre-wrap;overflow-wrap:anywhere;}
+.page-confessions-figma .cf-bubble__actions{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #e8d4cc;padding-top:13px;font:400 12px/1.5 Inter,Arial,sans-serif;color:#6b4b56;}
+.page-confessions-figma .cf-bubble__views{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.page-confessions-figma .cf-bubble__links{display:flex;align-items:center;gap:12px;}
+.page-confessions-figma .cf-bubble__links a{color:#6b4b56;text-decoration:none;min-height:36px;display:inline-flex;align-items:center;}
+.page-confessions-figma .cf-bubble__links a:hover{text-decoration:underline;}
+.page-confessions-figma .cf-bubble__soon{border:0;background:transparent;color:#8a7278;font:400 12px Inter,Arial,sans-serif;white-space:nowrap;cursor:not-allowed;min-height:36px;padding:0;}
+.page-confessions-figma .cf-empty{text-align:center;border:1px solid #57404a;border-radius:20px;background:#302128;padding:40px 30px;display:flex;flex-direction:column;gap:13px;align-items:center;}
+.page-confessions-figma .cf-empty__symbol{border:1px solid #57404a;background:#4a2434;color:#f4b598;border-radius:50%;width:72px;height:72px;display:grid;place-items:center;font-size:35px;}
+.page-confessions-figma .cf-empty h2{font:400 28px/1.2 Lora,Georgia,serif;margin:0;color:#f8ede2;}
+.page-confessions-figma .cf-empty p{color:#c8b4b9;font:400 14px/1.6 Inter,Arial,sans-serif;margin:0;max-width:440px;}
+.page-confessions-figma .cf-empty button{border:1px solid #57404a;border-radius:100px;padding:11px 16px;background:#4a2434;color:#f4b598;font-weight:600;}
+.page-confessions-figma .cf-feed-end{text-align:center;padding:24px 0 6px;}
+.page-confessions-figma .cf-feed-end h2{font:400 21px/1.3 Lora,Georgia,serif;margin:0 0 7px;}
+.page-confessions-figma .cf-feed-end p{font:400 13px/1.55 Inter,Arial,sans-serif;color:#c8b4b9;margin:0;}
+.page-confessions-figma .cf-aside{color:#c8b4b9;font:400 14px/1.55 Inter,Arial,sans-serif;padding-top:6px;}
+.page-confessions-figma .cf-aside h2{color:#f8ede2;font:400 25px/1.2 Lora,Georgia,serif;margin:0 0 14px;}
+.page-confessions-figma .cf-aside p{margin:0 0 15px;}
+.page-confessions-figma .cf-aside a{color:#f4b598;font-weight:500;}
+.page-confessions-figma .cf-beta{background:#3b2931;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;color:#c8b4b9;font:400 12px/1.55 Inter,Arial,sans-serif;}
+.page-confessions-figma .cf-beta strong{background:#4a2434;color:#f4b598;border-radius:5px;padding:4px 8px;font-size:10px;flex:0 0 auto;}
+.page-confessions-figma .cf-pagination{display:flex;align-items:center;justify-content:center;gap:16px;color:#c8b4b9;font-size:13px;}
+.page-confessions-figma .cf-pagination a{color:#f4b598;border:1px solid #57404a;border-radius:10px;padding:8px 14px;text-decoration:none;}
+.page-confessions-figma .cf-footer a{color:#f4b598;}
+.page-confessions-figma .cf-modal[hidden]{display:none!important;}
+.page-confessions-figma .cf-modal{position:fixed;z-index:160;inset:0;overflow-y:auto;padding:24px;display:grid;place-items:center;background:rgba(13,6,11,.82);backdrop-filter:blur(6px);}
+.page-confessions-figma .cf-composer{width:min(100%,540px);max-height:calc(100dvh - 48px);overflow-y:auto;border:1px solid #8e6572;background:#302128;border-radius:20px;padding:26px;box-shadow:0 24px 70px #0009;}
+.page-confessions-figma .cf-composer__top{display:flex;align-items:start;justify-content:space-between;gap:16px;}
+.page-confessions-figma .cf-composer h2{font:400 30px/1.18 Lora,Georgia,serif;margin:0 0 10px;color:#f8ede2;}
+.page-confessions-figma .cf-composer p{font:400 13px/1.55 Inter,Arial,sans-serif;color:#c8b4b9;margin:0 0 20px;}
+.page-confessions-figma .cf-composer__close{border:1px solid #57404a;background:#4a2434;color:#f8ede2;width:38px;height:38px;flex:0 0 38px;border-radius:50%;font-size:24px;line-height:1;}
+.page-confessions-figma .cf-composer label{display:block;color:#f8ede2;font-size:13px;font-weight:600;margin-bottom:8px;}
+.page-confessions-figma .cf-composer textarea{display:block;width:100%;min-height:180px;resize:vertical;background:#21151a;color:#f8ede2;border:1px solid #57404a;border-radius:14px;padding:15px;font:400 15px/1.55 Inter,Arial,sans-serif;}
+.page-confessions-figma .cf-composer textarea:focus{outline:2px solid #f4b598;outline-offset:2px;}
+.page-confessions-figma .cf-composer__help{font-size:12px!important;margin:7px 0 20px!important;}
+.page-confessions-figma .cf-composer__actions{display:flex;justify-content:flex-end;gap:10px;}
+.page-confessions-figma .cf-composer__actions button{min-height:45px;border-radius:10px;padding:10px 16px;font-weight:600;font-size:13px;}
+.page-confessions-figma .cf-composer__cancel{color:#f8ede2;background:#3b2931;border:1px solid #57404a;}
+.page-confessions-figma .cf-composer__submit{color:#361d27;background:#f4b598;border:0;}
+.page-confessions-figma .cf-flash{margin:0;}
+@media(max-width:1100px) and (min-width:701px){
+ .page-confessions-figma .cf-main{padding:38px 40px 48px;}
+ .page-confessions-figma .cf-layout{grid-template-columns:minmax(0,1.7fr) minmax(230px,1fr);gap:24px;}
+ .page-confessions-figma .cf-intro h1{font-size:46px;}
+}
+@media(max-width:700px){
+ .page-confessions-figma{padding-bottom:0;}
+ .page-confessions-figma .site-header{height:75px;}
+ .page-confessions-figma .cf-main{padding:24px 24px 38px;gap:22px;}
+ .page-confessions-figma .cf-intro{display:block;}
+ .page-confessions-figma .cf-intro h1{font-size:40px;}
+ .page-confessions-figma .cf-intro__copy>p:last-child{font-size:16px;}
+ .page-confessions-figma .cf-post-button{position:fixed;z-index:55;right:22px;bottom:110px;width:58px;height:58px;padding:0;border-radius:50%;box-shadow:0 10px 30px #0008;}
+ .page-confessions-figma .cf-post-button__label{display:none;}
+ .page-confessions-figma .cf-post-button__plus{font-size:32px;}
+ .page-confessions-figma .cf-layout{display:flex;flex-direction:column;gap:18px;}
+ .page-confessions-figma .cf-feed{width:100%;gap:20px;}
+ .page-confessions-figma .cf-toolbar{border:0;background:transparent;padding:0;min-height:45px;}
+ .page-confessions-figma .cf-post-count{display:none;}
+ .page-confessions-figma .cf-guidance{display:flex;flex-direction:row;gap:12px;border-radius:16px;padding:14px;}
+ .page-confessions-figma .cf-guidance::before{content:'✧';flex:0 0 26px;color:#f4b598;font-size:25px;}
+ .page-confessions-figma .cf-guidance h2{font:600 13px/1.5 Inter,Arial,sans-serif;}
+ .page-confessions-figma .cf-guidance p{font-size:12px;}
+ .page-confessions-figma .cf-card{padding:16px;background:#f8ede2;border:1px solid #f4b598;border-radius:18px 18px 18px 6px;gap:14px;}
+ .page-confessions-figma .cf-card__author strong{color:#361d27;}
+ .page-confessions-figma .cf-card__author time{color:#6b4b56;}
+ .page-confessions-figma .cf-bubble{padding:0;background:transparent;border:0;border-radius:0;}
+ .page-confessions-figma .cf-bubble__body{font-size:27px;margin:0 0 14px;}
+ .page-confessions-figma .cf-bubble__links a,.page-confessions-figma .cf-bubble__soon{background:#302128;color:#c8b4b9;border:1px solid #57404a;border-radius:50px;padding:7px 10px;min-height:34px;}
+ .page-confessions-figma .cf-bubble__actions{font-size:11px;}
+ .page-confessions-figma .cf-aside{display:none;}
+ .page-confessions-figma .cf-empty{padding:30px 18px;}
+ .page-confessions-figma .cf-beta{align-items:start;}
+ .page-confessions-figma .cf-footer{padding:18px 24px max(115px,calc(105px + env(safe-area-inset-bottom,0px)));display:block;font-size:11px;}
+ .page-confessions-figma .cf-footer .links{display:block;margin-top:6px;}
+ .page-confessions-figma .cf-modal{padding:16px;}
+ .page-confessions-figma .cf-composer{padding:20px;}
+ .page-confessions-figma .notification-panel{position:fixed;top:77px;right:14px;width:calc(100vw - 28px);}
+}
+@media(max-width:375px){
+ .page-confessions-figma .cf-main{padding-left:16px;padding-right:16px;}
+ .page-confessions-figma .cf-intro h1{font-size:36px;}
+ .page-confessions-figma .cf-tabs{gap:2px;}
+ .page-confessions-figma .cf-tab{padding-left:15px;padding-right:15px;}
+ .page-confessions-figma .cf-bubble__body{font-size:24px;}
+}
+@media(prefers-reduced-motion:reduce){.page-confessions-figma *{scroll-behavior:auto!important;transition:none!important;}}
