@@ -24,3 +24,23 @@ For a meaningful comparison with the source Figma frames, use **1280px viewport 
 The site has not been verified against a browser screenshot **after these changes**. Pixel-level visual differences may remain, and Figma's desktop/mobile mockups intentionally show different sample prompts. The PHP application (`../discover.php`) is still an earlier integration version and has **not** been updated with this complete HTML structure.
 
 The live hosted site and Kyle's email-verification backend remain untouched. Before connecting real users, resolve the repository's incompatible base SQL schemas and test age eligibility, identity verification, matching and message consent. Do not run `database/bushisa.sql` on an existing populated database without a backup: it includes `DROP TABLE` commands.
+
+
+## Automatic-scroll milestone (development branch)
+
+The real PHP Home route `../discover.php` now initially renders **six** eligible database profiles, then requests further groups of six automatically from `../api/discovery_feed.php` when the end of the list approaches. The API uses a stable, ascending user-ID cursor and rechecks the user's server-side discovery preferences and exclusions on every request. The browser appends cards with `../js/discovery_feed.js`, and Like/Pass interactions on new cards are handled by `../js/app.js`. No Show More button is used.
+
+To **see the interaction without a database or login**, open:
+
+`http://localhost/Bushisa-Figma/preview/home.html?scrollDemo=1`
+
+That optional demo shows the three exact original Figma concept profiles first, then loads clearly labelled fictional placeholders in batches of six on scroll, using the existing card geometry. It is not a real account list. The plain `preview/home.html` remains the unchanged Figma composition.
+
+The original design has its own Desktop (1280px) and Mobile (390px) frames. Use Chrome's device toolbar at those widths when comparing.
+
+### Before live deployment
+
+- Confirm the local database schema matches the selected source schema; don't import destructive SQL over real data.
+- Exercise pagination with more than six eligible test accounts, excluded matches/blocks/swipes, plus the last page and failed requests.
+- Confirm local login sessions and age eligibility, then integrate Kyle's newer verification code; that integration is out of scope here.
+- The PHP Home page is still an earlier Figma visual integration. This milestone adds real scrolling without claiming that the whole PHP screen is pixel-identical to the static design preview.
