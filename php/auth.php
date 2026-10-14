@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/confessions_identity.php';
+
 /**
  * Attempt to authenticate a user by email and password.
  *
@@ -96,7 +98,7 @@ function register_user(PDO $pdo, array $data): array
     $email = clean_email((string) ($data['email'] ?? ''));
     $password = (string) ($data['password'] ?? '');
     $displayName = trim(str_replace("\0", '', (string) ($data['display_name'] ?? '')));
-    $anonHandle = ltrim(trim(str_replace("\0", '', (string) ($data['anon_handle'] ?? ''))), '@');
+    $anonHandle = bushisa_clean_confessions_handle((string) ($data['anon_handle'] ?? ''));
     $gender = strtolower(trim(str_replace("\0", '', (string) ($data['gender'] ?? ''))));
     $faculty = trim(str_replace("\0", '', (string) ($data['faculty'] ?? '')));
     $yearOfStudy = trim(str_replace("\0", '', (string) ($data['year_of_study'] ?? '')));
@@ -142,20 +144,16 @@ function register_user(PDO $pdo, array $data): array
         ];
     }
 
-    if ($anonHandle === '' || !preg_match('/^[A-Za-z0-9_.-]{3,50}$/', $anonHandle)) {
+    if (($handleError = bushisa_validate_confessions_handle($anonHandle)) !== null) {
         return [
             'success' => false,
-            'error' => 'Please choose a valid anonymous handle.',
+            'error' => $handleError,
             'message' => null,
             'redirect' => null,
         ];
     }
 
-    // Reject handles that expose the public profile name, including versions
-    // separated by underscores, hyphens, spaces or dots.
-    $normalisedHandle = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $anonHandle));
-    $normalisedPublicName = strtolower((string) preg_replace('/[^A-Za-z0-9]/', '', $displayName));
-    if ($normalisedPublicName !== '' && $normalisedHandle === $normalisedPublicName) {
+    if (bushisa_confessions_handle_matches_public($anonHandle, $displayName)) {
         return [
             'success' => false,
             'error' => 'Choose a Confessions username that is different from your public display name.',
@@ -288,7 +286,9 @@ function register_user(PDO $pdo, array $data): array
 
         return [
             'success' => false,
-            'error' => 'Registration failed. Please try again.',
+            'error' => (string) $exception->getCode() === '23000'
+                ? 'That username or student account is already in use. Choose another.'
+                : 'Registration failed. Please try again.',
             'message' => null,
             'redirect' => null,
         ];
