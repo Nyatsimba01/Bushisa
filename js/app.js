@@ -421,7 +421,7 @@
 
       const targetId = button.dataset.swipeTarget ?? '';
       const direction = button.dataset.swipeDirection ?? '';
-      if (!/^\\d+$/.test(targetId) || !['like', 'pass'].includes(direction)) {
+      if (!/^[0-9]+$/.test(targetId) || !['like', 'pass'].includes(direction)) {
         return;
       }
 
