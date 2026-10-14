@@ -186,3 +186,87 @@
 @media(prefers-reduced-motion:reduce) {
  .page-you-figma *{transition:none!important;scroll-behavior:auto!important;}
 }
+
+
+/* Mobile refinement pass: preserve Figma's hierarchy and floating dock.
+   Source: visual review at 400px and intended full-height phone viewport. */
+.page-you-figma .you-privacy-row--unavailable { cursor: default; }
+.page-you-figma .you-privacy-row--unavailable .you-privacy-icon { opacity: .55; }
+.page-you-figma .you-feature-status {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 5px 8px;
+  border: 1px solid #57404a;
+  border-radius: 18px;
+  background: #302128;
+  color: #d7bac3;
+  font: 500 11px/1.3 Inter, Arial, sans-serif;
+  white-space: nowrap;
+}
+.page-you-figma .you-photo-slot--unavailable {
+  cursor: default;
+  opacity: .65;
+}
+.page-you-figma .you-photo-slot--unavailable .you-photo-plus {
+  font-size: 20px;
+  color: #a88e96;
+}
+.page-you-figma .you-photo-slot--unavailable > span:last-child {
+  font-size: 11px;
+  color: #c8b4b9;
+}
+@media (max-width: 760px) {
+  /* Keep focused form controls and anchor targets above the dock. */
+  html { scroll-padding-bottom: 135px; }
+  .page-you-figma .you-main {
+    gap: 26px;
+    padding-bottom: max(170px, calc(130px + env(safe-area-inset-bottom, 0px)));
+  }
+  .page-you-figma .you-intro { gap: 8px; }
+  .page-you-figma .you-intro h1 { font-size: clamp(35px, 9.4vw, 40px); }
+  .page-you-figma .you-editor-card { padding: 20px; }
+  .page-you-figma .you-card-heading { margin-bottom: 18px; }
+  .page-you-figma .you-identity { gap: 12px; }
+  .page-you-figma .you-avatar { width: 56px; height: 56px; flex-basis: 56px; }
+  .page-you-figma .you-identity h2 {
+    font-size: clamp(20px, 5.2vw, 24px);
+    line-height: 1.2;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  .page-you-figma .you-main-form,
+  .page-you-figma .you-personality-form,
+  .page-you-figma .you-preferences-form { gap: 17px; }
+  .page-you-figma .you-personality-form { margin-top: 20px; padding-top: 20px; }
+  .page-you-figma .you-form-section { gap: 10px; }
+  .page-you-figma .you-checklist { gap: 15px; padding: 22px; }
+  .page-you-figma .you-photo-slot { height: 98px; }
+  .page-you-figma .you-field,
+  .page-you-figma .you-save-button,
+  .page-you-figma .you-settings-expander,
+  .page-you-figma .you-task a {
+    scroll-margin-bottom: 130px;
+    scroll-margin-top: 90px;
+  }
+  .page-you-figma .you-privacy-row--unavailable { align-items: flex-start; }
+  .page-you-figma .you-feature-status {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+@media (max-width: 760px) and (max-height: 600px) {
+  /* Chrome's 400×464 test is unusually short; give editing room. */
+  .page-you-figma .bottom-nav {
+    height: 64px;
+    padding: 5px 9px;
+    bottom: 8px;
+  }
+  .page-you-figma .bottom-nav a { gap: 2px; }
+  .page-you-figma .bottom-nav img { width: 19px; height: 19px; }
+}
+@media (max-width: 380px) {
+  .page-you-figma .you-editor-card { padding: 17px; }
+  .page-you-figma .you-photo-slot { height: 92px; }
+  .page-you-figma .you-checklist { padding: 18px; }
+  .page-you-figma .you-feature-status { white-space: normal; max-width: 70px; text-align: center; }
+}
