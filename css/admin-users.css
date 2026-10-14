@@ -1,0 +1,397 @@
+/* Bushisa Users Management
+   Editable Figma desktop 83:18 and user-adjusted mobile 85:34.
+   Uses the same tokens and base sidebar as css/admin-dashboard.css.
+   Restricted to body.bushisa-admin-users. */
+
+body.bushisa-admin-users{background:#21151a;color:#f8ede2}
+.bushisa-admin-users .admin-users-main{
+  position:relative;min-height:100dvh;max-width:1400px;
+  background-image:url("../assets/admin/users-desktop-halo-top.svg"),
+    url("../assets/admin/users-desktop-halo-bottom.svg");
+  background-repeat:no-repeat,no-repeat;
+  background-position:right top,left bottom;
+  background-size:264px 155px,169px 305px;
+}
+.bushisa-admin-users .admin-users-header{position:relative;z-index:1}
+.bushisa-admin-users .admin-users-header h1{font-size:39px}
+.bushisa-admin-users .admin-users-mobile-top,.bushisa-admin-users .admin-users-bottom-nav{display:none}
+
+/* Frosted panes are under the readable foreground copy, not over it. */
+.bushisa-admin-users .admin-users-notice,.bushisa-admin-users .admin-users-filters{
+  position:relative;z-index:1;isolation:isolate;
+  background:rgba(59,41,49,.76);
+  border:1px solid rgba(144,104,120,.72);
+  border-radius:15px;
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+}
+.bushisa-admin-users .admin-users-notice{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  min-height:69px;margin-top:18px;padding:12px 22px;
+}
+.bushisa-admin-users .admin-users-notice:before{
+  content:"";position:absolute;top:11px;left:0;height:calc(100% - 22px);
+  width:3px;background:#f4b598;border-radius:2px;
+}
+.bushisa-admin-users .admin-users-notice__copy p{margin-top:7px;font-size:14px;line-height:1.5;color:#f8ede2}
+.bushisa-admin-users .admin-users-note-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:none;min-width:218px;min-height:32px;
+  border:1px solid #6b4d5b;border-radius:50px;background:rgba(41,28,37,.86);
+  padding:6px 17px;color:#e0b2c1;font-size:10px;font-weight:650;
+}
+.bushisa-admin-users .admin-users-metrics{position:relative;z-index:1;margin-top:20px}
+.bushisa-admin-users .admin-users-filters{margin-top:24px;padding:13px 20px 20px}
+.bushisa-admin-users .admin-users-filters__title{display:block;margin:0 0 16px;letter-spacing:.05em}
+.bushisa-admin-users .admin-users-filters__fields{
+  display:grid;grid-template-columns:minmax(220px,400fr) minmax(105px,156fr)
+    minmax(110px,159fr) minmax(85px,131fr) minmax(140px,155fr);
+  gap:14px;align-items:center;
+}
+.bushisa-admin-users .admin-users-search-wrap{position:relative;min-width:0}
+.bushisa-admin-users .admin-users-search-wrap input,
+.bushisa-admin-users .admin-users-select select{
+  display:block;box-sizing:border-box;width:100%;height:45px;min-height:45px;
+  border:1px solid #57404a;border-radius:10px;
+  background:#291c25;color:#f8ede2;
+  font:500 12px/1.35 Inter,Arial,sans-serif;
+  outline:none;
+}
+.bushisa-admin-users .admin-users-search-wrap input{padding:0 14px 0 45px}
+.bushisa-admin-users .admin-users-search-wrap input::placeholder{color:#9f8a93;opacity:1}
+.bushisa-admin-users :is(input,select):focus-visible{
+  outline:2px solid #f4b598;outline-offset:2px;
+}
+.bushisa-admin-users .admin-users-search-button{
+  position:absolute;z-index:2;left:7px;top:5px;
+  display:grid;place-items:center;width:35px;height:35px;padding:0;
+  color:#f4b598;background:transparent;border:0;border-radius:8px;cursor:pointer;
+  font:400 24px/1 Georgia,serif;
+}
+.bushisa-admin-users .admin-users-search-button:hover{background:#3d2733}
+.bushisa-admin-users .admin-users-select{position:relative;min-width:0}
+.bushisa-admin-users .admin-users-select select{
+  -webkit-appearance:none;appearance:none;
+  padding:0 28px 0 12px;cursor:pointer;
+}
+.bushisa-admin-users .admin-users-select:after{
+  content:"⌄";position:absolute;right:12px;top:11px;
+  font-size:15px;color:#f4b598;pointer-events:none;
+}
+.bushisa-admin-users .admin-users-export{
+  display:flex;justify-content:center;align-items:center;gap:12px;
+  min-width:0;min-height:45px;padding:10px 8px;
+  color:#21151a!important;background:#f4b598;border-radius:10px;
+  font-size:12px;font-weight:750;white-space:nowrap;
+}
+.bushisa-admin-users .admin-users-export:hover{background:#ffd0b8;color:#21151a!important}
+.bushisa-admin-users .admin-users-filter-help{display:none}
+.bushisa-admin-users .admin-users-sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.bushisa-admin-users .admin-users-directory{
+  position:relative;z-index:1;margin-top:24px;
+  padding:20px 22px 14px;min-width:0;
+  background:#302128;border:1px solid #57404a;border-radius:16px;
+}
+.bushisa-admin-users .admin-users-directory__heading{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:15px;padding-bottom:24px;border-bottom:1px solid #57404a;
+}
+.bushisa-admin-users .admin-users-directory__heading h2{
+  margin-top:9px;font:500 23px/1.3 Lora,Georgia,serif;letter-spacing:-.02em;
+}
+.bushisa-admin-users .admin-users-directory__count{
+  display:inline-flex;justify-content:center;align-items:center;
+  padding:8px 15px;min-width:150px;min-height:33px;
+  background:#3b2931;border:1px solid #705161;border-radius:20px;
+  color:#e0b2c1;font-size:10px;font-weight:650;
+}
+.bushisa-admin-users .admin-users-table-wrap{overflow-x:auto}
+.bushisa-admin-users .admin-users-table{
+  width:100%;border-spacing:0;border-collapse:collapse;table-layout:fixed;
+  font:400 12px/1.4 Inter,Arial,sans-serif;color:#c8b4b9;
+}
+.bushisa-admin-users .admin-users-table th{
+  height:43px;padding:10px 7px;text-align:left;
+  font-size:10px;font-weight:700;color:#9f8a93;
+  white-space:nowrap;border-bottom:1px solid #57404a;
+}
+.bushisa-admin-users .admin-users-table td{
+  height:64px;padding:8px 7px;border-bottom:1px solid rgba(87,64,74,.55);
+  text-align:left;vertical-align:middle;
+}
+.bushisa-admin-users .admin-users-table tbody tr:nth-child(even){background:rgba(59,41,49,.16)}
+.bushisa-admin-users .admin-users-table tr>:first-child{width:34.4%}
+.bushisa-admin-users .admin-users-table tr>:nth-child(2){width:14%}
+.bushisa-admin-users .admin-users-table tr>:nth-child(3){width:12.2%}
+.bushisa-admin-users .admin-users-table tr>:nth-child(4){width:13.4%}
+.bushisa-admin-users .admin-users-table tr>:nth-child(5){width:13.2%}
+.bushisa-admin-users .admin-users-table tr>:nth-child(6){width:12.8%}
+.bushisa-admin-users .admin-users-identity{display:flex;align-items:center;gap:13px;min-width:0}
+.bushisa-admin-users .admin-users-avatar{
+  display:inline-flex;flex:none;align-items:center;justify-content:center;
+  width:42px;height:42px;background:#4b2b3b;border:1px solid #624757;
+  border-radius:50%;color:#f4b598;font-size:15px;font-weight:650;
+}
+.bushisa-admin-users .admin-users-identity>div{min-width:0}
+.bushisa-admin-users .admin-users-identity strong,
+.bushisa-admin-users .admin-users-mobile-card__identity strong{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  color:#f8ede2;font-size:12px;font-weight:650;white-space:nowrap;
+}
+.bushisa-admin-users .admin-users-identity small,
+.bushisa-admin-users .admin-users-mobile-card__identity small{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  margin-top:3px;color:#9f8a93;font-size:11px;white-space:nowrap;
+}
+.bushisa-admin-users .admin-users-id{font-size:12px;color:#c8b4b9}
+.bushisa-admin-users .admin-users-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:29px;padding:6px 12px;white-space:nowrap;
+  border:1px solid #57404a;border-radius:20px;
+  background:#291c25;color:#c8b4b9;
+  font-size:11px;font-weight:650;
+}
+.bushisa-admin-users .admin-users-badge--role-admin{
+  border-color:#86566c;background:#4a293a;color:#e0b2c1;
+}
+.bushisa-admin-users .admin-users-badge--role-moderator{
+  border-color:#755a80;background:#36293f;color:#dfb8e9;
+}
+.bushisa-admin-users .admin-users-badge--verified-verified,
+.bushisa-admin-users .admin-users-badge--status-active{
+  border-color:#4b745f;background:#253b34;color:#a9d3bc;
+}
+.bushisa-admin-users .admin-users-badge--verified-pending{
+  border-color:#806150;background:#4c372e;color:#f3c5a8;
+}
+.bushisa-admin-users .admin-users-badge--status-suspended{
+  border-color:#9a546c;background:#572e3f;color:#ffbbce;
+}
+.bushisa-admin-users .admin-users-view{
+  display:inline-flex;align-items:center;justify-content:space-between;
+  gap:8px;min-width:99px;min-height:33px;
+  padding:7px 14px;border:1px solid #57404a;border-radius:10px;
+  background:#3b2931;color:#f4b598!important;
+  font-size:12px;font-weight:650;
+}
+.bushisa-admin-users .admin-users-view:hover{background:#4a303d}
+.bushisa-admin-users .admin-users-mobile-cards{display:none}
+.bushisa-admin-users .admin-users-directory__footer{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-top:8px;padding:12px 0 1px;border-top:1px solid #57404a;
+  color:#9f8a93;font-size:11px;
+}
+.bushisa-admin-users .admin-users-pagination{display:flex;align-items:center;gap:13px;white-space:nowrap;color:#f4b598}
+.bushisa-admin-users .admin-users-pagination a{color:#f4b598;font-size:19px}
+.bushisa-admin-users .admin-users-empty{
+  padding:28px 14px;text-align:center;font-size:13px;color:#c8b4b9;
+}
+.bushisa-admin-users .admin-users-empty a{color:#f4b598;text-decoration:underline}
+
+/* Private read-only account summary, opened with a real query parameter. */
+.bushisa-admin-users .admin-users-detail-overlay{
+  position:fixed;z-index:400;inset:0;
+  display:grid;place-items:center;overflow:auto;
+  padding:24px;background:rgba(14,8,13,.79);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.bushisa-admin-users .admin-users-detail{
+  position:relative;width:min(460px,100%);max-height:calc(100dvh - 40px);
+  overflow:auto;padding:34px;
+  background:#302128;border:1px solid #896878;border-radius:19px;
+  box-shadow:0 24px 70px #0d0811aa;
+}
+.bushisa-admin-users .admin-users-detail__close{
+  position:absolute;right:19px;top:13px;
+  font-size:29px;color:#f4b598;line-height:1;
+}
+.bushisa-admin-users .admin-users-detail h2{margin-top:10px;font:500 27px/1.3 Lora,Georgia,serif}
+.bushisa-admin-users .admin-users-detail__subtitle{margin:7px 0 25px!important;font-size:12px;color:#c8b4b9}
+.bushisa-admin-users .admin-users-detail dl{margin:0;border-top:1px solid #57404a}
+.bushisa-admin-users .admin-users-detail dl div{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:13px 0;border-bottom:1px solid #57404a;
+}
+.bushisa-admin-users .admin-users-detail dt{color:#c8b4b9;font-size:12px}
+.bushisa-admin-users .admin-users-detail dd{color:#f8ede2;font-size:13px;font-weight:650;text-align:right}
+.bushisa-admin-users .admin-users-detail__privacy{
+  margin-top:20px!important;font-size:12px;color:#c8b4b9;line-height:1.6;
+}
+.bushisa-admin-users .admin-users-detail__back{
+  display:inline-flex;margin-top:22px;padding:11px 16px;
+  background:#f4b598;border-radius:9px;color:#21151a!important;
+  font-size:12px;font-weight:700;
+}
+
+/* Desktop: retain Figma's 246px sidebar and 4-column account table. */
+@media(max-width:1310px){
+ .bushisa-admin-users .admin-users-filters__fields{gap:9px}
+ .bushisa-admin-users .admin-users-metrics{gap:13px}
+ .bushisa-admin-users .admin-users-filters{padding-left:16px;padding-right:16px}
+ .bushisa-admin-users .admin-users-table td{padding-left:4px;padding-right:4px}
+}
+@media(min-width:751px) and (max-width:1150px){
+ .bushisa-admin-users .admin-users-filters__fields{
+   grid-template-columns:repeat(3,minmax(0,1fr));
+ }
+ .bushisa-admin-users .admin-users-search-wrap{grid-column:span 2}
+ .bushisa-admin-users .admin-users-export{min-width:125px}
+ .bushisa-admin-users .admin-users-table{min-width:790px}
+}
+
+/* The user's updated mobile Figma moves navigation to the BOTTOM.
+   Only this page switches to a mobile bottom dock; desktop remains unchanged. */
+@media(max-width:750px){
+ body.bushisa-admin-users{overflow-x:hidden}
+ .bushisa-admin-users .admin-layout.admin-users-layout{display:block;min-height:100dvh}
+ .bushisa-admin-users .admin-users-layout .admin-sidebar{display:none}
+ .bushisa-admin-users .admin-users-mobile-top{
+   display:flex;justify-content:space-between;align-items:center;
+   height:77px;padding:0 19px;
+   border-bottom:1px solid #57404a;background:#1d1319;
+ }
+ .bushisa-admin-users .admin-users-mobile-brand{
+   display:flex;align-items:center;gap:16px;
+   color:#f8ede2!important;font:500 25px/1 Lora,Georgia,serif;
+ }
+ .bushisa-admin-users .admin-users-mobile-brand>span{
+   font:400 30px/1 Lora,Georgia,serif;color:#f4b598;
+ }
+ .bushisa-admin-users .admin-users-mobile-caption{
+   color:#f4b598;font:650 11px/1.4 Inter,Arial,sans-serif;
+ }
+ .bushisa-admin-users .admin-users-main{
+   width:100%;max-width:500px;margin:0 auto;
+   min-height:calc(100dvh - 77px);
+   padding:28px 16px calc(118px + env(safe-area-inset-bottom,0px));
+   background-image:url("../assets/admin/users-mobile-halo-top.svg"),
+     url("../assets/admin/users-mobile-halo-bottom.svg");
+   background-position:right 0 top 79px,left 0 bottom 16px;
+   background-size:90px 175px,110px 270px;
+ }
+ .bushisa-admin-users .admin-users-header{
+   display:block;padding-bottom:0;border-bottom:0;
+ }
+ .bushisa-admin-users .admin-users-header h1{
+   font-size:29px;margin:12px 0 4px;letter-spacing:-.025em;
+ }
+ .bushisa-admin-users .admin-users-header .admin-eyebrow{font-size:10px}
+ .bushisa-admin-users .admin-users-header .admin-page-header__description{
+   margin-top:10px;font-size:13px;
+ }
+ .bushisa-admin-users .admin-users-header .admin-preview-tag{display:none}
+ .bushisa-admin-users .admin-users-notice{
+   min-height:89px;margin-top:37px;padding:12px 15px;
+ }
+ .bushisa-admin-users .admin-users-notice:before{height:calc(100% - 22px)}
+ .bushisa-admin-users .admin-users-notice__copy p{
+   margin-top:8px;font-size:12px;max-width:340px;line-height:1.5;
+ }
+ .bushisa-admin-users .admin-users-note-chip{display:none}
+ .bushisa-admin-users .admin-users-metrics{
+   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+   margin-top:17px;gap:10px;
+ }
+ .bushisa-admin-users .admin-users-metrics .admin-metric{
+   height:108px;min-height:108px;padding:12px 13px;
+   border-radius:13px;
+ }
+ .bushisa-admin-users .admin-users-metrics .admin-metric h2{font-size:11px;white-space:nowrap}
+ .bushisa-admin-users .admin-users-metrics .admin-metric__value{
+   padding-top:5px;font-size:31px;line-height:1.2;
+ }
+ .bushisa-admin-users .admin-users-metrics .admin-metric__note{
+   padding-top:6px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ }
+ .bushisa-admin-users .admin-users-filters{
+   margin-top:24px;padding:13px 13px 11px;min-height:168px;
+ }
+ .bushisa-admin-users .admin-users-filters__title{margin-bottom:14px}
+ .bushisa-admin-users .admin-users-filters__fields{
+   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 10px;
+ }
+ .bushisa-admin-users .admin-users-search-wrap{grid-column:1 / -1}
+ .bushisa-admin-users .admin-users-select--verification,
+ .bushisa-admin-users .admin-users-export{display:none}
+ .bushisa-admin-users .admin-users-filter-help{display:block;margin-top:5px!important;font-size:10px;color:#9f8a93}
+ .bushisa-admin-users .admin-users-directory{
+   margin-top:25px;padding:0;background:transparent;border:0;
+ }
+ .bushisa-admin-users .admin-users-directory__heading{display:block;padding:0 3px 17px;border:0}
+ .bushisa-admin-users .admin-users-directory__heading h2{font-size:23px;margin-top:5px}
+ .bushisa-admin-users .admin-users-directory__count{display:none}
+ .bushisa-admin-users .admin-users-table-wrap{display:none}
+ .bushisa-admin-users .admin-users-mobile-cards{
+   display:flex;flex-direction:column;gap:12px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card{
+   padding:15px 13px 17px;min-height:132px;
+   border:1px solid #57404a;border-radius:14px;background:#302128;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__top{
+   display:flex;align-items:flex-start;gap:12px;
+   min-height:61px;border-bottom:1px solid #57404a;
+ }
+ .bushisa-admin-users .admin-users-mobile-card .admin-users-avatar{
+   width:41px;height:41px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__identity{
+   flex:1;min-width:0;padding-top:3px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__identity strong{font-size:12px}
+ .bushisa-admin-users .admin-users-mobile-card__identity small{font-size:10px}
+ .bushisa-admin-users .admin-users-mobile-card__top .admin-users-badge{
+   min-width:75px;min-height:29px;padding:5px 10px;
+   font-size:10px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__bottom{
+   display:grid;grid-template-columns:auto auto minmax(0,1fr);
+   align-items:center;gap:7px;padding-top:14px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__bottom .admin-users-badge{
+   min-height:30px;padding:5px 10px;font-size:10px;
+ }
+ .bushisa-admin-users .admin-users-mobile-card__bottom .admin-users-view{
+   justify-self:end;min-width:0;white-space:nowrap;
+   padding:6px 10px;min-height:32px;font-size:10px;
+ }
+ .bushisa-admin-users .admin-users-directory__footer{
+   margin-top:8px;padding:14px 2px 0;
+   font-size:10px;line-height:1.5;
+ }
+ .bushisa-admin-users .admin-users-bottom-nav{
+   position:fixed;z-index:100;bottom:max(10px,env(safe-area-inset-bottom,0px));
+   left:50%;transform:translateX(-50%);
+   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+   gap:3px;width:min(364px,calc(100% - 26px));
+   min-height:46px;padding:5px;
+   background:rgba(59,41,49,.94);
+   border:1px solid #57404a;border-radius:11px;
+   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+   box-shadow:0 10px 30px rgba(18,9,15,.42);
+ }
+ .bushisa-admin-users .admin-users-bottom-nav a{
+   display:flex;align-items:center;justify-content:center;min-width:0;
+   min-height:34px;padding:7px 2px;
+   border:1px solid transparent;border-radius:9px;
+   color:#c8b4b9;font-size:11px;font-weight:500;
+ }
+ .bushisa-admin-users .admin-users-bottom-nav a.is-current{
+   background:#684151;border-color:#93657a;color:#f8ede2;font-weight:700;
+ }
+ .bushisa-admin-users .admin-users-detail{padding:27px 22px}
+}
+@media(max-width:365px){
+ .bushisa-admin-users .admin-users-main{padding-left:12px;padding-right:12px}
+ .bushisa-admin-users .admin-users-mobile-card{padding-left:11px;padding-right:11px}
+ .bushisa-admin-users .admin-users-mobile-card__top{gap:8px}
+ .bushisa-admin-users .admin-users-mobile-card__bottom{gap:5px}
+ .bushisa-admin-users .admin-users-mobile-card__bottom .admin-users-badge{padding:5px 7px}
+ .bushisa-admin-users .admin-users-mobile-card__bottom .admin-users-view{padding:6px 7px;font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .bushisa-admin-users .admin-users-bottom-nav{scroll-behavior:auto}
+}
