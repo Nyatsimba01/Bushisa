@@ -1159,3 +1159,31 @@ button:disabled {
   font-size: 13px;
 }
 .page-home .home-discovery-end a { color: #f4b598; font-size: 13px; }
+
+
+/* Optional, accessible emoji choices for the separate Confessions identity.
+   Works on both Join and You without altering either page's Figma layout. */
+.anon-emoji-picker {
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:3px 0 0;
+}
+.anon-emoji-picker > span {
+  font:500 12px/1.4 Inter,Arial,sans-serif;
+  color:#c8b4b9;
+  margin-right:3px;
+}
+.anon-emoji-picker > button {
+  box-sizing:border-box;
+  display:inline-grid;place-items:center;
+  min-width:37px;height:37px;padding:3px;
+  border:1px solid #57404a;border-radius:11px;
+  background:#3b2931;color:#f8ede2;
+  font:400 19px/1 system-ui,sans-serif;
+  cursor:pointer;transition:background .14s ease,border-color .14s ease;
+}
+.anon-emoji-picker > button:hover {
+  background:#4a2434;border-color:#f4b598;
+}
+.anon-emoji-picker > button:focus-visible {
+  outline:2px solid #f4b598;outline-offset:2px;
+}
