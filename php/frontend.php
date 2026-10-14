@@ -88,6 +88,8 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <link rel="stylesheet" href="<?= e(asset_path('css/style.css')) ?>">
     <?php if (current_page_name() === 'discover.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('css/home-discovery-cards.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
+        <link rel="stylesheet" href="<?= e(asset_path('css/home-real.css')) ?>">
     <?php endif; ?>
 </head>
 <?php
