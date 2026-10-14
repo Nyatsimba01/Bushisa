@@ -561,5 +561,6 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 </nav>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
 <script src="<?= e(asset_path('js/find-match.js')) ?>"></script>
+<script src="<?= e(asset_path('js/find-match-delight.js')) ?>"></script>
 </body>
 </html>
