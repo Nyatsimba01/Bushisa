@@ -1,0 +1,77 @@
+/*
+ * Bushisa Figma reference alignment — desktop and mobile.
+ * Original source frames:
+ * Home 4:2737 / 4:3145
+ * Find Match 4:2906 / 4:3310
+ * Confessions 4:2828 / 4:3234
+ * You 4:3002 / 4:3400
+ *
+ * This stylesheet is deliberately last. Preserve the PHP-rendered data,
+ * accessibility states, and newer Find Match map/questionnaire features.
+ * It is a design-token / fine alignment pass, not a pixel-diff certification.
+ */
+:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) {
+  --bg: #21151a;
+  --raised: #302128;
+  --pane: #3b2931;
+  --warm: #4a2434;
+  --line: #57404a;
+  --cream: #f8ede2;
+  --muted: #c8b4b9;
+  --peach: #f4b598;
+  --chip: #e4c5b5;
+  background-color: #21151a;
+  color: #f8ede2;
+}
+:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) :is(.brand-title,h1,h2,h3) {
+  text-rendering: optimizeLegibility;
+}
+:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) .site-header {
+  border-bottom: 1px solid #57404a;
+}
+:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) :is(.desktop-nav a,.bottom-nav a) {
+  -webkit-tap-highlight-color: transparent;
+}
+:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) :is(button,a,input,select,textarea):focus-visible {
+  outline: 2px solid #f4b598;
+  outline-offset: 3px;
+}
+/* In the Figma You desktop frame, Save profile is a compact
+   right-aligned peach action rather than a full-width banner. */
+@media (min-width: 761px) {
+  .page-you-figma .you-editor-card :is(.you-main-form,.you-personality-form) > .you-save-button {
+    align-self: flex-end;
+    min-width: 158px;
+    max-width: 100%;
+    background: #f4b598;
+  }
+}
+@media (max-width: 760px) {
+  /* Each mobile Figma frame has a 76px top header. */
+  :is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) .site-header {
+    height: 76px;
+  }
+  .page-you-figma .you-editor-card :is(.you-main-form,.you-personality-form) > .you-save-button {
+    align-self: stretch;
+    width: 100%;
+    background: #f4b598;
+  }
+}
+/* Desktop Confessions displays the moderation/reporting guidance in
+   the right column; mobile uses the compact mentions-first callout. */
+.page-confessions-figma .cf-guidance__mobile {
+  display: none;
+}
+@media (max-width: 700px) {
+  .page-confessions-figma .cf-guidance__desktop {
+    display: none;
+  }
+  .page-confessions-figma .cf-guidance__mobile {
+    display: block;
+  }
+  .page-confessions-figma .cf-guidance::before {
+    content: '✎';
+    font-size: 26px;
+    line-height: 1.2;
+  }
+}
