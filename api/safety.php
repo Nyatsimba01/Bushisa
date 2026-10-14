@@ -11,6 +11,7 @@ require_once __DIR__ . '/../php/db.php';
 require_once __DIR__ . '/../php/logger.php';
 require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/operational.php';
+require_once __DIR__ . '/../php/confession_reports.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['error' => 'Method not allowed'], 405);
@@ -94,7 +95,7 @@ if ($action === 'report') {
     $targetId = clean_int($payload['target_id'] ?? null);
     $reportedUserId = clean_int($payload['reported_user_id'] ?? null);
     $reason = isset($payload['reason']) && is_string($payload['reason']) ? clean($payload['reason']) : '';
-    $allowedReasons = ['harassment', 'hate_speech', 'explicit_content', 'spam', 'catfish_impersonation', 'other'];
+    $allowedReasons = ['harassment', 'hate_speech', 'private_information', 'explicit_content', 'spam', 'catfish_impersonation', 'other'];
 
     if ($targetType === null || $targetId === null || $targetId <= 0 || $reason === '') {
         json_response(['error' => 'Invalid report'], 400);
@@ -102,6 +103,17 @@ if ($action === 'report') {
 
     if (!in_array($reason, $allowedReasons, true)) {
         json_response(['error' => 'Invalid report reason'], 400);
+    }
+
+    if ($targetType === 'confession') {
+        // Resolve its author from the database, never the client-supplied ID.
+        // Use the same duplicate, self-report and rate-limit rules as the page.
+        $details = isset($payload['details']) && is_string($payload['details']) ? $payload['details'] : '';
+        $result = bushisa_report_confession($pdo, $currentUserId, $targetId, $reason, $details);
+        if (!$result['success']) {
+            json_response(['error' => $result['error']], 400);
+        }
+        json_response(['success' => true, 'data' => ['status' => 'pending']]);
     }
 
     if ($targetType === 'user') {
