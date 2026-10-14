@@ -9,6 +9,7 @@ require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/block_handler.php';
+require_once __DIR__ . '/php/discovery_feed.php';
 require_once __DIR__ . '/php/frontend.php';
 
 require_login();
@@ -51,75 +52,9 @@ $matchesStatement->execute([
 ]);
 $establishedMatches = $matchesStatement->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-if ($preferences !== null && isset($preferences['preferred_gender'])) {
-    $preferredGender = (string) $preferences['preferred_gender'];
-    $ageRangeMin = isset($preferences['age_range_min']) ? (int) $preferences['age_range_min'] : 18;
-    $ageRangeMax = isset($preferences['age_range_max']) ? (int) $preferences['age_range_max'] : 30;
-    $preferredFaculty = isset($preferences['preferred_faculty']) ? (string) $preferences['preferred_faculty'] : 'Any';
-    $blockedUserIds = get_blocked_user_ids($pdo, $currentUserId);
-
-    $sql = <<<SQL
-SELECT
-    p.user_id,
-    p.display_name,
-    p.bio,
-    p.gender,
-    p.date_of_birth,
-    p.faculty,
-    p.year_of_study,
-    p.profile_photo_path,
-    TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age
-FROM profiles p
-INNER JOIN users u ON u.id = p.user_id
-WHERE p.user_id <> :exclude_user
-  AND u.is_suspended = 0
-  AND p.gender = :preferred_gender
-  AND p.date_of_birth IS NOT NULL
-  AND TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) BETWEEN :age_min AND :age_max
-  AND NOT EXISTS (
-      SELECT 1
-      FROM swipes s
-      WHERE s.swiper_id = :swiper_user
-        AND s.swiped_id = p.user_id
-  )
-  AND NOT EXISTS (
-      SELECT 1
-      FROM matches m
-      WHERE (m.{$matchUserAColumn} = :match_user_a AND m.{$matchUserBColumn} = p.user_id)
-         OR (m.{$matchUserBColumn} = :match_user_b AND m.{$matchUserAColumn} = p.user_id)
-  )
-SQL;
-
-    $params = [
-        ':exclude_user' => $currentUserId,
-        ':swiper_user' => $currentUserId,
-        ':match_user_a' => $currentUserId,
-        ':match_user_b' => $currentUserId,
-        ':preferred_gender' => $preferredGender,
-        ':age_min' => $ageRangeMin,
-        ':age_max' => $ageRangeMax,
-    ];
-
-    if ($preferredFaculty !== 'Any' && $preferredFaculty !== '') {
-        $sql .= "\n  AND p.faculty = :preferred_faculty";
-        $params[':preferred_faculty'] = $preferredFaculty;
-    }
-
-    if ($blockedUserIds !== []) {
-        $blockedPlaceholders = [];
-        foreach (array_values($blockedUserIds) as $index => $blockedUserId) {
-            $placeholder = ':blocked_' . $index;
-            $blockedPlaceholders[] = $placeholder;
-            $params[$placeholder] = (int) $blockedUserId;
-        }
-        $sql .= "\n  AND p.user_id NOT IN (" . implode(', ', $blockedPlaceholders) . ')';
-    }
-
-    $sql .= "\nORDER BY RAND()\nLIMIT 10";
-    $statement = $pdo->prepare($sql);
-    $statement->execute($params);
-    $candidates = $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
-}
+// Reuse the same eligibility rules for the first six and subsequent batches.
+$discovery = bushisa_discovery_batch($pdo, $currentUserId, $preferences);
+$candidates = $discovery['profiles'];
 
 $currentProfile = get_profile($pdo, $currentUserId);
 $firstName = trim((string) ($currentProfile['display_name'] ?? 'there'));
@@ -169,7 +104,7 @@ render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
             <a class="button-secondary" href="profile.php#preferences">Edit preferences</a>
         </div>
     <?php else: ?>
-        <div class="profile-grid" data-static-discovery>
+        <div class="profile-grid" data-static-discovery data-discovery-grid>
             <?php foreach ($candidates as $candidate): ?>
                 <?php
                 $name = (string) ($candidate['display_name'] ?? 'Student');
@@ -199,9 +134,19 @@ render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
                 </article>
             <?php endforeach; ?>
         </div>
+        <div class="home-discovery-pagination" data-discovery-pagination data-after="<?= e($discovery['next_cursor'] ?? '') ?>" data-has-more="<?= $discovery['has_more'] ? 'true' : 'false' ?>">
+            <p class="home-discovery-loading" data-discovery-loading role="status" hidden>Finding more profiles…</p>
+            <p class="home-discovery-error" data-discovery-error role="alert" hidden>Couldn't load more profiles. Scroll again or <button type="button" data-discovery-retry>retry</button>.</p>
+            <div class="home-discovery-end" data-discovery-end <?= $discovery['has_more'] ? 'hidden' : '' ?>>
+                <h3>You're caught up.</h3>
+                <p>You've seen all eligible profiles for now. You can return to your matches or adjust your preferences.</p>
+                <a href="matches.php">Check your matches →</a>
+            </div>
+            <span class="home-discovery-sentinel" data-discovery-sentinel aria-hidden="true"></span>
+        </div>
     <?php endif; ?>
 </section>
 <section class="home-consent" aria-labelledby="home-consent-title"><h2 id="home-consent-title">A mutual yes. Then a hello.</h2><p>Liking each other creates a mutual match, not permission to message. A conversation starts only after the invitation is accepted.</p><a href="matches.php">Explore Find Match →</a></section>
 <footer class="home-footer">For NUST students · 18+ only · Independent student project <span><a href="community_guidelines.php">Community rules</a> / <a href="privacy_policy.php">Safety &amp; privacy</a></span></footer>
 <?php
-render_page_shell_end();
+render_page_shell_end(['js/discovery_feed.js']);
