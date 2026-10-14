@@ -17,6 +17,8 @@
   const complete = root.querySelector('[data-match-complete]');
   const actions = root.querySelector('[data-match-actions]');
   const labels = ['Your intentions', 'Your vibe', 'Shared interests', 'Preferences'];
+  const optionalKeys = new Set(["connection_pace","hangout_style","sports","sport_style","football_team","music_styles","reading_styles","gaming_styles","creative_styles","outing_styles","planning_style"]);
+  const conditional = Array.from(root.querySelectorAll('[data-conditional]'));
   const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   let step = 0;
   let saving = false;
@@ -25,15 +27,36 @@
     return Array.from(groups[step]?.querySelectorAll('input[data-answer-key]') || []);
   }
 
+  // The optional questions reveal themselves based on earlier choices.
+  // Never make the additional themes compulsory.
+  function updateConditional() {
+    for (const section of conditional) {
+      const choices = (section.dataset.whenValues || '').split('|');
+      const visible = Array.from(root.querySelectorAll('input[data-answer-key]')).some(input =>
+        input.dataset.answerKey === section.dataset.whenKey &&
+        input.checked && choices.includes(input.value) &&
+        !input.closest('[data-conditional][hidden]')
+      );
+      section.hidden = !visible;
+    }
+  }
+
   function readStep() {
     const answers = {};
     const entries = new Map();
     for (const input of activeInputs()) {
-      if (!entries.has(input.dataset.answerKey)) entries.set(input.dataset.answerKey, []);
-      if (input.checked) entries.get(input.dataset.answerKey).push(input.value);
+      const key = input.dataset.answerKey;
+      if (!entries.has(key)) entries.set(key, []);
+      // Hidden branches are sent empty to clear stale answers on the server.
+      if (input.closest('[data-conditional][hidden]')) continue;
+      if (input.type === 'radio' || input.type === 'checkbox') {
+        if (input.checked) entries.get(key).push(input.value);
+      } else if (input.value.trim()) {
+        entries.get(key).push(input.value.trim());
+      }
     }
     for (const [key, values] of entries) {
-      if (!values.length) return null;
+      if (!values.length && !optionalKeys.has(key)) return null;
       answers[key] = values.join(', ');
     }
     return answers;
@@ -47,6 +70,7 @@
 
   function display() {
     groups.forEach((group, i) => { group.hidden = i !== step; });
+    updateConditional();
     if (complete) complete.hidden = true;
     if (actions) actions.hidden = false;
     if (progressLabel) progressLabel.textContent = 'Step ' + (step + 1) + ' of 4 · ' + labels[step];
@@ -71,7 +95,11 @@
     document.querySelector('[data-match-flow-title]')?.scrollIntoView({ behavior: 'auto', block: 'start' });
   }
 
-  groups.forEach(group => group.addEventListener('change', updateSelected));
+  groups.forEach(group => group.addEventListener('change', () => {
+    updateConditional();
+    updateSelected();
+    if (error) error.textContent = '';
+  }));
   back?.addEventListener('click', () => {
     if (saving || step === 0) return;
     step -= 1;
@@ -79,6 +107,7 @@
   });
   next?.addEventListener('click', async () => {
     if (saving) return;
+    updateConditional();
     const answers = readStep();
     if (!answers) {
       if (error) error.textContent = step === 2
