@@ -409,56 +409,54 @@
    * @returns {void}
    */
   const initialiseStaticSwipes = () => {
-    const buttons = Array.from(document.querySelectorAll('[data-swipe-target][data-swipe-direction]'));
-    if (buttons.length === 0) {
-      return;
-    }
-
-    buttons.forEach((button) => {
-      if (!(button instanceof HTMLButtonElement)) {
+    // Event delegation also covers profiles appended by the scroll feed.
+    document.addEventListener('click', async (event) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      const button = event.target.closest('[data-swipe-target][data-swipe-direction]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) {
         return;
       }
 
-      button.addEventListener('click', async () => {
-        const targetId = button.dataset.swipeTarget ?? '';
-        const direction = button.dataset.swipeDirection ?? '';
-        const card = button.closest('[data-candidate-id]');
+      const targetId = button.dataset.swipeTarget ?? '';
+      const direction = button.dataset.swipeDirection ?? '';
+      if (!/^\\d+$/.test(targetId) || !['like', 'pass'].includes(direction)) {
+        return;
+      }
 
-        if (!targetId || !['like', 'pass'].includes(direction)) {
-          return;
+      const card = button.closest('[data-candidate-id]');
+      const buttons = card instanceof HTMLElement
+        ? Array.from(card.querySelectorAll('[data-swipe-target][data-swipe-direction]'))
+        : [button];
+      buttons.forEach((item) => { item.disabled = true; });
+
+      try {
+        const response = await window.fetch('api/swipe.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': readCsrfToken()
+          },
+          body: JSON.stringify({ target_id: targetId, direction })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.error ?? 'Could not save your choice.');
         }
 
-        button.disabled = true;
-
-        try {
-          const response = await window.fetch('api/swipe.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-Token': readCsrfToken()
-            },
-            body: JSON.stringify({
-              target_id: targetId,
-              direction
-            })
-          });
-
-          const payload = await response.json().catch(() => ({}));
-          if (!response.ok) {
-            throw new Error(payload.error ?? 'Could not save your choice.');
-          }
-
-          if (card instanceof HTMLElement) {
-            card.remove();
-          }
-
-          const didMatch = payload.match === true || payload.matched === true;
-          showToast(didMatch ? 'It is a match. Open Find Match to continue carefully.' : 'Choice saved.', didMatch ? 'success' : 'info');
-        } catch (error) {
-          button.disabled = false;
-          showToast(error instanceof Error ? error.message : 'Could not save your choice.', 'error');
+        if (card instanceof HTMLElement) {
+          card.remove();
         }
-      });
+        const didMatch = payload.match === true || payload.matched === true;
+        showToast(
+          didMatch ? 'It is a match. Open Find Match to continue carefully.' : 'Choice saved.',
+          didMatch ? 'success' : 'info'
+        );
+      } catch (error) {
+        buttons.forEach((item) => { item.disabled = false; });
+        showToast(error instanceof Error ? error.message : 'Could not save your choice.', 'error');
+      }
     });
   };
 
