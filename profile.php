@@ -367,6 +367,14 @@ render_document_head('You', $csrfToken, $userId);
                 </form>
             </section>
 
+            <details class="you-settings-expander" id="matching-answers">
+                <summary>Matching preferences <span>Review your questionnaire answers</span></summary>
+                <div class="you-settings-inner">
+                    <p>Your original four-step Find Match answers are saved to your account. You can revisit them whenever your interests or preferences change.</p>
+                    <p><a class="you-save-button" style="display:block;text-align:center;text-decoration:none" href="matches.php?edit=1">Edit my matching answers →</a></p>
+                    <p class="you-muted">After saving, Find Match returns to the campus-area discovery view.</p>
+                </div>
+            </details>
             <details class="you-settings-expander" id="preferences">
                 <summary>Discovery preferences <span>Review or update your filters</span></summary>
                 <div class="you-settings-inner">
