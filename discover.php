@@ -11,6 +11,7 @@ require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/block_handler.php';
 require_once __DIR__ . '/php/discovery_feed.php';
 require_once __DIR__ . '/php/frontend.php';
+require_once __DIR__ . '/php/discovery_cards.php';
 
 require_login();
 
@@ -105,34 +106,7 @@ render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
         </div>
     <?php else: ?>
         <div class="profile-grid" data-static-discovery data-discovery-grid>
-            <?php foreach ($candidates as $candidate): ?>
-                <?php
-                $name = (string) ($candidate['display_name'] ?? 'Student');
-                $age = isset($candidate['age']) ? (int) $candidate['age'] : null;
-                $meta = array_filter([
-                    $age !== null ? $age . ' years old' : null,
-                    $candidate['faculty'] ?? null,
-                    $candidate['year_of_study'] ?? null,
-                ]);
-                ?>
-                <article class="profile-card" data-candidate-id="<?= e($candidate['user_id'] ?? '') ?>">
-                    <div class="profile-card__image">
-                        <?= render_avatar($candidate['profile_photo_path'] ?? null, $name, 'home-photo') ?>
-                        <div class="home-photo-overlay"><h3 class="profile-card__name"><?= e($name) ?><?= $age !== null ? ', ' . e($age) : '' ?></h3><p><?= e((string) ($candidate['faculty'] ?? 'NUST')) ?> · NUST</p></div>
-                    </div>
-                    <div class="profile-card__body">
-                        <div class="home-conversation-prompt">
-                            <p class="home-eyebrow">ABOUT ME</p>
-                            <p class="profile-card__bio"><?= e($candidate['bio'] !== '' ? $candidate['bio'] : 'This student has not added a bio yet.') ?></p>
-                        </div>
-                        <div class="card-actions home-card-actions">
-                            <button class="discover-card__action home-pass" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="pass" aria-label="Pass on <?= e($name) ?>" title="Pass">×</button>
-                            <button class="discover-card__action discover-card__action--like home-like" type="button" data-swipe-target="<?= e($candidate['user_id'] ?? '') ?>" data-swipe-direction="like" aria-label="Like <?= e($name) ?>" title="Like"><span aria-hidden="true">♡</span></button>
-                            <a class="home-report" href="community_guidelines.php">Safety &amp; reporting</a>
-                        </div>
-                    </div>
-                </article>
-            <?php endforeach; ?>
+            <?= bushisa_render_discovery_cards($candidates) ?>
         </div>
         <div class="home-discovery-pagination" data-discovery-pagination data-after="<?= e($discovery['next_cursor'] ?? '') ?>" data-has-more="<?= $discovery['has_more'] ? 'true' : 'false' ?>">
             <p class="home-discovery-loading" data-discovery-loading role="status" hidden>Finding more profiles…</p>
