@@ -33,3 +33,15 @@
 .scroll-demo-sentinel { display: block; height: 2px; }
 .scroll-demo-sentinel[hidden], .scroll-demo-state[hidden], .scroll-demo-cards[hidden], .caught-up[hidden] { display: none !important; }
 @media(max-width:700px) { .scroll-demo-cards { margin-top: 16px; } .scroll-demo-initial { font-size: 48px; } }
+
+
+/* Mobile Home alignment: match the original Figma frame without changing desktop. */
+@media (max-width: 700px) {
+  .chats .section-head { display: block; width: 100%; }
+  .chats .head-with-pill { width: 100%; justify-content: space-between; gap: 12px; }
+  /* The Figma mobile frame shows the request total, not the pending avatars. */
+  .chats-strip .pending-request { display: none; }
+  /* Allow short screens to scroll the avatars without a distracting scrollbar. */
+  .chats-strip { scrollbar-width: none; -ms-overflow-style: none; }
+  .chats-strip::-webkit-scrollbar { display: none; }
+}
