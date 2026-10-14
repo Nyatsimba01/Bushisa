@@ -72,7 +72,7 @@ function attempt_login(PDO $pdo, string $email, string $password, ?string $ident
     clear_attempts($pdo, 'login', $rateLimitKey);
     regenerate_session();
     $_SESSION['user_id'] = (int) $user['id'];
-    $_SESSION['role'] = isset($user['role']) && is_string($user['role']) && $user['role'] !== '' ? $user['role'] : 'user';
+    $_SESSION['role'] = isset($user['role']) && is_string($user['role']) && $user['role'] !== '' ? $user['role'] : 'student';
     $_SESSION['email'] = $user['email'] ?? $email;
 
     log_action($pdo, (int) $user['id'], 'login', $rateLimitKey);
@@ -81,7 +81,9 @@ function attempt_login(PDO $pdo, string $email, string $password, ?string $ident
     return [
         'success' => true,
         'error' => null,
-        'redirect' => 'discover.php',
+        'redirect' => in_array($_SESSION['role'], ['admin', 'moderator'], true)
+            ? 'admin/dashboard.php'
+            : 'discover.php',
     ];
 }
 
