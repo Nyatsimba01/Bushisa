@@ -222,6 +222,20 @@ function ensure_operational_schema(PDO $pdo): void
         if (!operational_column_exists($pdo, 'reports', 'confession_id')) {
             $pdo->exec('ALTER TABLE reports ADD COLUMN confession_id INT UNSIGNED NULL');
         }
+
+        // Older installs made the reported user mandatory. Posts can outlive
+        // deleted accounts, so allow a report with just its confession ID.
+        $reportedUserColumn = $pdo->query('SHOW COLUMNS FROM reports LIKE "reported_user_id"');
+        $reportedUserDefinition = $reportedUserColumn ? $reportedUserColumn->fetch(PDO::FETCH_ASSOC) : false;
+        if (is_array($reportedUserDefinition) && ($reportedUserDefinition['Null'] ?? '') === 'NO') {
+            $pdo->exec('ALTER TABLE reports MODIFY COLUMN reported_user_id INT UNSIGNED NULL');
+        }
+
+        // Keep confession reports quick to find without modifying existing data.
+        $indexStatement = $pdo->query('SHOW INDEX FROM reports WHERE Key_name = "idx_reports_confession_status"');
+        if ($indexStatement && $indexStatement->fetch(PDO::FETCH_ASSOC) === false) {
+            $pdo->exec('ALTER TABLE reports ADD INDEX idx_reports_confession_status (confession_id, status)');
+        }
     }
 
     $ensured = true;
