@@ -256,7 +256,7 @@ render_document_head('You', $csrfToken, $userId);
             <section class="you-editor-card" id="profile-editor" aria-labelledby="you-preview-title">
                 <div class="you-card-heading">
                     <span id="you-preview-title">YOUR PROFILE PREVIEW</span>
-                    <span class="you-draft">Your draft</span>
+                    <span class="you-draft">Draft</span>
                 </div>
                 <div class="you-identity">
                     <?php if ($displayPhotoUrl !== null): ?>
@@ -287,10 +287,10 @@ render_document_head('You', $csrfToken, $userId);
                                 <input type="file" name="profile_photo" accept="image/jpeg,image/png,image/webp" aria-label="Choose a main profile photo">
                             </label>
                             <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Second photo slot, coming soon">
-                                <span class="you-photo-plus" aria-hidden="true">—</span><span>Coming soon</span>
+                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
                             </div>
                             <div class="you-photo-slot you-photo-slot--unavailable" aria-label="Third photo slot, coming soon">
-                                <span class="you-photo-plus" aria-hidden="true">—</span><span>Coming soon</span>
+                                <span class="you-photo-plus" aria-hidden="true">+</span><span>Photo</span>
                             </div>
                         </div>
                         <p class="you-photo-meta"><?= e(number_format((float) $photoBytes / 1048576, 2)) ?> MB used of 5 MB. Main photo <?= $isPhotoSet ? 'added' : 'not added' ?>.</p>
