@@ -320,3 +320,55 @@
   .page-you-figma .you-anon-card{padding:20px;}
   .page-you-figma .you-anon-card h2{font-size:23px;}
 }
+
+
+/* The original You design tucked destructive account actions in a collapsed
+   accordion. Keep them directly visible in Privacy & account, but retain
+   password confirmation on the separate delete-account page. */
+.page-you-figma .you-account-shortcuts {
+  display:flex;flex-direction:column;gap:10px;
+  margin:9px 0 5px;scroll-margin-top:26px;
+}
+.page-you-figma .you-account-link {
+  box-sizing:border-box;display:flex;align-items:center;gap:12px;
+  min-width:0;padding:14px 15px;
+  border:1px solid #66505b;border-radius:15px;
+  background:#302128;color:#f8ede2;
+  text-decoration:none;transition:border-color .2s ease,background .2s ease;
+}
+.page-you-figma .you-account-link:hover {
+  border-color:#f4b598;background:#3b2931;
+}
+.page-you-figma .you-account-link:focus-visible {
+  outline:3px solid #f4b598;outline-offset:2px;
+}
+.page-you-figma .you-account-icon {
+  flex:none;display:grid;place-items:center;
+  width:37px;height:37px;border-radius:12px;
+  background:#4a2434;color:#f4b598;
+  font:600 25px/1 Inter,Arial,sans-serif;
+}
+.page-you-figma .you-account-link-copy {
+  display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;
+}
+.page-you-figma .you-account-link-copy strong {
+  color:#f8ede2;font:650 14px/1.25 Inter,Arial,sans-serif;
+}
+.page-you-figma .you-account-link-copy small {
+  color:#c8b4b9;font:400 11px/1.45 Inter,Arial,sans-serif;
+}
+.page-you-figma .you-account-arrow {
+  flex:none;color:#f4b598;font-size:19px;
+}
+.page-you-figma .you-account-link--delete {
+  border-color:#80525e;background:#3a2630;
+}
+.page-you-figma .you-account-link--delete .you-account-icon {
+  background:#673548;color:#ffc8bb;
+}
+.page-you-figma .you-account-link--delete .you-account-link-copy strong{
+  color:#ffcab9;
+}
+@media(max-width:760px){
+  .page-you-figma .you-account-link{min-height:66px;padding:12px}
+}
