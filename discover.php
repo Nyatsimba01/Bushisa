@@ -17,8 +17,15 @@ require_login();
 
 $currentUserId = (int) $_SESSION['user_id'];
 $preferences = get_preferences($pdo, $currentUserId);
-$candidates = [];
-$establishedMatches = [];
+$discovery = bushisa_discovery_batch($pdo, $currentUserId, $preferences);
+$candidates = $discovery['profiles'];
+$currentProfile = get_profile($pdo, $currentUserId);
+$displayName = trim((string) ($currentProfile['display_name'] ?? ''));
+$firstName = $displayName !== '' ? explode(' ', $displayName)[0] : 'there';
+$initial = function_exists('mb_substr')
+    ? mb_strtoupper(mb_substr($firstName, 0, 1))
+    : strtoupper(substr($firstName, 0, 1));
+$csrfToken = generate_csrf_token();
 
 $matchColumnsStatement = $pdo->query('SHOW COLUMNS FROM matches');
 $matchColumns = $matchColumnsStatement !== false ? $matchColumnsStatement->fetchAll(PDO::FETCH_COLUMN) : [];
@@ -27,19 +34,19 @@ $matchUserBColumn = in_array('user_b_id', $matchColumns, true) ? 'user_b_id' : '
 $matchTimeColumn = in_array('matched_at', $matchColumns, true) ? 'matched_at' : 'created_at';
 
 $matchesSql = sprintf(
-    'SELECT
-        m.id AS match_id,
-        CASE WHEN m.%1$s = :select_user THEN m.%2$s ELSE m.%1$s END AS other_user_id,
-        p.display_name,
-        p.profile_photo_path,
-        p.faculty,
-        m.%3$s AS matched_at
+    'SELECT m.id AS match_id,
+         CASE WHEN m.%1$s = :select_user THEN m.%2$s ELSE m.%1$s END AS other_user_id,
+         p.display_name, p.profile_photo_path, m.%3$s AS matched_at
      FROM matches m
      INNER JOIN profiles p
-        ON p.user_id = CASE WHEN m.%1$s = :join_user THEN m.%2$s ELSE m.%1$s END
-     WHERE m.%1$s = :where_user_a OR m.%2$s = :where_user_b
-     ORDER BY m.%3$s DESC, m.id DESC
-     LIMIT 12',
+       ON p.user_id = CASE WHEN m.%1$s = :join_user THEN m.%2$s ELSE m.%1$s END
+     WHERE (m.%1$s = :where_user_a OR m.%2$s = :where_user_b)
+       AND NOT EXISTS (
+           SELECT 1 FROM blocks b
+           WHERE (b.blocker_id = :blocker_user AND b.blocked_id = p.user_id)
+              OR (b.blocked_id = :blocked_user AND b.blocker_id = p.user_id)
+       )
+     ORDER BY m.%3$s DESC, m.id DESC LIMIT 12',
     $matchUserAColumn,
     $matchUserBColumn,
     $matchTimeColumn
@@ -50,77 +57,263 @@ $matchesStatement->execute([
     ':join_user' => $currentUserId,
     ':where_user_a' => $currentUserId,
     ':where_user_b' => $currentUserId,
+    ':blocker_user' => $currentUserId,
+    ':blocked_user' => $currentUserId,
 ]);
 $establishedMatches = $matchesStatement->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
-// Reuse the same eligibility rules for the first six and subsequent batches.
-$discovery = bushisa_discovery_batch($pdo, $currentUserId, $preferences);
-$candidates = $discovery['profiles'];
+$pendingRequests = [];
+$pendingCount = 0;
+$unreadNotifications = 0;
+try {
+    if (operational_table_exists($pdo, 'message_requests')) {
+        $pendingCountStatement = $pdo->prepare(
+            'SELECT COUNT(*) FROM message_requests
+             WHERE recipient_id = :user_id AND status = "pending"'
+        );
+        $pendingCountStatement->execute([':user_id' => $currentUserId]);
+        $pendingCount = (int) $pendingCountStatement->fetchColumn();
 
-$currentProfile = get_profile($pdo, $currentUserId);
-$firstName = trim((string) ($currentProfile['display_name'] ?? 'there'));
-$firstName = explode(' ', $firstName)[0] ?: 'there';
-$csrfToken = generate_csrf_token();
-render_page_shell_start('home', 'Bushisa', $csrfToken, $currentUserId, true);
+        $pendingSql = 'SELECT mr.match_id, p.display_name, p.profile_photo_path
+                       FROM message_requests mr
+                       INNER JOIN profiles p ON p.user_id = mr.requester_id
+                       WHERE mr.recipient_id = :recipient_id
+                         AND mr.status = "pending"
+                       ORDER BY mr.requested_at DESC LIMIT 2';
+        $pendingStatement = $pdo->prepare($pendingSql);
+        $pendingStatement->execute([':recipient_id' => $currentUserId]);
+        $pendingRequests = $pendingStatement->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+    if (operational_table_exists($pdo, 'notifications')) {
+        $unreadStatement = $pdo->prepare(
+            'SELECT COUNT(*) FROM notifications
+             WHERE recipient_id = :user_id AND read_at IS NULL'
+        );
+        $unreadStatement->execute([':user_id' => $currentUserId]);
+        $unreadNotifications = (int) $unreadStatement->fetchColumn();
+    }
+} catch (Throwable $error) {
+    // Feed and navigation are still usable if an optional messaging table
+    // belongs to an older development database revision.
+    error_log('Home activity list: ' . $error->getMessage());
+    $pendingRequests = [];
+    $pendingCount = 0;
+    $unreadNotifications = 0;
+}
+
+$navigation = [
+    ['href' => 'discover.php', 'label' => 'Home', 'icon' => 'home', 'active' => true],
+    ['href' => 'matches.php', 'label' => 'Find Match', 'icon' => 'nav-heart', 'active' => false],
+    ['href' => 'confessions.php', 'label' => 'Confessions', 'icon' => 'confessions', 'active' => false],
+    ['href' => 'profile.php', 'label' => 'You', 'icon' => 'you', 'active' => false],
+];
+
+render_document_head('Home', $csrfToken, $currentUserId);
 ?>
-<div class="home-concept-note" role="note">CONCEPT PREVIEW · Layout follows our Figma design · Profiles shown below come from your actual development database</div>
-<div class="home-welcome"><p>Hey, <?= e($firstName) ?>. Make room for a little possibility.</p><p>Your campus. Your kind of connection.</p></div>
-<?php
-?>
-<section class="matches-strip home-chats" aria-labelledby="matches-title">
-    <div class="home-section-heading"><h2 id="matches-title">Your chats</h2><a href="matches.php">See all <span aria-hidden="true">→</span></a></div>
-    <?php if ($establishedMatches === []): ?>
-        <div class="empty-state">
-            <h2>No established matches yet</h2>
-            <p>Find compatible students, send likes, and mutual likes will appear here. A match still is not chat permission.</p>
-            <a class="button-secondary" href="matches.php">Go to Find Match</a>
-        </div>
-    <?php else: ?>
-        <ul class="matches-strip__list" aria-label="Established matches">
-            <?php foreach ($establishedMatches as $match): ?>
-                <li>
-                    <a class="match-avatar-link" href="chat.php?match_id=<?= e($match['match_id'] ?? '') ?>" aria-label="Open consent-aware chat with <?= e($match['display_name'] ?? 'match') ?>">
-                        <?= render_avatar($match['profile_photo_path'] ?? null, (string) ($match['display_name'] ?? 'Match')) ?>
-                        <span><?= e($match['display_name'] ?? 'Match') ?></span>
-                    </a>
-                </li>
+<body id="top" class="page-home home-figma-app" data-current-user-id="<?= e($currentUserId) ?>">
+<header class="site-header">
+    <div class="header-inner">
+        <a href="discover.php" class="brand" aria-label="Bushisa Home">
+            <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="" aria-hidden="true">
+            <span class="brand-title">Bushisa</span>
+            <span class="brand-subtitle">NUST CONNECTIONS</span>
+        </a>
+        <nav class="desktop-nav" aria-label="Main navigation">
+            <?php foreach ($navigation as $link): ?>
+                <a href="<?= e($link['href']) ?>" <?= $link['active'] ? 'class="active" aria-current="page"' : '' ?>>
+                    <img src="<?= e(asset_path('preview/assets/icons/' . $link['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+                    <span><?= e($link['label']) ?></span>
+                </a>
             <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-</section>
+        </nav>
+        <div class="header-actions">
+            <button type="button" class="round-button notification-bell" data-notification-bell
+                    aria-label="Open notifications" aria-expanded="false" aria-controls="notificationPanel">
+                <img src="<?= e(asset_path('preview/assets/icons/bell.svg')) ?>" alt="" aria-hidden="true">
+                <?php if ($unreadNotifications > 0): ?>
+                    <span class="unread-count"><?= e($unreadNotifications > 9 ? '9+' : (string) $unreadNotifications) ?></span>
+                <?php endif; ?>
+            </button>
+            <a class="round-button account-letter" href="profile.php" aria-label="Your profile"><?= e($initial) ?></a>
+        </div>
+    </div>
+</header>
+<?php render_notification_panel(); ?>
+<div class="preview-banner">
+    <div class="inner"><span class="preview-eye" aria-hidden="true">◉</span>
+        <span>DEVELOPMENT PREVIEW · Live data from the local test database · Figma Home layout</span>
+    </div>
+</div>
 
-<section aria-labelledby="home-heading">
-    <div class="home-suggestions-heading"><div><h2 class="hero-statement" id="home-heading">Suggested for you</h2><p>Discover new people at your own pace.</p></div><a class="home-filter-button" href="profile.php#preferences">☷ <span>Filter</span></a></div>
+<main class="main">
+    <div class="welcome">
+        <p>Hey, <?= e($firstName) ?>. Make room for a little possibility.</p>
+        <p>Your campus. Your kind of connection.</p>
+    </div>
 
-    <?php if ($preferences === null): ?>
-        <div class="empty-state">
-            <h2>Set your discovery preferences</h2>
-            <p>Bushisa needs basic preferences before it can show eligible nonmatches.</p>
-            <a class="button" href="profile.php#preferences">Set preferences</a>
-        </div>
-    <?php elseif ($candidates === []): ?>
-        <div class="empty-state">
-            <h2>No discovery profiles right now</h2>
-            <p>There are no eligible nonmatches for your current preferences. You can broaden your preferences or check back later.</p>
-            <a class="button-secondary" href="profile.php#preferences">Edit preferences</a>
-        </div>
-    <?php else: ?>
-        <div class="profile-grid" data-static-discovery data-discovery-grid>
-            <?= bushisa_render_discovery_cards($candidates) ?>
-        </div>
-        <div class="home-discovery-pagination" data-discovery-pagination data-after="<?= e($discovery['next_cursor'] ?? '') ?>" data-has-more="<?= $discovery['has_more'] ? 'true' : 'false' ?>">
-            <p class="home-discovery-loading" data-discovery-loading role="status" hidden>Finding more profiles…</p>
-            <p class="home-discovery-error" data-discovery-error role="alert" hidden>Couldn't load more profiles. Scroll again or <button type="button" data-discovery-retry>retry</button>.</p>
-            <div class="home-discovery-end" data-discovery-end <?= $discovery['has_more'] ? 'hidden' : '' ?>>
-                <h3>You're caught up.</h3>
-                <p>You've seen all eligible profiles for now. You can return to your matches or adjust your preferences.</p>
-                <a href="matches.php">Check your matches →</a>
+    <section class="chats" aria-labelledby="chats-title">
+        <div class="section-head">
+            <div class="head-with-pill">
+                <h2 class="section-title" id="chats-title">Your chats</h2>
+                <?php if ($pendingCount > 0): ?>
+                    <a class="pill" href="matches.php"><?= e($pendingCount) ?> <?= $pendingCount === 1 ? 'request' : 'requests' ?></a>
+                <?php endif; ?>
             </div>
-            <span class="home-discovery-sentinel" data-discovery-sentinel aria-hidden="true"></span>
+            <a class="peach-link" href="matches.php">See all →</a>
         </div>
-    <?php endif; ?>
-</section>
-<section class="home-consent" aria-labelledby="home-consent-title"><h2 id="home-consent-title">A mutual yes. Then a hello.</h2><p>Liking each other creates a mutual match, not permission to message. A conversation starts only after the invitation is accepted.</p><a href="matches.php">Explore Find Match →</a></section>
-<footer class="home-footer">For NUST students · 18+ only · Independent student project <span><a href="community_guidelines.php">Community rules</a> / <a href="privacy_policy.php">Safety &amp; privacy</a></span></footer>
-<?php
-render_page_shell_end(['js/discovery_feed.js']);
+        <div class="chats-strip" aria-label="Your actual matches and pending requests">
+            <a class="chat-circle" href="matches.php">
+                <span class="new-circle"><img src="<?= e(asset_path('preview/assets/icons/new-chat.svg')) ?>" alt="" aria-hidden="true"></span>
+                <span>New</span>
+            </a>
+            <?php foreach ($establishedMatches as $match): ?>
+                <?php $matchName = trim((string) ($match['display_name'] ?? 'Student')); ?>
+                <a class="chat-circle" href="chat.php?match_id=<?= e($match['match_id']) ?>" aria-label="<?= e($matchName) ?> chat or invitation">
+                    <?= render_avatar($match['profile_photo_path'] ?? null, $matchName) ?>
+                    <span><?= e($matchName) ?></span>
+                </a>
+            <?php endforeach; ?>
+            <?php if ($pendingRequests !== []): ?>
+                <span class="chat-divider" role="separator"></span>
+                <?php foreach ($pendingRequests as $request): ?>
+                    <?php $requestName = trim((string) ($request['display_name'] ?? 'Student')); ?>
+                    <a class="chat-circle pending-request" href="chat.php?match_id=<?= e($request['match_id']) ?>" aria-label="Pending request from <?= e($requestName) ?>">
+                        <?= render_avatar($request['profile_photo_path'] ?? null, $requestName) ?>
+                        <span class="pending-icon">?</span>
+                        <span>Pending</span>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <?php if ($establishedMatches === []): ?>
+                <div class="chat-note home-empty-chat">
+                    <strong>No matches yet</strong>
+                    When eligible matches and accepted invitations are available, your conversations will appear here.
+                </div>
+            <?php else: ?>
+                <div class="chat-note">
+                    <strong>Mutual match required</strong>
+                    Chat opens only after an invitation is accepted. Passing stays private.
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="chats-bottom"><span class="private-pass">Passing stays private. Conversations require consent.</span></div>
+    </section>
+
+    <section class="suggestions" aria-labelledby="suggested-title">
+        <div class="section-head">
+            <div>
+                <h2 id="suggested-title" class="section-title">Suggested for you</h2>
+                <p class="section-head-sub">Discover eligible profiles at your own pace.</p>
+            </div>
+            <div class="suggestion-tools">
+                <a class="soft-button" href="profile.php#preferences">
+                    <img src="<?= e(asset_path('preview/assets/icons/filter.svg')) ?>" alt="" aria-hidden="true">
+                    Filter
+                </a>
+            </div>
+        </div>
+
+        <?php if ($preferences === null || $candidates === []): ?>
+            <div class="home-figma-empty" role="status">
+                <h3><?= $preferences === null ? 'Set your discovery preferences' : 'No discovery profiles right now' ?></h3>
+                <p><?= $preferences === null
+                        ? 'Choose your preferences to see eligible student profiles.'
+                        : 'There are no eligible profiles for your current preferences. You can update them or check back later.' ?></p>
+                <a class="soft-button" href="profile.php#preferences"><?= $preferences === null ? 'Set preferences' : 'Edit preferences' ?> →</a>
+            </div>
+        <?php else: ?>
+            <div class="suggestions-grid" data-discovery-grid>
+                <?= bushisa_render_discovery_cards(array_slice($candidates, 0, 2)) ?>
+                <?php if (isset($candidates[2])): ?>
+                    <div class="mobile-third-card"><?= bushisa_render_discovery_card($candidates[2]) ?></div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="feature-row<?= !isset($candidates[2]) ? ' feature-row--no-card' : '' ?>">
+            <section class="story-panel" aria-labelledby="story-title">
+                <img class="story-icon" src="<?= e(asset_path('preview/assets/icons/sprout.svg')) ?>" alt="" aria-hidden="true">
+                <h3 id="story-title">Your story starts here.</h3>
+                <p>Make your profile feel like you. Add a short bio, interests and a conversation starter.</p>
+                <a class="peach-link" href="profile.php#conversation-and-interests">Add a conversation prompt →</a>
+                <a class="peach-link" href="matches.php">Explore Find Match →</a>
+            </section>
+            <?php if (isset($candidates[2])): ?>
+                <?= bushisa_render_discovery_card($candidates[2]) ?>
+            <?php endif; ?>
+            <section class="consent-panel">
+                <p class="kicker">A MATCH IS JUST THE START</p>
+                <h3>A mutual yes. Then a hello.</h3>
+                <p>Liking each other creates a mutual match, not permission to message. Chat starts only when an invitation is accepted.</p>
+            </section>
+        </div>
+
+        <?php if ($candidates !== []): ?>
+            <div class="suggestions-grid home-continuation-grid" data-discovery-continuation>
+                <?= bushisa_render_discovery_cards(array_slice($candidates, 3)) ?>
+            </div>
+            <div class="home-discovery-pagination" data-discovery-pagination
+                 data-after="<?= e($discovery['next_cursor'] ?? '') ?>"
+                 data-has-more="<?= $discovery['has_more'] ? 'true' : 'false' ?>">
+                <p class="home-discovery-loading scroll-demo-state" data-discovery-loading role="status" hidden>Finding more profiles…</p>
+                <p class="home-discovery-error scroll-demo-state" data-discovery-error role="alert" hidden>
+                    Couldn't load more profiles. <button type="button" data-discovery-retry>Retry</button>
+                </p>
+                <span class="home-discovery-sentinel" data-discovery-sentinel aria-hidden="true"></span>
+                <section class="caught-up" data-discovery-end <?= $discovery['has_more'] ? 'hidden' : '' ?>>
+                    <h3><img src="<?= e(asset_path('preview/assets/icons/caught-up.svg')) ?>" alt="" aria-hidden="true"> You're caught up.</h3>
+                    <p>You've seen all eligible profiles for now. You can revisit your matches or adjust preferences.</p>
+                    <div class="caught-up-actions">
+                        <a class="soft-button" href="matches.php">Check your matches</a>
+                        <a class="soft-button" href="profile.php#preferences">Edit preferences</a>
+                    </div>
+                </section>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <section class="process-section" aria-labelledby="process-title">
+        <h2 id="process-title">A connection, at your pace.</h2>
+        <div class="process-steps">
+            <?php
+            $steps = [
+                ['Your profile', 'Share a little about you.'],
+                ['Discover', 'Find shared answers.'],
+                ['Like', 'Show your interest.'],
+                ['Mutual match', 'You both choose each other.'],
+                ['Chat consent', 'An invitation must be accepted.'],
+            ];
+            foreach ($steps as $index => $step):
+            ?>
+                <div class="process-step">
+                    <span class="number"><?= e($index + 1) ?></span>
+                    <strong><?= e($step[0]) ?></strong>
+                    <p><?= e($step[1]) ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <div class="beta-bar"><span class="beta-chip">BETA</span> Matching, chat and media features are being tested. Some features are not available yet.</div>
+</main>
+
+<footer class="site-footer">
+    <span>For NUST students · 18+ only · Independent student project</span>
+    <span class="links">
+        <a href="community_guidelines.php">Community rules</a> /
+        <a href="privacy_policy.php">Safety &amp; privacy</a>
+    </span>
+</footer>
+<nav class="bottom-nav" aria-label="Mobile navigation">
+    <?php foreach ($navigation as $link): ?>
+        <a href="<?= e($link['href']) ?>" <?= $link['active'] ? 'class="active" aria-current="page"' : '' ?>>
+            <img src="<?= e(asset_path('preview/assets/icons/' . $link['icon'] . '.svg')) ?>" alt="" aria-hidden="true">
+            <span><?= e($link['label']) ?></span>
+        </a>
+    <?php endforeach; ?>
+</nav>
+<script src="<?= e(asset_path('js/app.js')) ?>"></script>
+<script src="<?= e(asset_path('js/discovery_feed.js')) ?>"></script>
+<script src="<?= e(asset_path('js/home-real.js')) ?>"></script>
+</body>
+</html>
