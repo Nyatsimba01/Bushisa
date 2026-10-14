@@ -227,9 +227,13 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                 <p class="cf-post-count"><?= e((string) $totalConfessions) ?> <?= $totalConfessions === 1 ? 'confession' : 'confessions' ?></p>
             </div>
             <aside class="cf-guidance">
-                <div>
+                <div class="cf-guidance__desktop">
                     <h2>Keep it kind. Respect mention settings.</h2>
                     <p>Mention only opted-in students. No private details, contact information or harassment.</p>
+                </div>
+                <div class="cf-guidance__mobile">
+                    <h2>Respectful mentions only</h2>
+                    <p>Mention someone only if they've opted in. No private details, contact info, or harassment.</p>
                 </div>
             </aside>
             <?php if ($confessions === []): ?>
@@ -286,9 +290,9 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
             </div>
         </section>
         <aside class="cf-aside" aria-label="Community guidance">
-            <h2>Behind every post is a person.</h2>
-            <p>Keep personal information private, respect boundaries, and remember that anonymity is not a reason to be unkind.</p>
-            <a href="community_guidelines.php">Community rules →</a>
+            <h2>See something harmful?</h2>
+            <p>Use Report on the post. Posting and reporting are still being tested; do not rely on immediate review or removal.</p>
+            <a href="community_guidelines.php">Read community rules →</a>
         </aside>
     </div>
     <div class="cf-beta">
