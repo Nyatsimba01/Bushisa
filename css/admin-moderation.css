@@ -1,0 +1,293 @@
+/* Bushisa Moderation Centre — Figma desktop 99:944, mobile 99:1214.
+   Reuses the same panel dimensions, colours, mobile dock, and original Figma
+   halo SVG assets as Reports; all actions stay in the protected PHP page. */
+
+.bushisa-admin-moderation .admin-moderation-main{position:relative;isolation:isolate;min-height:100dvh}
+.bushisa-admin-moderation .admin-moderation-mobile-top,
+.bushisa-admin-moderation .admin-moderation-bottom-nav{display:none}
+
+.bushisa-admin-moderation .admin-moderation-notice,
+.bushisa-admin-moderation .admin-moderation-filters{
+  position:relative;z-index:1;isolation:isolate;
+  border:1px solid rgba(144,104,120,.72);
+  border-radius:15px;
+  background:rgba(59,41,49,.76);
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+}
+.bushisa-admin-moderation .admin-moderation-notice{margin:22px 0 24px;padding:21px 24px;min-height:94px}
+.bushisa-admin-moderation .admin-moderation-notice:before{
+  content:"";position:absolute;top:14px;bottom:14px;left:0;
+  width:3px;background:#f4b598;border-radius:2px;
+}
+.bushisa-admin-moderation .admin-moderation-notice p:last-child{
+  margin-top:10px;color:#f8ede2;font-size:14px;line-height:1.6;
+}
+.bushisa-admin-moderation .admin-moderation-metrics{margin-bottom:24px}
+.bushisa-admin-moderation .admin-moderation-flash{margin:4px 0 18px}
+.bushisa-admin-moderation .admin-moderation-flash .status-banner{margin-bottom:12px}
+.bushisa-admin-moderation .admin-moderation-filters{margin-top:24px;padding:18px 22px 20px}
+.bushisa-admin-moderation .admin-moderation-filter-fields{
+  display:grid;grid-template-columns:minmax(0,1fr) 190px 132px;
+  align-items:center;gap:12px;margin-top:16px;
+}
+.bushisa-admin-moderation .admin-moderation-filter-fields input,
+.bushisa-admin-moderation .admin-moderation-filter-fields select{
+  display:block;min-width:0;width:100%;height:45px;
+  padding:10px 13px;border:1px solid #57404a;border-radius:10px;
+  background:#291c25;color:#f8ede2;
+  font:500 12px/1.45 Inter,Arial,sans-serif;
+}
+.bushisa-admin-moderation .admin-moderation-filter-fields input::placeholder{color:#9f8a93}
+.bushisa-admin-moderation .admin-moderation-filter-fields button{
+  min-height:45px;padding:9px 17px;border:0;border-radius:10px;
+  background:#f4b598;color:#21151a;font:700 12px/1.3 Inter,Arial,sans-serif;
+  cursor:pointer;
+}
+.bushisa-admin-moderation .admin-moderation-filter-fields button:hover{background:#ffd0b8}
+.bushisa-admin-moderation :is(input,select,button,summary):focus-visible{
+  outline:2px solid #f4b598;outline-offset:3px;
+}
+.bushisa-admin-moderation .admin-moderation-filter-note{
+  margin-top:13px!important;font-size:11px;color:#9f8a93;
+}
+.bushisa-admin-moderation .admin-moderation-panels{
+  display:grid;grid-template-columns:minmax(0,1.78fr) minmax(280px,1fr);
+  align-items:start;gap:20px;margin-top:24px;
+}
+.bushisa-admin-moderation .admin-moderation-directory,
+.bushisa-admin-moderation .admin-moderation-guidance{
+  min-width:0;border:1px solid #57404a;border-radius:16px;
+  background:rgba(48,33,40,.87);padding:23px;
+}
+.bushisa-admin-moderation .admin-moderation-directory{min-height:390px}
+.bushisa-admin-moderation .admin-moderation-section-heading{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding-bottom:17px;border-bottom:1px solid #57404a;
+}
+.bushisa-admin-moderation .admin-moderation-section-heading h2,
+.bushisa-admin-moderation .admin-moderation-guidance h2{
+  margin-top:9px;font:500 24px/1.3 Lora,Georgia,serif;letter-spacing:-.02em;
+}
+.bushisa-admin-moderation .admin-moderation-count{
+  display:inline-flex;justify-content:center;align-items:center;
+  flex:none;min-width:76px;padding:7px 11px;border-radius:22px;
+  background:#3b2931;border:1px solid #705161;
+  font-size:11px;color:#e0b2c1;font-weight:650;
+}
+.bushisa-admin-moderation .admin-moderation-explainer{
+  margin:16px 0 0!important;color:#c8b4b9;font-size:12px;line-height:1.65;
+}
+.bushisa-admin-moderation .admin-moderation-guidance{min-height:285px}
+.bushisa-admin-moderation .admin-moderation-guidance h2{padding-bottom:16px;border-bottom:1px solid #57404a}
+.bushisa-admin-moderation .admin-moderation-guidance>p:not(.admin-eyebrow){
+  margin:16px 0!important;font-size:13px;line-height:1.65;color:#c8b4b9;
+}
+.bushisa-admin-moderation .admin-moderation-action-link{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:12px 15px;border:1px solid #755365;border-radius:11px;
+  background:#503343;color:#f4b598!important;font-size:12px;font-weight:650;
+}
+.bushisa-admin-moderation .admin-moderation-action-link:hover{background:#634050}
+.bushisa-admin-moderation .admin-moderation-empty{
+  margin-top:22px;padding:30px 22px;min-height:152px;
+  border:1px solid #614756;border-radius:13px;
+  background:rgba(75,49,64,.8);text-align:center;
+}
+.bushisa-admin-moderation .admin-moderation-empty-icon{
+  display:inline-grid;place-items:center;width:45px;height:45px;
+  border-radius:50%;background:#4c3642;color:#9ec4af;font-size:23px;
+}
+.bushisa-admin-moderation .admin-moderation-empty h3{
+  margin:9px 0 7px;font:500 21px Lora,Georgia,serif;
+}
+.bushisa-admin-moderation .admin-moderation-empty p{color:#c8b4b9;font-size:12px;line-height:1.6}
+.bushisa-admin-moderation .admin-moderation-list{display:grid;gap:14px;margin-top:22px}
+.bushisa-admin-moderation .admin-moderation-case{
+  min-width:0;border:1px solid rgba(135,103,118,.64);border-radius:13px;
+  background:rgba(75,48,64,.55);padding:17px 18px;
+}
+.bushisa-admin-moderation .admin-moderation-case-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.bushisa-admin-moderation .admin-moderation-case-header strong{font-size:13px;color:#f8ede2;font-weight:700}
+.bushisa-admin-moderation .admin-moderation-status{
+  border-radius:20px;border:1px solid #755365;
+  background:#4a303d;color:#eed0d8;padding:4px 10px;
+  font-size:11px;font-weight:650;
+}
+.bushisa-admin-moderation .admin-moderation-status--pending{
+  background:#4c372e;border-color:#806150;color:#f3c5a8;
+}
+.bushisa-admin-moderation .admin-moderation-status--reviewed{
+  background:#253b34;border-color:#4b745f;color:#a9d3bc;
+}
+.bushisa-admin-moderation .admin-moderation-status--dismissed{
+  background:#372a36;border-color:#6b556b;color:#c8b4b9;
+}
+.bushisa-admin-moderation .admin-moderation-case-body{
+  margin:13px 0 10px!important;overflow-wrap:anywhere;
+  white-space:pre-wrap;color:#f8ede2;font-size:14px;line-height:1.55;
+}
+.bushisa-admin-moderation .admin-moderation-muted,
+.bushisa-admin-moderation .admin-moderation-muted{
+  color:#9f8a93;font-size:11px;line-height:1.6;overflow-wrap:anywhere;
+}
+.bushisa-admin-moderation .admin-moderation-details{
+  margin-top:15px;padding-top:13px;border-top:1px solid rgba(135,103,118,.56);
+}
+.bushisa-admin-moderation .admin-moderation-details summary{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  cursor:pointer;list-style:none;color:#f4b598;font-weight:650;font-size:12px;
+}
+.bushisa-admin-moderation .admin-moderation-details summary::-webkit-details-marker{display:none}
+.bushisa-admin-moderation .admin-moderation-details[open] summary{
+  padding-bottom:13px;border-bottom:1px solid rgba(135,103,118,.56);
+}
+.bushisa-admin-moderation .admin-moderation-detail-content{padding-top:14px}
+.bushisa-admin-moderation .admin-moderation-detail-content>p{margin:0 0 13px!important}
+.bushisa-admin-moderation .admin-moderation-case-preview{
+  border:1px solid #614756;border-radius:11px;background:#36242e;
+  padding:14px;margin:12px 0;
+}
+.bushisa-admin-moderation .admin-moderation-case-preview strong{font-size:12px;color:#f4b598}
+.bushisa-admin-moderation .admin-moderation-case-preview p{
+  overflow-wrap:anywhere;white-space:pre-wrap;
+  margin:10px 0 0!important;color:#f8ede2;font-size:13px;
+}
+.bushisa-admin-moderation .admin-moderation-buttons{
+  display:flex;flex-wrap:wrap;gap:10px;padding-top:11px;
+}
+.bushisa-admin-moderation .admin-moderation-buttons form{margin:0;min-width:0}
+.bushisa-admin-moderation .admin-moderation-button{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:38px;min-width:0;padding:9px 13px;border:1px solid #755365;
+  background:#503343;color:#f4b598;border-radius:9px;
+  cursor:pointer;font:650 12px Inter,Arial,sans-serif;
+}
+.bushisa-admin-moderation .admin-moderation-button:hover{background:#634050}
+.bushisa-admin-moderation .admin-moderation-button.is-danger{
+  border-color:#94526a;background:#4d2c3d;color:#ffc7d7;
+}
+.bushisa-admin-moderation .admin-moderation-button.is-danger:hover{background:#613447}
+.bushisa-admin-moderation .admin-moderation-footnote{
+  margin:28px 0 10px!important;color:#9f8a93;font-size:11px;
+}
+@media(max-width:1150px){
+  .bushisa-admin-moderation .admin-moderation-panels{grid-template-columns:1fr}
+}
+@media(max-width:750px){
+  body.bushisa-admin-moderation{overflow-x:hidden}
+  .bushisa-admin-moderation .admin-sidebar{display:none}
+  .bushisa-admin-moderation .admin-moderation-mobile-top{
+    display:flex;justify-content:space-between;align-items:center;
+    min-height:77px;padding:0 19px;background:#1d1319;border-bottom:1px solid #57404a;
+    color:#f4b598;font:650 11px Inter,Arial,sans-serif;
+  }
+  .bushisa-admin-moderation .admin-moderation-mobile-brand{
+    display:flex;gap:14px;align-items:center;
+    font:500 25px Lora,Georgia,serif;color:#f8ede2!important;
+  }
+  .bushisa-admin-moderation .admin-moderation-mobile-brand>span{font-size:30px;color:#f4b598}
+  .bushisa-admin-moderation .admin-moderation-main{
+    width:100%;max-width:500px;margin:0 auto;min-height:calc(100dvh - 77px);
+    padding:28px 16px calc(116px + env(safe-area-inset-bottom,0px));
+    background-image:
+      url("../assets/admin/users-mobile-halo-top.svg"),
+      url("../assets/admin/users-mobile-halo-bottom.svg");
+    background-position:right top 79px,left bottom 16px;
+    background-repeat:no-repeat,no-repeat;
+    background-size:90px 175px,110px 270px;
+  }
+  .bushisa-admin-moderation .admin-moderation-header{display:block;padding-bottom:0;border-bottom:0}
+  .bushisa-admin-moderation .admin-moderation-header h1{
+    font-size:29px;line-height:1.23;margin:12px 0 9px;
+  }
+  .bushisa-admin-moderation .admin-moderation-header .admin-page-header__description{font-size:13px}
+  .bushisa-admin-moderation .admin-preview-tag{display:none}
+  .bushisa-admin-moderation .admin-moderation-notice{
+    min-height:106px;margin:28px 0 18px;padding:17px 16px;
+  }
+  .bushisa-admin-moderation .admin-moderation-notice p:last-child{font-size:12px}
+  .bushisa-admin-moderation .admin-moderation-metrics{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:20px;
+  }
+  .bushisa-admin-moderation .admin-moderation-metrics .admin-metric{
+    min-height:128px;padding:14px 13px;border-radius:13px;
+  }
+  .bushisa-admin-moderation .admin-moderation-metrics .admin-metric h2{font-size:11px}
+  .bushisa-admin-moderation .admin-moderation-metrics .admin-metric__value{padding-top:7px;font-size:31px}
+  .bushisa-admin-moderation .admin-moderation-metrics .admin-metric__note{font-size:10px}
+  .bushisa-admin-moderation .admin-moderation-filters{margin-top:20px;padding:16px}
+  .bushisa-admin-moderation .admin-moderation-filter-fields{
+    grid-template-columns:minmax(0,1fr) 108px;gap:9px;
+  }
+  .bushisa-admin-moderation .admin-moderation-filter-fields input{grid-column:1/-1}
+  .bushisa-admin-moderation .admin-moderation-panels{
+    grid-template-columns:minmax(0,1fr);gap:18px;margin-top:20px;
+  }
+  .bushisa-admin-moderation .admin-moderation-directory,
+  .bushisa-admin-moderation .admin-moderation-guidance{padding:18px 16px}
+  .bushisa-admin-moderation .admin-moderation-section-heading h2,
+  .bushisa-admin-moderation .admin-moderation-guidance h2{font-size:23px}
+  .bushisa-admin-moderation .admin-moderation-count{font-size:10px}
+  .bushisa-admin-moderation .admin-moderation-bottom-nav{
+    position:fixed;z-index:100;bottom:max(10px,env(safe-area-inset-bottom,0px));
+    left:50%;transform:translateX(-50%);display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:center;gap:2px;width:min(420px,calc(100% - 22px));
+    min-height:50px;padding:5px;border:1px solid #57404a;border-radius:13px;
+    background:rgba(59,41,49,.95);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+    box-shadow:0 10px 30px rgba(18,9,15,.42);
+  }
+  .bushisa-admin-moderation .admin-moderation-bottom-nav a{
+    display:flex;align-items:center;justify-content:center;
+    min-width:0;min-height:38px;padding:7px 2px;border:1px solid transparent;
+    border-radius:9px;color:#c8b4b9;
+    font-size:clamp(9px,2.45vw,11px);font-weight:500;letter-spacing:-.015em;
+    white-space:nowrap;
+  }
+  .bushisa-admin-moderation .admin-moderation-bottom-nav a.is-current{
+    background:#684151;border-color:#93657a;color:#f8ede2;font-weight:700;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .bushisa-admin-moderation .admin-moderation-details,
+  .bushisa-admin-moderation .admin-moderation-bottom-nav{scroll-behavior:auto}
+}
+
+/* Account controls in the second column keep their own isolated list. */
+.bushisa-admin-moderation .admin-moderation-users-list{
+  display:grid;gap:12px;margin-top:15px;
+}
+.bushisa-admin-moderation .admin-moderation-user{
+  display:grid;gap:8px;min-width:0;padding:15px;
+  border:1px solid rgba(135,103,118,.64);border-radius:12px;
+  background:rgba(75,48,64,.55);
+}
+.bushisa-admin-moderation .admin-moderation-user>strong{
+  font-size:13px;color:#f8ede2;overflow-wrap:anywhere;
+}
+.bushisa-admin-moderation .admin-moderation-user>form{margin-top:6px}
+.bushisa-admin-moderation .admin-moderation-anon{
+  color:#f4b598;font-size:12px;font-weight:650;margin:10px 0 0!important;
+}
+.bushisa-admin-moderation .admin-moderation-textlink{
+  display:inline-block;margin-top:18px;color:#f4b598;font-size:12px;font-weight:650;
+}
+.bushisa-admin-moderation .admin-moderation-empty-small{
+  padding:18px 13px;min-height:0;
+}
+.bushisa-admin-moderation .admin-moderation-empty-small h3{font-size:18px}
+.bushisa-admin-moderation .admin-moderation-flash{margin:4px 0 18px}
+.bushisa-admin-moderation .admin-moderation-action-link{cursor:pointer}
+.bushisa-admin-moderation .admin-moderation-case-body{
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+@media(max-width:750px){
+  .bushisa-admin-moderation .admin-moderation-users-list{margin-top:17px}
+  .bushisa-admin-moderation .admin-moderation-directory,
+  .bushisa-admin-moderation .admin-moderation-guidance{min-height:245px}
+  .bushisa-admin-moderation .admin-moderation-case{padding:15px}
+}
