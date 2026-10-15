@@ -181,7 +181,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
                         <h2 id="fm-compatible-title">People on your wavelength</h2>
                         <p>We look for common ground in your saved answers, not your location.</p>
                     </div>
-                    <span class="fm-compat-counter"><?= e((string) count($commonGroundProfiles)) ?> connections</span>
+                    <span class="fm-compat-counter"><?= e((string) count($commonGroundProfiles)) ?> suggestions</span>
                 </div>
                 <?php if ($commonGroundProfiles === []): ?>
                     <div class="fm-compat-empty">
@@ -594,7 +594,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             </div>
             <section class="fm-complete" data-match-complete hidden aria-live="polite">
                 <h2>A little more of your story, saved.</h2>
-                <p>Your answers have been saved to your profile’s questionnaire. Compatibility scoring from these answers has not yet been launched, and student and age verification still need to be enforced before real discovery.</p>
+                <p>Your answers have been saved to your profile’s questionnaire. Find Match uses the answers you share to highlight common interests with eligible students. You can edit your answers anytime.</p>
                 <p><a href="profile.php">Review your profile →</a></p>
                 <button type="button" class="fm-back" data-match-edit>Review my answers</button>
             </section>
@@ -604,7 +604,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             <div class="fm-guidance">
                 <span class="fm-sparkle" aria-hidden="true">✧</span>
                 <h2>Common ground,<br>not a score.</h2>
-                <p>When discovery is ready, compatibility will be explained through shared answers, interests and intentions — not a mysterious percentage.</p>
+                <p>Find Match highlights the shared interests and broad answers that give you common ground — without a mysterious compatibility percentage.</p>
             </div>
             <div class="fm-consent">
                 <h2>You both get a say.</h2>
@@ -618,7 +618,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 
     <div class="fm-beta">
         <strong>BETA</strong>
-        <span>Matching and chat are still in testing. This questionnaire saves your answers; verified compatibility results are not available yet.</span>
+        <span>Questionnaire suggestions use real saved answers. Accounts must meet eligibility checks, and conversations still need mutual interest and an accepted invitation.</span>
     </div>
     <?php endif; ?>
 
