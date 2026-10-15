@@ -358,17 +358,20 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                                         <?php else: ?>
                                             <button type="button" class="cf-report-trigger" data-report-confession="<?= e((string) $confession['id']) ?>" aria-label="Report confession #<?= e((string) $confession['id']) ?>">Report</button>
                                         <?php endif; ?>
-                                        <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>" class="cf-action-form">
+                                        <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>"
+                                            class="cf-action-form cf-like-form" data-confession-like-form
+                                            data-like-endpoint="<?= e(asset_path('api/confession-like.php')) ?>">
                                             <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                                             <input type="hidden" name="toggle_like" value="1">
                                             <input type="hidden" name="confession_id" value="<?= e((string) $confession['id']) ?>">
-                                            <button type="submit" class="cf-like-button<?= $viewerLiked ? ' is-liked' : '' ?>"
+                                            <button type="submit" data-confession-like-button class="cf-like-button<?= $viewerLiked ? ' is-liked' : '' ?>"
                                                 aria-pressed="<?= $viewerLiked ? 'true' : 'false' ?>"
-                                                aria-label="<?= $viewerLiked ? 'Unlike' : 'Like' ?> confession #<?= e((string) $confession['id']) ?>">
-                                                <span aria-hidden="true"><?= $viewerLiked ? '♥' : '♡' ?></span>
-                                                <?= $viewerLiked ? 'Liked' : 'Like' ?>
-                                                <span class="cf-like-count"><?= e((string) $likes) ?></span>
+                                                aria-label="<?= $viewerLiked ? 'Unlike' : 'Like' ?> confession #<?= e((string) $confession['id']) ?>, <?= e((string) $likes) ?> <?= $likes === 1 ? 'like' : 'likes' ?>">
+                                                <span class="cf-like-heart" data-like-heart aria-hidden="true"><?= $viewerLiked ? '♥' : '♡' ?></span>
+                                                <span data-like-label><?= $viewerLiked ? 'Liked' : 'Like' ?></span>
+                                                <span class="cf-like-count" data-like-count><?= e((string) $likes) ?></span>
                                             </button>
+                                            <span class="cf-like-feedback" data-like-feedback role="status" aria-live="polite" aria-atomic="true"></span>
                                         </form>
                                     </div>
                                 </div>
@@ -475,5 +478,6 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
 </section>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
 <script src="<?= e(asset_path('js/confessions-report.js')) ?>"></script>
+<script src="<?= e(asset_path('js/confessions-likes.js')) ?>"></script>
 </body>
 </html>
