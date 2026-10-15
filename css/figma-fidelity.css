@@ -689,3 +689,32 @@ body.bushisa-admin-dashboard .admin-moderation-directory{
     background-image:linear-gradient(145deg,#3b2030,#21151a)!important;
   }
 }
+
+/* The Home action is now a real, mutually-consented connection interest.
+   Make the previous disabled footer button feel intentional and clickable. */
+body.home-figma-app .figma-profile-card .home-connect-action{
+  border:1px solid rgba(244,181,152,.38);
+  background:rgba(244,181,152,.90);
+  color:#28151e;
+  font-weight:700;
+  min-height:38px;
+  padding:10px 14px;
+  transition:background .18s ease,transform .18s ease;
+}
+body.home-figma-app .figma-profile-card .home-connect-action:hover{
+  background:#ffd0b9;
+  transform:translateY(-1px);
+}
+body.home-figma-app .figma-profile-card .home-connect-action:focus-visible{
+  outline:2px solid #fff0e0;
+  outline-offset:3px;
+}
+body.home-figma-app .figma-profile-card .home-connect-action[disabled]{
+  opacity:.65;cursor:progress;
+}
+@media(prefers-reduced-motion:reduce){
+  body.home-figma-app .figma-profile-card .home-connect-action{
+    transition:none;
+    transform:none!important;
+  }
+}
