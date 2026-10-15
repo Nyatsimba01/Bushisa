@@ -1,236 +1,198 @@
 'use strict';
 
-/* Optional detail experience. Presentation only: original answer inputs remain
-   inside the active questionnaire step and still save through find-match.js. */
+/* Inline optional questions for the four-step Find Match questionnaire.
+   Reuse the REAL answer inputs (and the existing save/CSRF path in find-match.js).
+   No bottom-floating prompt, detached dialog, copied answers or new API calls. */
 (() => {
   const root = document.querySelector('[data-find-match]');
-  if (!root || !window.HTMLDialogElement || !HTMLDialogElement.prototype.showModal) return;
+  if (!root) return;
 
   const steps = Array.from(root.querySelectorAll('.fm-step[data-step]'));
-  const offer = document.createElement('aside');
-  offer.className = 'fm-detail-offer';
-  offer.hidden = true;
-  offer.setAttribute('aria-label', 'Optional personalized questions');
-  offer.innerHTML =
-    '<div class="fm-detail-offer-copy">' +
-      '<span class="fm-detail-offer-sparkle" aria-hidden="true">✧</span>' +
-      '<span><strong data-offer-title>Make it yours</strong><small data-offer-copy>A few optional details about what you enjoy.</small></span>' +
-    '</div>' +
-    '<div class="fm-detail-offer-actions">' +
-      '<button type="button" class="fm-offer-skip" data-offer-skip>Not now</button>' +
-      '<button type="button" class="fm-offer-open" data-offer-open>Explore ✨</button>' +
-    '</div>';
-  root.appendChild(offer);
+  const next = root.querySelector('[data-match-next]');
+  const actions = root.querySelector('[data-match-actions]');
+  const error = root.querySelector('[data-match-error]');
+  if (!steps.length || !next || !actions) return;
 
-  const dialog = document.createElement('dialog');
-  dialog.className = 'fm-detail-dialog';
-  dialog.setAttribute('aria-labelledby', 'fm-detail-title');
-  dialog.innerHTML =
-    '<div class="fm-detail-dialog-shell">' +
-      '<header class="fm-detail-dialog-head">' +
-        '<div><span class="fm-detail-kicker">✧ MAKE IT YOURS · OPTIONAL</span>' +
-          '<h2 id="fm-detail-title">A little more you.</h2>' +
-          '<p>Choose what feels like you. Every extra answer is optional.</p></div>' +
-        '<button type="button" class="fm-detail-close" data-detail-close aria-label="Close extra questions">×</button>' +
-      '</header>' +
-      '<div class="fm-detail-progress" data-detail-progress aria-live="polite"></div>' +
-      '<div class="fm-detail-slot" data-detail-slot></div>' +
-      '<footer class="fm-detail-dialog-actions">' +
-        '<button type="button" class="fm-detail-text-button" data-detail-skip>Skip extras</button>' +
-        '<button type="button" class="fm-detail-next" data-detail-next>Next theme →</button>' +
-        '<button type="button" class="fm-detail-done" data-detail-done>Done ✓</button>' +
-      '</footer>' +
-    '</div>';
+  const radioGroups = steps.flatMap(step =>
+    Array.from(step.querySelectorAll('fieldset.fm-choices')).filter(fieldset => {
+      const inputs = Array.from(fieldset.querySelectorAll('input[data-answer-key]'));
+      return inputs.length > 0 && inputs.every(input => input.type === 'radio');
+    })
+  );
+  const changeButtons = new Map();
 
-  const slot = dialog.querySelector('[data-detail-slot]');
-  const heading = dialog.querySelector('#fm-detail-title');
-  const themeProgress = dialog.querySelector('[data-detail-progress]');
-  const nextTheme = dialog.querySelector('[data-detail-next]');
-  const promptTitle = offer.querySelector('[data-offer-title]');
-  const promptText = offer.querySelector('[data-offer-copy]');
-  let activeDetail = null;
-  let anchor = null;
-  let activeIndex = 0;
-  let returnFocus = null;
-  let dismissedStep = null;
+  // The optional section belongs immediately after the answer that revealed it.
+  // Step 1 previously placed both extras after all required questions.
+  steps.forEach(step => {
+    for (const section of Array.from(step.querySelectorAll(':scope > details.fm-followups[data-conditional]'))) {
+      const key = section.dataset.whenKey;
+      if (!['intent', 'social_activity', 'communication_style', 'availability'].includes(key)) continue;
+      const fieldset = Array.from(step.querySelectorAll(':scope > fieldset.fm-choices'))
+        .find(field => field.querySelector('input[data-answer-key="' + key + '"]'));
+      if (fieldset) fieldset.after(section);
+    }
+  });
 
-  function currentStep() {
+  function activeStep() {
     return steps.find(group => !group.hidden) || null;
   }
 
-  function eligibleThemes() {
-    const group = currentStep();
-    if (!group) return [];
-    return Array.from(group.querySelectorAll('details.fm-followups[data-conditional]'))
-      .filter(section => !section.hidden);
-  }
-
-  function themeName(section) {
-    const summary = section.querySelector('summary');
-    return (summary ? summary.textContent : 'Your interests')
-      .replace(/\s*Optional\s*/i, '').trim();
-  }
-
-  // Personalize the small invitation from choices on the active step.
-  // This is display text only; the original answers and saving API are unchanged.
-  function selectedValues(group, key) {
-    return Array.from(group.querySelectorAll('input[data-answer-key]'))
-      .filter(input => input.dataset.answerKey === key && input.checked &&
-        !input.closest('[data-conditional]'))
-      .map(input => input.value);
-  }
-
-  function invitationFor(group, themes) {
-    const step = Number(group.dataset.step);
-    const first = key => selectedValues(group, key)[0] || '';
-    if (step === 0) {
-      const intent = first('intent');
-      const messages = {
-        'Something serious': ['Your pace, your way', 'You chose something serious. What pace feels comfortable? One little extra, or skip.'],
-        'Casual dating': ['Your pace, your call', 'You chose casual dating. How do you prefer getting to know someone? Totally optional.'],
-        'Friendship first': ['Start with a hello', 'Friendship first feels right to you. Share your preferred pace, or keep going.'],
-        'Still exploring': ['Room to explore', 'Still figuring it out? Share what feels comfortable, or skip the extra.']
-      };
-      if (messages[intent]) return { title: messages[intent][0], copy: messages[intent][1] };
+  function hasCoreAnswers(step) {
+    const required = new Map();
+    for (const input of step.querySelectorAll('input[data-answer-key]:not([data-optional-answer])')) {
+      const key = input.dataset.answerKey;
+      if (!required.has(key)) required.set(key, false);
+      if (input.checked) required.set(key, true);
     }
-    if (step === 1) {
-      const social = first('social_activity');
-      const messages = {
-        'Quiet moments': ['Your quieter side?', 'Quiet moments are your vibe. What does a good hangout or first hello look like?'],
-        'Somewhere in the middle': ['A little of both?', 'A balance sounds like you. Tell us what spending time together feels like, or skip.'],
-        'Always up for an activity': ['Always up for something?', 'You chose an active vibe. What kind of time together sounds most like you?']
-      };
-      if (messages[social]) return { title: messages[social][0], copy: messages[social][1] };
-      const communication = first('communication_style');
-      if (communication) return {
-        title: 'Your way of connecting',
-        copy: communication + ' feels right to you. Want to add what makes a good first hello?'
-      };
-    }
-    if (step === 2) {
-      const interests = selectedValues(group, 'interests');
-      if (interests.length > 1) {
-        const firstTwo = interests.slice(0, 2);
-        return {
-          title: 'More on your interests?',
-          copy: firstTwo.join(' + ') + (interests.length > 2 ? ' and more' : '') +
-            ' made your list. Add a little detail about any of them, or skip.'
-        };
-      }
-      const messages = {
-        'Sport': ['Your sporty side?', 'You chose sport. Which sports do you enjoy? You can even share a favourite team.'],
-        'Music': ['More on your music?', 'You chose music. What kind of sounds are on repeat for you?'],
-        'Reading': ['Your next great read?', 'You chose reading. What kinds of stories do you enjoy?'],
-        'Photography': ['Behind your lens?', 'You chose photography. What do you most enjoy creating or capturing?'],
-        'Art': ['Your creative side?', 'You chose art. Tell us a little more about what you like making or enjoying.'],
-        'Gaming': ['Your gaming side?', 'You chose gaming. What kinds of games do you come back to?'],
-        'Campus events': ['Your campus side?', 'Campus events caught your eye. What would you enjoy going to?'],
-        'Travel': ['Places and possibilities?', 'You chose travel. What kind of outing sounds like you?'],
-        'Food & cooking': ['What’s on your menu?', 'You chose food and cooking. What do you enjoy trying or making?'],
-        'Films & series': ['On your watchlist?', 'You chose films and series. What genres do you enjoy?'],
-        'Technology': ['Your curious side?', 'You chose technology. What kinds of ideas excite you?'],
-        'Community': ['Your community side?', 'You chose community. How do you enjoy getting involved?']
-      };
-      if (messages[interests[0]]) return { title: messages[interests[0]][0], copy: messages[interests[0]][1] };
-    }
-    if (step === 3) {
-      const availability = first('availability');
-      if (availability) return {
-        title: 'Plans that feel like you',
-        copy: availability + ' works for you. Do you prefer planning ahead or keeping it flexible?'
-      };
-    }
-    const names = themes.slice(0, 2).map(themeName);
-    return {
-      title: 'Make it yours',
-      copy: names.join(' + ') + (themes.length > 2 ? ' and more' : '') +
-        ' · Add a little detail, or skip.'
-    };
+    return required.size > 0 && Array.from(required.values()).every(Boolean);
   }
 
-  function refreshOffer() {
-    const group = currentStep();
-    const themes = eligibleThemes();
-    const show = !!group && themes.length > 0 && group !== dismissedStep && !dialog.open;
-    offer.hidden = !show;
-    if (!show) return;
-    const invitation = invitationFor(group, themes);
-    promptTitle.textContent = invitation.title;
-    promptText.textContent = invitation.copy;
-  }
+  // Keep the selected card, hide only its siblings, and provide an easy way
+  // to change the choice. Never collapse checkbox/multi-select interests.
+  radioGroups.forEach(fieldset => {
+    const change = document.createElement('button');
+    change.type = 'button';
+    change.className = 'fm-change-answer';
+    change.textContent = 'Change answer';
+    change.setAttribute('aria-label', 'Change ' + (fieldset.getAttribute('aria-label') || 'selection'));
+    change.hidden = true;
+    fieldset.after(change);
+    changeButtons.set(fieldset, change);
+    change.addEventListener('click', () => {
+      fieldset.dataset.showChoices = 'true';
+      refreshRadioGroup(fieldset);
+      const alternative = Array.from(fieldset.querySelectorAll('input[type="radio"]'))
+        .find(input => !input.checked);
+      (alternative || fieldset.querySelector('input[type="radio"]'))?.focus();
+    });
+  });
 
-  function restoreDetail() {
-    if (activeDetail && anchor) {
-      activeDetail.open = false;
-      anchor.replaceWith(activeDetail);
+  function refreshRadioGroup(fieldset) {
+    const chosen = fieldset.querySelector('input[type="radio"]:checked');
+    const collapsed = !!chosen && fieldset.dataset.showChoices !== 'true';
+    fieldset.classList.toggle('fm-choice-condensed', collapsed);
+    for (const label of fieldset.querySelectorAll(':scope > label.fm-option')) {
+      const input = label.querySelector('input[type="radio"]');
+      label.hidden = collapsed && !!input && !input.checked;
     }
-    activeDetail = null;
-    anchor = null;
+    const change = changeButtons.get(fieldset);
+    if (change) change.hidden = !collapsed;
   }
 
-  function showTheme(index) {
-    restoreDetail();
-    const themes = eligibleThemes();
-    if (!themes.length) {
-      dialog.close();
+  const skip = document.createElement('button');
+  skip.type = 'button';
+  skip.className = 'fm-inline-skip';
+  skip.textContent = 'Skip optional questions →';
+  skip.hidden = true;
+  const actionsRight = actions.querySelector('.fm-actions-right');
+  if (actionsRight) actionsRight.prepend(skip);
+
+  // Give each inline optional card a shortcut at its top, not at the very
+  // bottom of the mobile screen. Skip simply advances once core answers exist.
+  for (const section of root.querySelectorAll('details.fm-followups[data-conditional]')) {
+    const body = section.querySelector('.fm-followup-body');
+    if (!body) continue;
+    const prompt = document.createElement('div');
+    prompt.className = 'fm-inline-prompt';
+    prompt.innerHTML = '<span>✨ A little more about you <small>Optional — answer one, both, or neither.</small></span>';
+    const earlySkip = document.createElement('button');
+    earlySkip.type = 'button';
+    earlySkip.className = 'fm-inline-early-skip';
+    earlySkip.textContent = 'Skip →';
+    earlySkip.addEventListener('click', () => skipExtras(section));
+    prompt.appendChild(earlySkip);
+    body.prepend(prompt);
+  }
+
+  function skipExtras(section) {
+    const step = activeStep();
+    if (!step) return;
+    if (hasCoreAnswers(step)) {
+      next.click(); // Existing validation and authenticated persistence.
       return;
     }
-    activeIndex = Math.max(0, Math.min(index, themes.length - 1));
-    activeDetail = themes[activeIndex];
-    anchor = document.createComment('optional theme original position');
-    activeDetail.parentNode.insertBefore(anchor, activeDetail);
-    slot.appendChild(activeDetail);
-    activeDetail.open = true;
-    heading.textContent = 'Your ' + themeName(activeDetail).toLowerCase() + ' side.';
-    themeProgress.textContent = 'Theme ' + (activeIndex + 1) + ' of ' + themes.length +
-      ' · You can skip any of these.';
-    nextTheme.hidden = activeIndex >= themes.length - 1;
-    dialog.querySelector('[data-detail-done]').textContent =
-      activeIndex >= themes.length - 1 ? 'All done ✓' : 'Done for now ✓';
+    section.open = false;
+    section.dataset.skipped = 'true';
+    const required = radioGroups.find(fieldset =>
+      step.contains(fieldset) &&
+      !!fieldset.querySelector('input[data-answer-key]:not([data-optional-answer])') &&
+      !fieldset.querySelector('input:checked')
+    );
+    if (required) {
+      required.scrollIntoView({block:'center', behavior:'smooth'});
+      required.querySelector('input')?.focus({preventScroll:true});
+    }
   }
 
-  function openThemes() {
-    const group = currentStep();
-    if (!group || !eligibleThemes().length) return;
-    returnFocus = document.activeElement;
-    group.appendChild(dialog); // Keep the original inputs inside the active step for saving.
-    dialog.showModal();
-    showTheme(0);
-    offer.hidden = true;
+  skip.addEventListener('click', () => next.click());
+
+  // The same existing Back / Continue buttons now sit at the end of the
+  // visible step rather than being stranded after every hidden step.
+  let previousStep = null;
+  function sync(changedInput = null) {
+    const step = activeStep();
+    // Make the first optional section speak to the actual selected intention.
+    const intent = steps[0]?.querySelector('input[data-answer-key="intent"]:checked')?.value || '';
+    const summary = steps[0]?.querySelector('details.fm-followups[data-when-key="intent"] summary');
+    const firstText = summary?.firstChild;
+    const intentTitles = {
+      'Something serious': 'Tell us about your pace ',
+      'Casual dating': 'Tell us more about casual dating ',
+      'Friendship first': 'Tell us about starting as friends ',
+      'Still exploring': 'Tell us what feels comfortable '
+    };
+    if (firstText?.nodeType === Node.TEXT_NODE) {
+      firstText.nodeValue = intentTitles[intent] || 'Your pace ';
+    }
+    for (const fieldset of radioGroups) refreshRadioGroup(fieldset);
+    if (!step) return;
+    const isNewStep = previousStep !== step;
+    previousStep = step;
+
+    if (actions.parentNode !== step) {
+      if (error) step.appendChild(error);
+      step.appendChild(actions);
+    }
+
+    const visibleSections = Array.from(step.querySelectorAll('details.fm-followups[data-conditional]'))
+      .filter(section => !section.hidden && !section.closest('details.fm-followups[hidden]'));
+    skip.hidden = visibleSections.length === 0;
+
+    if (changedInput) {
+      const changedKey = changedInput.dataset.answerKey;
+      // A changed primary answer invites the new relevant question in-place.
+      visibleSections.forEach(section => {
+        if (section.dataset.whenKey === changedKey ||
+            (changedKey === 'sports' && section.dataset.whenKey === 'sports')) {
+          section.open = true;
+          delete section.dataset.skipped;
+        }
+      });
+    } else if (isNewStep) {
+      // Prefilled answers: show the relevant extras inline when revisiting.
+      // Multiple interests stay individually expandable to avoid scroll fatigue.
+      if (step.dataset.step === '2') {
+        const first = visibleSections.find(section => !section.dataset.skipped);
+        if (first) first.open = true;
+      } else {
+        visibleSections.forEach(section => {
+          if (!section.dataset.skipped) section.open = true;
+        });
+      }
+    }
   }
 
-  function closeThemes(dismiss) {
-    if (dismiss) dismissedStep = currentStep();
-    if (dialog.open) dialog.close();
-    else refreshOffer();
-  }
-
-  offer.querySelector('[data-offer-open]').addEventListener('click', openThemes);
-  offer.querySelector('[data-offer-skip]').addEventListener('click', () => {
-    dismissedStep = currentStep();
-    refreshOffer();
-  });
-  dialog.querySelector('[data-detail-close]').addEventListener('click', () => closeThemes(false));
-  dialog.querySelector('[data-detail-done]').addEventListener('click', () => closeThemes(true));
-  dialog.querySelector('[data-detail-skip]').addEventListener('click', () => closeThemes(true));
-  nextTheme.addEventListener('click', () => showTheme(activeIndex + 1));
-  dialog.addEventListener('click', event => {
-    if (event.target === dialog) closeThemes(false);
-  });
-  dialog.addEventListener('close', () => {
-    restoreDetail();
-    if (returnFocus && typeof returnFocus.focus === 'function') returnFocus.focus();
-    returnFocus = null;
-    refreshOffer();
+  root.addEventListener('change', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    const fieldset = input.closest('fieldset.fm-choices');
+    if (fieldset && input.type === 'radio') delete fieldset.dataset.showChoices;
+    // find-match.js's group listener has already applied conditional visibility.
+    sync(input);
   });
 
-  // Keep the invitation in sync with the existing branch logic and step navigation.
-  root.addEventListener('change', () => window.setTimeout(refreshOffer, 0));
-  const observer = new MutationObserver(() => {
-    if (!dialog.open) dismissedStep = null;
-    refreshOffer();
-  });
-  steps.forEach(group => observer.observe(group, { attributes: true, attributeFilter: ['hidden'] }));
-  root.classList.add('fm-enhanced');
-  refreshOffer();
+  const watcher = new MutationObserver(() => sync());
+  steps.forEach(step => watcher.observe(step, {attributes:true, attributeFilter:['hidden']}));
+  root.classList.add('fm-inline-enhanced');
+  sync();
 })();
