@@ -245,3 +245,59 @@
 .page-confessions-figma .cf-bubble__actions .cf-bubble__links{
   margin-left:auto;
 }
+
+/* Single-purpose Like microinteraction: a quiet heart pop, not a page-wide
+   celebration. The underlying POST remains functional without JavaScript. */
+.page-confessions-figma .cf-like-form {
+  position:relative;
+}
+.page-confessions-figma .cf-like-heart {
+  display:inline-block;
+  transform-origin:center center;
+  font-size:14px;
+  line-height:1;
+}
+.page-confessions-figma .cf-like-button {
+  transition:background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+.page-confessions-figma .cf-like-button[disabled] {
+  opacity:.72;
+  cursor:progress;
+}
+@keyframes cf-heart-pop {
+  0%   { transform:scale(1); filter:none; }
+  32%  { transform:scale(1.38) rotate(-7deg); filter:drop-shadow(0 0 3px rgba(232,115,134,.38)); }
+  63%  { transform:scale(.91) rotate(3deg); }
+  100% { transform:scale(1); filter:none; }
+}
+.page-confessions-figma .cf-like-heart.is-popping {
+  animation:cf-heart-pop 370ms cubic-bezier(.2,.9,.35,1) both;
+}
+.page-confessions-figma .cf-like-feedback {
+  /* Accessible only when successful: no distracting green toast and no jump. */
+  position:absolute;
+  width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.page-confessions-figma .cf-like-feedback.is-error {
+  /* Only failure gets a visible message, next to the button that failed. */
+  display:block;
+  position:absolute;
+  right:0;bottom:calc(100% + 7px);
+  width:max-content;height:auto;max-width:min(260px,78vw);
+  padding:9px 12px;margin:0;
+  overflow:visible;clip:auto;white-space:normal;
+  border:1px solid #ae6a75;border-radius:10px;
+  background:#552b3e;color:#ffe5dd;
+  box-shadow:0 6px 18px rgba(22,11,16,.24);
+  font:500 11px/1.5 Inter,Arial,sans-serif;
+  z-index:3;
+}
+@media (prefers-reduced-motion:reduce) {
+  .page-confessions-figma .cf-like-heart.is-popping {
+    animation:none!important;
+  }
+  .page-confessions-figma .cf-like-button {
+    transition:none!important;
+  }
+}
