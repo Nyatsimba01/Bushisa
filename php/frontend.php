@@ -90,10 +90,13 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php endif; ?>
     <title><?= e($title) ?> | Bushisa</title>
     <link rel="stylesheet" href="<?= e(asset_path('css/style.css')) ?>">
-    <?php if (in_array(current_page_name(), ['dashboard.php', 'users.php'], true) && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin'): ?>
+    <?php if (in_array(current_page_name(), ['dashboard.php', 'users.php', 'confessions.php'], true) && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('css/admin-dashboard.css')) ?>">
         <?php if (current_page_name() === 'users.php'): ?>
             <link rel="stylesheet" href="<?= e(asset_path('css/admin-users.css')) ?>">
+        <?php endif; ?>
+        <?php if (current_page_name() === 'confessions.php'): ?>
+            <link rel="stylesheet" href="<?= e(asset_path('css/admin-confessions.css')) ?>">
         <?php endif; ?>
     <?php endif; ?>
     <?php if (current_page_name() === 'discover.php'): ?>
@@ -103,7 +106,7 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php elseif (current_page_name() === 'profile.php'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/you-figma.css')) ?>">
-    <?php elseif (current_page_name() === 'confessions.php'): ?>
+    <?php elseif (current_page_name() === 'confessions.php' && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) !== 'admin'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('preview/home-figma.css')) ?>">
         <link rel="stylesheet" href="<?= e(asset_path('css/confessions-figma.css')) ?>">
     <?php elseif (current_page_name() === 'matches.php'): ?>
