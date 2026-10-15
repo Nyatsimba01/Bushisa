@@ -182,3 +182,60 @@
   }
   .page-confessions-figma .cf-report-composer h2{font-size:25px}
 }
+
+/* Real confession interactions — matched to the existing Figma-style card.
+   Authors see Delete; other members see Report; everyone can like/unlike.
+   Buttons are actual CSRF-protected HTML forms, never decorative controls. */
+.page-confessions-figma .cf-bubble__links{
+  display:flex;align-items:center;flex-wrap:wrap;gap:9px;
+}
+.page-confessions-figma .cf-action-form{
+  display:inline-flex;align-items:center;margin:0;min-width:0;
+}
+.page-confessions-figma .cf-bubble__links .cf-delete-button,
+.page-confessions-figma .cf-bubble__links .cf-like-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:36px;padding:7px 12px;
+  border-radius:50px;border:1px solid #57404a;
+  background:#302128;color:#f4b598;
+  cursor:pointer;font:600 12px/1.4 Inter,Arial,sans-serif;
+  white-space:nowrap;
+}
+.page-confessions-figma .cf-bubble__links .cf-delete-button{
+  background:#633345;border-color:#8f5266;color:#ffe0e7;
+}
+.page-confessions-figma .cf-bubble__links .cf-delete-button:hover{
+  background:#793e54;
+}
+.page-confessions-figma .cf-bubble__links .cf-like-button:hover{
+  background:#553542;border-color:#956377;
+}
+.page-confessions-figma .cf-bubble__links .cf-like-button.is-liked{
+  background:#f4b598;border-color:#d99c84;color:#361d27;
+}
+.page-confessions-figma .cf-like-count{
+  font-variant-numeric:tabular-nums;
+  font-weight:700;margin-left:2px;min-width:1ch;
+}
+.page-confessions-figma .cf-bubble__links :is(.cf-delete-button,.cf-like-button):focus-visible{
+  outline:2px solid #ad536d;outline-offset:3px;
+}
+.page-confessions-figma .cf-interaction-error{
+  background:#4d2c3d;color:#ffe2e8;
+  border:1px solid #a96178;border-radius:14px;
+  padding:14px 17px;margin:15px 0;
+  font:500 13px/1.55 Inter,Arial,sans-serif;
+}
+@media(max-width:520px){
+  .page-confessions-figma .cf-bubble__actions{
+    align-items:flex-start;
+  }
+  .page-confessions-figma .cf-bubble__links{
+    justify-content:flex-end;
+    gap:7px;
+  }
+  .page-confessions-figma .cf-bubble__links .cf-delete-button,
+  .page-confessions-figma .cf-bubble__links .cf-like-button{
+    min-height:38px;padding:7px 10px;font-size:11px;
+  }
+}
