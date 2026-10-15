@@ -257,3 +257,30 @@
   .bushisa-admin-reports .admin-reports-details,
   .bushisa-admin-reports .admin-reports-bottom-nav{scroll-behavior:auto}
 }
+
+/* Private identity labels in expanded admin-only report details.
+   Names are not shown on the student-facing pages or on collapsed report cards. */
+.bushisa-admin-reports .admin-reports-identities{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;margin:16px 0 12px;
+}
+.bushisa-admin-reports .admin-reports-identity{
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:6px;min-width:0;padding:14px 15px;
+  border:1px solid #614756;border-radius:11px;
+  background:rgba(59,41,49,.75);
+}
+.bushisa-admin-reports .admin-reports-identity-label{
+  color:#f4b598;font-size:11px;font-weight:700;letter-spacing:.025em;
+}
+.bushisa-admin-reports .admin-reports-identity strong{
+  color:#f8ede2;font-size:13px;font-weight:650;overflow-wrap:anywhere;
+}
+.bushisa-admin-reports .admin-reports-identity .admin-reports-muted{
+  font-size:11px;color:#9f8a93;
+}
+@media(max-width:650px){
+  .bushisa-admin-reports .admin-reports-identities{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
