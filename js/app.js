@@ -380,6 +380,29 @@
       return;
     }
 
+    // The mobile + button must escape the Figma main/intro stacking
+    // contexts, or the fixed bottom-navigation pill paints above it.
+    // Move the EXISTING button instead of cloning it: composer listeners,
+    // keyboard focus and desktop markup are all preserved.
+    const desktopParent = openButton.parentNode;
+    const desktopNextSibling = openButton.nextSibling;
+    const mobileComposer = window.matchMedia('(max-width: 700px)');
+    const positionComposerButton = () => {
+      if (mobileComposer.matches) {
+        if (openButton.parentNode !== document.body) {
+          document.body.appendChild(openButton);
+        }
+      } else if (desktopParent && openButton.parentNode !== desktopParent) {
+        desktopParent.insertBefore(openButton, desktopNextSibling);
+      }
+    };
+    positionComposerButton();
+    if (typeof mobileComposer.addEventListener === 'function') {
+      mobileComposer.addEventListener('change', positionComposerButton);
+    } else {
+      mobileComposer.addListener(positionComposerButton);
+    }
+
     const textarea = modal.querySelector('textarea');
 
     const closeModal = () => {
