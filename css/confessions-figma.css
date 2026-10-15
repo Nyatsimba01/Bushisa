@@ -239,3 +239,9 @@
     min-height:38px;padding:7px 10px;font-size:11px;
   }
 }
+
+/* Keep the two meaningful actions (Delete/Report and Like) on the right.
+   The view total is intentionally hidden; view tracking remains for Trending. */
+.page-confessions-figma .cf-bubble__actions .cf-bubble__links{
+  margin-left:auto;
+}
