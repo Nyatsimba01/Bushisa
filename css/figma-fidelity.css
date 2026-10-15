@@ -616,6 +616,18 @@ body.home-figma-app{
     url("../assets/figma/home/ambient-desktop-center.svg"),
     radial-gradient(ellipse 560px 360px at 70% 11%,rgba(74,36,52,.10),transparent 84%),
     linear-gradient(145deg,var(--bushisa-gradient-a),var(--bushisa-gradient-b) 62%,var(--bushisa-gradient-c))!important;
+  /* Five backgrounds need FIVE sizes/positions. Previously the gradient
+     inherited the first SVG's 420px square, leaving the rest of Home flat.
+     Match's burgundy gradient already fills the page; make Home do the same
+     while keeping all three original Figma ambient SVGs in their positions. */
+  background-size:420px 420px,320px 320px,260px 260px,auto,100% 100%;
+  background-position:
+    left calc(50% - 760px) top -120px,
+    left calc(50% + 340px) top -80px,
+    left calc(50% + 120px) top 72px,
+    center top,
+    center center;
+  background-repeat:no-repeat;
 }
 body.page-match-figma{
   background-color:#251719;
