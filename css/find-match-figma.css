@@ -235,3 +235,144 @@
  .page-match-figma .fm-detail-dialog-actions{padding:11px 14px;gap:6px;}
  .page-match-figma .fm-detail-dialog-actions button{font-size:11px;padding:8px;}
 }
+
+/* =======================================================================
+   Inline Find Match details (replaces fixed mini-offer / dialog).
+   A choice keeps its selected card; the other radio choices collapse with
+   an explicit Change answer control. Checkbox interests remain multi-pick.
+   Existing input names, values and API saving are unchanged.
+   ======================================================================= */
+.page-match-figma .fm-inline-enhanced .fm-step .fm-option[hidden],
+.page-match-figma .fm-inline-enhanced .fm-change-answer[hidden],
+.page-match-figma .fm-inline-enhanced .fm-inline-skip[hidden]{
+  display:none!important;
+}
+.page-match-figma .fm-inline-enhanced .fm-choice-condensed{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+}
+.page-match-figma .fm-inline-enhanced .fm-choice-condensed>.fm-option{
+  border-color:rgba(244,181,152,.70);
+  background:rgba(80,41,57,.67);
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+}
+.page-match-figma .fm-inline-enhanced .fm-change-answer{
+  align-self:flex-start;
+  margin-top:-13px;
+  padding:9px 6px;
+  border:0;
+  background:transparent;
+  color:#f4b598;
+  cursor:pointer;
+  font:600 12px/1.4 Inter,Arial,sans-serif;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.page-match-figma .fm-inline-enhanced .fm-step>.fm-followups{
+  display:block;
+  background:rgba(59,36,49,.73);
+  border:1px solid rgba(244,181,152,.25);
+  -webkit-backdrop-filter:blur(13px) saturate(112%);
+  backdrop-filter:blur(13px) saturate(112%);
+  box-shadow:inset 0 1px 0 rgba(255,246,239,.09),
+             0 12px 28px rgba(20,8,14,.09);
+  animation:bushisa-inline-fade .24s ease both;
+}
+.page-match-figma .fm-inline-enhanced .fm-followups[hidden]{
+  display:none!important;
+}
+.page-match-figma .fm-inline-enhanced .fm-followups[open] summary{
+  color:#f4b598;
+}
+.page-match-figma .fm-inline-enhanced .fm-followup-body{
+  padding-top:13px;
+}
+.page-match-figma .fm-inline-enhanced .fm-inline-prompt{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:0 0 10px;
+  padding:0 0 12px;
+  border-bottom:1px solid rgba(248,237,226,.12);
+  font:600 12px/1.35 Inter,Arial,sans-serif;
+  color:#f4b598;
+}
+.page-match-figma .fm-inline-enhanced .fm-inline-prompt small{
+  display:block;
+  margin-top:4px;
+  font:400 11px/1.4 Inter,Arial,sans-serif;
+  color:#d5bfc6;
+}
+.page-match-figma .fm-inline-enhanced .fm-inline-early-skip,
+.page-match-figma .fm-inline-enhanced .fm-inline-skip{
+  min-height:38px;
+  padding:9px 12px;
+  border:1px solid rgba(244,181,152,.25);
+  border-radius:100px;
+  background:rgba(74,36,52,.5);
+  color:#ffccb8;
+  cursor:pointer;
+  font:600 12px/1.3 Inter,Arial,sans-serif;
+}
+.page-match-figma .fm-inline-enhanced .fm-inline-early-skip:hover,
+.page-match-figma .fm-inline-enhanced .fm-inline-skip:hover{
+  background:rgba(244,181,152,.16);
+}
+.page-match-figma .fm-inline-enhanced .fm-step>.fm-step-actions{
+  margin-top:2px;
+  border-top:1px solid rgba(248,237,226,.14);
+  padding-top:16px;
+}
+.page-match-figma .fm-inline-enhanced .fm-step>.fm-error{
+  margin:0;
+}
+.page-match-figma .fm-inline-enhanced .fm-selected{
+  display:none;
+}
+.page-match-figma .fm-inline-enhanced :is(.fm-change-answer,.fm-inline-early-skip,.fm-inline-skip):focus-visible{
+  outline:2px solid #ffd3bc;
+  outline-offset:3px;
+}
+@keyframes bushisa-inline-fade{
+  from{opacity:.65;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:700px){
+  .page-match-figma .fm-inline-enhanced .fm-step{
+    gap:15px;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-followups summary{
+    padding:12px 14px;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-inline-prompt{
+    align-items:flex-start;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-inline-early-skip{
+    margin-left:auto;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-step>.fm-step-actions{
+    gap:10px;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-step-actions .fm-actions-right{
+    flex-wrap:wrap;
+    width:100%;
+  }
+  .page-match-figma .fm-inline-enhanced .fm-inline-skip{
+    flex:1 1 auto;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .page-match-figma .fm-inline-enhanced .fm-step>.fm-followups{
+    animation:none;
+  }
+}
+@media(prefers-contrast:more){
+  .page-match-figma .fm-inline-enhanced .fm-step>.fm-followups{
+    background:#302128;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
