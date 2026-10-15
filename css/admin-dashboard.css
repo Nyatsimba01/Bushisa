@@ -206,3 +206,56 @@ body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confes
     background-size: 90px 175px, 110px 270px;
   }
 }
+
+/* Shared Figma atmospheric finish (admin frames 83:18, 99:34, 99:489,
+   99:944). Retains original halo assets; only presentation is adjusted.
+   Original Figma glass panes use rgba(59,41,49,.72-.82) and 9-10px blur.
+   Do not modify navigation geometry, content, forms, or data. */
+@media (min-width:751px) {
+  body.bushisa-admin-dashboard .admin-main {
+    background-color:#21151a;
+    background-image:
+      url("../assets/admin/users-desktop-halo-top.svg"),
+      url("../assets/admin/users-desktop-halo-bottom.svg"),
+      radial-gradient(ellipse 310px 240px at 85% 27%,rgba(248,237,226,.035),transparent 72%),
+      radial-gradient(ellipse 280px 270px at 7% 83%,rgba(94,53,75,.11),transparent 78%);
+    background-repeat:no-repeat;
+    background-position:right top,left bottom,right top,left bottom;
+    background-size:264px 155px,169px 305px,auto,auto;
+  }
+}
+/* Keep foreground text fully opaque; only pane surfaces are translucent. */
+body.bushisa-admin-dashboard .admin-metric,
+body.bushisa-admin-dashboard .admin-reports-directory,
+body.bushisa-admin-dashboard .admin-reports-guidance,
+body.bushisa-admin-dashboard .admin-moderation-directory,
+body.bushisa-admin-dashboard .admin-moderation-guidance,
+body.bushisa-admin-dashboard .admin-confessions-directory,
+body.bushisa-admin-dashboard .admin-confessions-guidance,
+body.bushisa-admin-dashboard .admin-users-directory {
+  background:rgba(59,41,49,.82);
+  border-color:rgba(135,103,118,.62);
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+}
+@media (max-width:750px) {
+  body.bushisa-admin-dashboard .admin-main {
+    background-image:
+      url("../assets/admin/users-mobile-halo-top.svg"),
+      url("../assets/admin/users-mobile-halo-bottom.svg"),
+      radial-gradient(ellipse 150px 170px at 91% 22%,rgba(248,237,226,.035),transparent 75%);
+    background-repeat:no-repeat;
+    background-position:right top,left bottom 16px,right top;
+    background-size:90px 175px,110px 270px,auto;
+  }
+}
+@media (prefers-contrast:more) {
+  body.bushisa-admin-dashboard .admin-metric,
+  body.bushisa-admin-dashboard .admin-reports-directory,
+  body.bushisa-admin-dashboard .admin-moderation-directory,
+  body.bushisa-admin-dashboard .admin-confessions-directory,
+  body.bushisa-admin-dashboard .admin-users-directory {
+    background:#302128;
+    backdrop-filter:none;
+  }
+}

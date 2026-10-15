@@ -167,3 +167,45 @@
 @media (prefers-contrast: more) {
   .page-you-figma .you-main::before { opacity:.4; }
 }
+
+/* Student Confessions Figma finishing pass, desktop 4:2828 / mobile 4:3234.
+   Layer the soft original cream/plum atmospheric curves, while keeping post
+   bodies and active buttons opaque and readable. No extra decorative widgets. */
+body.page-confessions-figma {
+  background-color:#21151a;
+  background-image:
+    radial-gradient(ellipse 420px 400px at 96% 8%,rgba(248,237,226,.062),transparent 78%),
+    radial-gradient(ellipse 360px 480px at 0% 82%,rgba(248,237,226,.038),transparent 77%),
+    radial-gradient(ellipse 410px 330px at 64% 45%,rgba(94,53,75,.10),transparent 76%);
+  background-repeat:no-repeat;
+  background-attachment:scroll;
+}
+.page-confessions-figma .cf-toolbar,
+.page-confessions-figma .cf-card,
+.page-confessions-figma .cf-guidance {
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+}
+.page-confessions-figma .cf-toolbar {
+  background:rgba(48,33,40,.88);
+}
+.page-confessions-figma .cf-card {
+  background:rgba(48,33,40,.88);
+}
+@media (max-width:700px) {
+  body.page-confessions-figma {
+    background-image:
+      radial-gradient(ellipse 185px 210px at 102% 4%,rgba(248,237,226,.085),transparent 75%),
+      radial-gradient(ellipse 150px 180px at -12% 68%,rgba(248,237,226,.057),transparent 78%),
+      radial-gradient(ellipse 170px 190px at 88% 95%,rgba(94,53,75,.115),transparent 78%);
+    background-attachment:scroll;
+  }
+}
+@media (prefers-contrast:more) {
+  .page-confessions-figma .cf-toolbar,
+  .page-confessions-figma .cf-card,
+  .page-confessions-figma .cf-guidance {
+    backdrop-filter:none;
+    background:#302128;
+  }
+}
