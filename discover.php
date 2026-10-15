@@ -370,6 +370,52 @@ render_document_head('Home', $csrfToken, $currentUserId);
     <div class="beta-bar"><span class="beta-chip">BETA</span> Matching, chat and media features are being tested. Some features are not available yet.</div>
 </main>
 
+<!-- Desktop-only compact chat access while browsing far down the Home feed.
+     Same real matches and requests as the original chat strip; never demo data.
+     Not a claim of real-time message delivery or unread-message counts. -->
+<aside class="home-chat-dock" data-home-chat-dock inert aria-hidden="true"
+       aria-label="Quick access to your chats">
+    <div class="home-chat-dock__heading">
+        <span class="home-chat-dock__icon" aria-hidden="true">
+            <img src="<?= e(asset_path('preview/assets/icons/new-chat.svg')) ?>" alt="">
+        </span>
+        <span class="home-chat-dock__title">Your chats</span>
+        <?php if ($pendingCount > 0): ?>
+            <a class="home-chat-dock__requests" href="matches.php">
+                <?= e($pendingCount) ?> <?= $pendingCount === 1 ? 'request' : 'requests' ?>
+            </a>
+        <?php endif; ?>
+    </div>
+    <?php if ($establishedMatches !== [] || $pendingRequests !== []): ?>
+        <div class="home-chat-dock__people" aria-label="Recent matches and pending invitations">
+            <?php foreach (array_slice($establishedMatches, 0, 4) as $match): ?>
+                <?php $dockMatchName = trim((string) ($match['display_name'] ?? 'Student')); ?>
+                <a href="chat.php?match_id=<?= e($match['match_id']) ?>"
+                   class="home-chat-dock__person"
+                   title="<?= e($dockMatchName) ?>"
+                   aria-label="Open chat or invitation with <?= e($dockMatchName) ?>">
+                    <?= render_avatar($match['profile_photo_path'] ?? null, $dockMatchName) ?>
+                </a>
+            <?php endforeach; ?>
+            <?php foreach (array_slice($pendingRequests, 0, 2) as $request): ?>
+                <?php $dockRequestName = trim((string) ($request['display_name'] ?? 'Student')); ?>
+                <a href="chat.php?match_id=<?= e($request['match_id']) ?>"
+                   class="home-chat-dock__person home-chat-dock__person--pending"
+                   title="Pending invitation from <?= e($dockRequestName) ?>"
+                   aria-label="Review invitation from <?= e($dockRequestName) ?>">
+                    <?= render_avatar($request['profile_photo_path'] ?? null, $dockRequestName) ?>
+                    <span class="home-chat-dock__pending-dot" aria-hidden="true"></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <span class="home-chat-dock__empty">No conversations yet</span>
+    <?php endif; ?>
+    <a href="matches.php" class="home-chat-dock__all">
+        View chats <span aria-hidden="true">→</span>
+    </a>
+</aside>
+
 <footer class="site-footer">
     <span>For NUST students · 18+ only · Independent student project</span>
     <span class="links">

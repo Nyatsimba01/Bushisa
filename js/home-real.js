@@ -39,3 +39,44 @@
     }
   }
 })();
+
+
+/* Show a compact, read-only shortcut to the already-rendered chat list
+   after the original full-size chat section scrolls above the viewport.
+   No fabricated activity, network polling, timers or third-party animation. */
+(() => {
+  const chats = document.querySelector('body.home-figma-app .chats');
+  const dock = document.querySelector('[data-home-chat-dock]');
+  if (!chats || !dock) return;
+
+  const desktop = window.matchMedia('(min-width:761px)');
+  let framePending = false;
+  let isShown = false;
+
+  function updateDock() {
+    const shouldShow = desktop.matches && chats.getBoundingClientRect().bottom < 14;
+    if (shouldShow === isShown) return;
+
+    isShown = shouldShow;
+    if (!shouldShow && dock.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+    // Remove inactive navigation from keyboard and screen-reader focus.
+    dock.inert = !shouldShow;
+    dock.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+    dock.classList.toggle('is-visible', shouldShow);
+  }
+
+  function scheduleUpdate() {
+    if (framePending) return;
+    framePending = true;
+    requestAnimationFrame(() => {
+      framePending = false;
+      updateDock();
+    });
+  }
+
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate, { passive: true });
+  updateDock();
+})();
