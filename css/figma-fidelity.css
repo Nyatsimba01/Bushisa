@@ -800,3 +800,204 @@ body.bushisa-admin-dashboard .admin-main{
 @media(prefers-contrast:more) and (max-width:700px){
  body.page-confessions-figma .cf-card{background:#f8ede2;border-color:#d7a28e;color:#361d27}
 }
+
+/* ================================================================
+   Bushisa liquid-glass depth pass — additional Figma-like contours
+   (approved burgundy/plum gradient stays unchanged).
+
+   The important part is the layering: crisp soft rings sit ON THE
+   BACKDROP, under semitransparent cards. A small amount of the ring
+   is therefore visible through glass as the page scrolls naturally.
+   No animation tied to scrolling, and no touch-intercepting overlays.
+   ================================================================ */
+
+/* Extend the existing background ornament layer by only TWO
+   new nested ring clusters per viewport: one near the content,
+   another deeper into scroll. Keep the existing faint hairlines. */
+body.home-figma-app .main::after,
+body.page-match-figma .fm-main::after,
+body.page-confessions-figma .cf-main::after,
+body.page-you-figma .you-main::after {
+  background-image:
+    /* Figma-like high halo */
+    radial-gradient(circle at calc(100% - 26px) 230px,
+      transparent 0 140px,rgba(248,237,226,.085) 141px 142px,
+      transparent 143px 169px,rgba(244,181,152,.05) 170px 171px,
+      transparent 172px),
+    /* Original low-left halo */
+    radial-gradient(circle at -86px 1020px,
+      transparent 0 188px,rgba(244,181,152,.075) 189px 190px,
+      transparent 191px 212px,rgba(248,237,226,.05) 213px 214px,
+      transparent 215px),
+    /* New middle halo: deliberately crosses the glass card region */
+    radial-gradient(circle at calc(100% + 36px) 620px,
+      transparent 0 153px,rgba(248,237,226,.17) 154px 156px,
+      transparent 157px 175px,rgba(244,181,152,.09) 176px 177px,
+      transparent 178px),
+    /* New lower halo: seen while scrolling down */
+    radial-gradient(circle at -56px 1460px,
+      transparent 0 125px,rgba(244,181,152,.12) 126px 127px,
+      transparent 128px 152px,rgba(248,237,226,.067) 153px 154px,
+      transparent 155px),
+    linear-gradient(90deg,transparent,rgba(248,237,226,.088),transparent),
+    linear-gradient(90deg,transparent,rgba(244,181,152,.06),transparent);
+  background-repeat:no-repeat;
+  background-size:
+    100% 100%,100% 100%,100% 100%,100% 100%,
+    min(300px,65%) 1px,min(220px,55%) 1px;
+  background-position:
+    0 0,0 0,0 0,0 0,
+    right 5% top 380px,left 9% top 1080px;
+}
+
+/* This is the actual "liquid" effect: LOWER pane opacity,
+   LESS backdrop blur (so lines don't disappear), gentle edge
+   reflection. Text remains fully opaque above the panels. */
+body.home-figma-app :is(
+  .home-firstlook,.home-path,.home-empty-summary,.caught-up,
+  .beta-bar,.story-panel,.consent-panel,.home-quiet-chats,.chat-note),
+body.page-match-figma :is(.fm-compat-directory,.fm-compat-sidebar),
+body.page-confessions-figma :is(.cf-toolbar,.cf-guidance),
+body.page-you-figma :is(.you-editor-card,.you-anon-card,.you-settings-expander) {
+  background-color:rgba(59,41,49,.72);
+  -webkit-backdrop-filter:blur(6px) saturate(110%);
+  backdrop-filter:blur(6px) saturate(110%);
+  box-shadow:inset 0 1px 0 rgba(255,246,239,.09),
+             0 12px 34px rgba(17,8,13,.12);
+}
+/* A background-image can paint OVER a background-color. Keep
+   Home's authored photo/glow assets and subtle card gradients;
+   only the semitransparent base behind them is adjusted. */
+body.home-figma-app .figma-profile-card {
+  background-color:rgba(48,33,40,.72);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+body.page-confessions-figma .cf-card {
+  background-color:rgba(48,33,40,.72);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  box-shadow:inset 0 1px 0 rgba(255,246,239,.075),
+             0 12px 36px rgba(14,7,12,.19);
+}
+
+/* Admin already has exact exported geometry for two large rings,
+   retained as ::before/::after. A third, very faint ring travels
+   under translucent metric and management panels further down. */
+body.bushisa-admin-dashboard .admin-main {
+  background-image:
+    radial-gradient(circle at calc(100% - 180px) 700px,
+      transparent 0 127px,rgba(248,237,226,.115) 128px 129px,
+      transparent 130px 146px,rgba(244,181,152,.055) 147px 148px,
+      transparent 149px),
+    linear-gradient(90deg,transparent,rgba(248,237,226,.065),transparent),
+    linear-gradient(90deg,transparent,rgba(244,181,152,.045),transparent),
+    radial-gradient(ellipse 360px 270px at calc(100% - 275px) 279px,
+      rgba(94,53,75,.11),transparent 94%),
+    linear-gradient(145deg,#401a2c 0%,#2b1923 57%,#23191b 100%)!important;
+  background-size:
+    100% 100%,min(290px,45%) 1px,min(215px,37%) 1px,auto,auto;
+  background-position:
+    0 0,right 7% top 375px,left 14% top 1000px,center,center;
+  background-repeat:no-repeat;
+}
+body.bushisa-admin-dashboard :is(
+  .admin-metric,.admin-users-directory,.admin-users-mobile-card,
+  .admin-confessions-directory,.admin-confessions-guidance,
+  .admin-reports-directory,.admin-reports-guidance,
+  .admin-moderation-directory,.admin-moderation-guidance) {
+  background-color:rgba(59,41,49,.72);
+  -webkit-backdrop-filter:blur(7px) saturate(110%);
+  backdrop-filter:blur(7px) saturate(110%);
+  box-shadow:inset 0 1px 0 rgba(255,246,239,.07),
+             0 10px 28px rgba(17,8,13,.08);
+}
+
+/* On a phone the glass-post card stays CREAM with dark readable
+   type; translucency is subtle, not a darkened text overlay. */
+@media (max-width:700px) {
+  body.page-confessions-figma .cf-card {
+    background:rgba(248,237,226,.92);
+    color:#361d27;
+    border:1px solid rgba(244,181,152,.82);
+    -webkit-backdrop-filter:blur(2px);
+    backdrop-filter:blur(2px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6),
+               0 12px 36px rgba(26,10,18,.19);
+  }
+  body.page-confessions-figma .cf-card .cf-bubble {
+    background:transparent;
+    color:#361d27;
+  }
+  body.page-confessions-figma .cf-card .cf-bubble__body {
+    color:#361d27;
+    -webkit-text-fill-color:#361d27;
+    opacity:1;
+    text-shadow:none;
+  }
+  /* Existing main ring at top right, new glass-cutting arc in the
+     middle, plus a secondary ring encountered lower on the page. */
+  body.home-figma-app .main::after,
+  body.page-match-figma .fm-main::after,
+  body.page-confessions-figma .cf-main::after,
+  body.page-you-figma .you-main::after {
+    background-image:
+      radial-gradient(circle at calc(100% + 25px) 165px,
+        transparent 0 106px,rgba(248,237,226,.09) 107px 108px,
+        transparent 109px 130px,rgba(244,181,152,.048) 131px 132px,
+        transparent 133px),
+      radial-gradient(circle at -54px 860px,
+        transparent 0 130px,rgba(244,181,152,.095) 131px 132px,
+        transparent 133px),
+      radial-gradient(circle at calc(100% + 48px) 455px,
+        transparent 0 150px,rgba(248,237,226,.23) 151px 153px,
+        transparent 154px 178px,rgba(244,181,152,.115) 179px 180px,
+        transparent 181px),
+      radial-gradient(circle at -38px 1350px,
+        transparent 0 122px,rgba(244,181,152,.13) 123px 124px,
+        transparent 125px),
+      linear-gradient(90deg,transparent,rgba(248,237,226,.075),transparent),
+      linear-gradient(90deg,transparent,rgba(244,181,152,.049),transparent);
+    background-repeat:no-repeat;
+    background-size:100% 100%,100% 100%,100% 100%,100% 100%,
+                    min(165px,60%) 1px,min(125px,48%) 1px;
+    background-position:0 0,0 0,0 0,0 0,
+                        right 20px top 280px,left 22px top 950px;
+  }
+  /* Admin mobile original rings remain in place, extra contour
+     shrinks to the scale of the existing floating-pill layout. */
+  body.bushisa-admin-dashboard .admin-main {
+    background-image:
+      radial-gradient(circle at calc(100% + 28px) 670px,
+        transparent 0 104px,rgba(248,237,226,.12) 105px 106px,
+        transparent 107px 122px,rgba(244,181,152,.055) 123px 124px,
+        transparent 125px),
+      linear-gradient(90deg,transparent,rgba(248,237,226,.055),transparent),
+      linear-gradient(145deg,#401a2c,#2b1923 57%,#23191b)!important;
+    background-size:100% 100%,min(165px,60%) 1px,auto;
+    background-position:0 0,right 12px top 320px,center;
+  }
+}
+@media (prefers-contrast:more) {
+  body.home-figma-app .main::after,
+  body.page-match-figma .fm-main::after,
+  body.page-confessions-figma .cf-main::after,
+  body.page-you-figma .you-main::after {display:none}
+  body.home-figma-app :is(.story-panel,.consent-panel,.home-firstlook),
+  body.page-match-figma :is(.fm-compat-directory,.fm-compat-sidebar),
+  body.page-confessions-figma :is(.cf-toolbar,.cf-guidance),
+  body.page-you-figma :is(.you-editor-card,.you-anon-card),
+  body.bushisa-admin-dashboard :is(.admin-metric,.admin-users-directory) {
+    background-color:#302128;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
+@media (prefers-contrast:more) and (max-width:700px) {
+  body.page-confessions-figma .cf-card {
+    background:#f8ede2;
+    color:#361d27;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
