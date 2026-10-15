@@ -197,12 +197,43 @@ body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confes
 /* Mobile uses the exact shorter SVG artwork from the approved Figma
    screens rather than scaling the large desktop halos out of proportion. */
 @media (max-width: 750px) {
-  body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confessions) .admin-main {
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confessions):not(.bushisa-admin-reports):not(.bushisa-admin-moderation) .admin-main {
     background-image:
       url("../assets/admin/users-mobile-halo-top.svg"),
       url("../assets/admin/users-mobile-halo-bottom.svg");
     background-repeat: no-repeat, no-repeat;
     background-position: right top, left bottom 16px;
     background-size: 90px 175px, 110px 270px;
+  }
+}
+
+
+/* Figma-inspired translucent surfaces: the warm 5%-opacity wash and the
+   genuine existing SVG halo assets now remain perceptible behind the
+   Dashboard's information cards, without whitening text or changing layout.
+   Users/Confessions/Reports/Moderation keep their existing glass treatments. */
+body.bushisa-admin-dashboard .admin-metric {
+  background-color:rgba(48,33,40,.92);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+body.bushisa-admin-dashboard .admin-panel {
+  background-color:rgba(48,33,40,.93);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+body.bushisa-admin-dashboard .admin-alert {
+  background-color:rgba(59,41,49,.91);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+/* Base admin metrics sit on a painted fallback and are translucent only
+   where browser support allows it. Core contrast stays readable. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  body.bushisa-admin-dashboard :is(.admin-metric,.admin-panel) {
+    background-color:#302128;
+  }
+  body.bushisa-admin-dashboard .admin-alert{
+    background-color:#3b2931;
   }
 }
