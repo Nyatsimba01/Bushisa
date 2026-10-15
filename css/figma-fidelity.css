@@ -1001,3 +1001,177 @@ body.bushisa-admin-dashboard :is(
     backdrop-filter:none;
   }
 }
+
+/* ================================================================
+   ADMIN GLASS + MOBILE DOCK CORRECTION
+   Reference: iPhone SE Overview screenshot, 15 Oct 2026.
+   Keep the existing gradient and original Figma ring geometry.
+   The blur applies to GLASS PANELS, not their text or the dock's
+   containing ancestor. No PHP/JS/DB edits are needed.
+   ================================================================ */
+
+/* Main dashboard alert and cards were still using opaque CSS variables.
+   These fills are translucent enough for rings to show through, while
+   inset lighting/reflections help keep outlines clear. */
+body.bushisa-admin-dashboard :is(
+  .admin-alert,.admin-panel,.admin-metric,
+  .admin-preview-tag,.admin-empty-queue,.admin-review-queue,
+  .admin-users-directory,.admin-users-mobile-card,
+  .admin-confessions-notice,.admin-confessions-filters,
+  .admin-confessions-directory,.admin-confessions-guidance,
+  .admin-confessions-post,
+  .admin-reports-notice,.admin-reports-filters,
+  .admin-reports-directory,.admin-reports-guidance,.admin-reports-post,
+  .admin-moderation-notice,.admin-moderation-filters,
+  .admin-moderation-directory,.admin-moderation-guidance,.admin-moderation-case
+){
+  background:rgba(59,41,49,.57);
+  -webkit-backdrop-filter:blur(4px) saturate(112%);
+  backdrop-filter:blur(4px) saturate(112%);
+  border-color:rgba(197,150,165,.31);
+  box-shadow:inset 0 1px 0 rgba(255,246,239,.10),
+             0 11px 30px rgba(15,7,12,.105);
+}
+/* Preserve layered hierarchy: the active alert and inner empty states are
+   slightly more opaque than the top-level glass metric cards. */
+body.bushisa-admin-dashboard :is(.admin-alert,.admin-empty-queue,.admin-review-queue){
+  background:rgba(59,41,49,.64);
+}
+body.bushisa-admin-dashboard .admin-preview-tag{
+  background:rgba(67,47,57,.66);
+}
+/* The background remains visible behind panels. Short hairline strokes
+   and the previous Figma circles are retained; add a single gentle arc
+   across the right-side metric area, rather than covering the page. */
+body.bushisa-admin-dashboard .admin-main{
+  background-image:
+    radial-gradient(circle at calc(100% + 12px) 555px,
+      transparent 0 116px,rgba(248,237,226,.15) 117px 118px,
+      transparent 119px 141px,rgba(244,181,152,.065) 142px 143px,
+      transparent 144px),
+    radial-gradient(circle at calc(100% - 180px) 700px,
+      transparent 0 127px,rgba(248,237,226,.10) 128px 129px,
+      transparent 130px 146px,rgba(244,181,152,.048) 147px 148px,
+      transparent 149px),
+    linear-gradient(90deg,transparent,rgba(248,237,226,.065),transparent),
+    linear-gradient(90deg,transparent,rgba(244,181,152,.045),transparent),
+    radial-gradient(ellipse 360px 270px at calc(100% - 275px) 279px,
+      rgba(94,53,75,.11),transparent 94%),
+    linear-gradient(145deg,#401a2c 0%,#2b1923 57%,#23191b 100%)!important;
+  background-repeat:no-repeat;
+  background-size:
+    100% 100%,100% 100%,
+    min(290px,45%) 1px,min(215px,37%) 1px,auto,auto;
+  background-position:
+    0 0,0 0,
+    right 7% top 375px,left 14% top 1000px,center,center;
+}
+
+/* Gentle response on mouse/trackpad devices only. Do not animate whole
+   cards on touch scrolling, and keep all action buttons enabled. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  body.bushisa-admin-dashboard :is(
+    .admin-metric,.admin-panel,
+    .admin-users-mobile-card,.admin-confessions-post,
+    .admin-reports-post,.admin-moderation-case
+  ){
+    transition:background-color .22s ease,border-color .22s ease,
+               box-shadow .22s ease,transform .22s ease;
+  }
+  body.bushisa-admin-dashboard :is(
+    .admin-metric,.admin-panel,
+    .admin-users-mobile-card,.admin-confessions-post,
+    .admin-reports-post,.admin-moderation-case
+  ):hover{
+    background-color:rgba(72,48,61,.66);
+    border-color:rgba(244,181,152,.40);
+    transform:translateY(-2px);
+    box-shadow:inset 0 1px 0 rgba(255,246,239,.13),
+               0 15px 34px rgba(15,7,12,.15);
+  }
+}
+
+/* The root cause of the dock stuck below the logo:
+   backdrop-filter on .admin-sidebar establishes a containing block for
+   position:fixed descendants. Remove ONLY that mobile ancestor filter,
+   keeping backdrop blur ON the actual navigation pill. */
+@media(max-width:750px){
+  body.bushisa-admin-dashboard .admin-sidebar{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    filter:none!important;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav{
+    position:fixed!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:max(12px,env(safe-area-inset-bottom,0px))!important;
+    left:50%!important;
+    transform:translateX(-50%)!important;
+    z-index:140;
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:center;
+    gap:2px;
+    box-sizing:border-box;
+    width:min(420px,calc(100vw - 24px));
+    min-height:56px;
+    padding:6px;
+    overflow:visible;
+    border:1px solid rgba(248,237,226,.18);
+    border-radius:21px;
+    background:rgba(53,36,46,.69);
+    -webkit-backdrop-filter:blur(18px) saturate(120%);
+    backdrop-filter:blur(18px) saturate(120%);
+    box-shadow:0 16px 38px rgba(16,7,13,.38),
+               inset 0 1px 0 rgba(255,246,239,.11);
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav__link{
+    min-height:42px;
+    border-radius:15px;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav__link.is-current{
+    background:rgba(124,76,99,.74);
+    border-color:rgba(244,181,152,.25);
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-main{
+    padding-bottom:calc(118px + env(safe-area-inset-bottom,0px));
+  }
+  /* Admin: preserve the desktop Figma pseudo-element rings and size the
+     newer background contour to meet glass alerts/statistic panels. */
+  body.bushisa-admin-dashboard .admin-main{
+    background-image:
+      radial-gradient(circle at calc(100% + 48px) 385px,
+        transparent 0 115px,rgba(248,237,226,.19) 116px 118px,
+        transparent 119px 141px,rgba(244,181,152,.09) 142px 143px,
+        transparent 144px),
+      radial-gradient(circle at calc(100% + 28px) 685px,
+        transparent 0 104px,rgba(248,237,226,.12) 105px 106px,
+        transparent 107px 122px,rgba(244,181,152,.055) 123px 124px,
+        transparent 125px),
+      linear-gradient(90deg,transparent,rgba(248,237,226,.055),transparent),
+      linear-gradient(145deg,#401a2c,#2b1923 57%,#23191b)!important;
+    background-size:100% 100%,100% 100%,min(165px,60%) 1px,auto;
+    background-position:0 0,0 0,right 12px top 320px,center;
+    background-repeat:no-repeat;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.bushisa-admin-dashboard :is(.admin-metric,.admin-panel,.admin-nav__link){
+    transition:none!important;
+    animation:none!important;
+  }
+}
+@media(prefers-contrast:more){
+  body.bushisa-admin-dashboard :is(
+    .admin-alert,.admin-panel,.admin-metric,
+    .admin-preview-tag,.admin-empty-queue,.admin-review-queue,
+    .admin-users-directory,.admin-confessions-directory,
+    .admin-reports-directory,.admin-moderation-directory
+  ){
+    background:#302128;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    border-color:#7a5c69;
+  }
+}
