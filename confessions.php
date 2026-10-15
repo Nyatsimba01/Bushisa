@@ -345,7 +345,6 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                             <div class="cf-bubble">
                                 <p class="cf-bubble__body"><?= e((string) ($confession['body'] ?? '')) ?></p>
                                 <div class="cf-bubble__actions">
-                                    <span class="cf-bubble__views"><?= e((string) $views) ?> <?= $views === 1 ? 'view' : 'views' ?></span>
                                     <div class="cf-bubble__links">
                                         <?php if ($isOwnConfession): ?>
                                             <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>" class="cf-action-form">
