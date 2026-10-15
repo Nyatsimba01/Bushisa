@@ -259,3 +259,140 @@ body.bushisa-admin-dashboard .admin-users-directory {
     backdrop-filter:none;
   }
 }
+
+/* ==============================================================
+   FIGMA EXACT-GEOMETRY ADMIN AMBIENT LAYERS — 2026-10-15 AUDIT
+
+   Figma frames: Users 83:18, Confessions 99:34, Reports 99:489,
+   Moderation 99:944. Each has identical source ellipse vectors:
+   upper right: x930 y-195, 350x350, stroke 22, #F4B598 / .075
+   lower left: x-191 y905, 360x360, stroke 28, #E0B2C1 / .085
+   (coordinates measured relative to the 1194px workspace).
+
+   These are CSS vector circles using source Figma geometry, not
+   flattened screenshot backgrounds or invented gradients.
+   Crucially they render even on XAMPP installations where the
+   optional assets/admin/*.svg files were never copied.
+   ============================================================== */
+body.bushisa-admin-dashboard .admin-main {
+  position:relative;
+  isolation:isolate;
+  overflow:clip;
+  background-color:#21151a;
+  /* The Figma background has a very faint wash BELOW translucent panels.
+     The rings themselves are independent absolute vector layers. */
+  background-image:
+    radial-gradient(ellipse 360px 270px at calc(100% - 275px) 279px,
+      rgba(94,53,75,.05) 0%,rgba(94,53,75,.025) 65%,transparent 100%) !important;
+  background-repeat:no-repeat;
+}
+body.bushisa-admin-dashboard .admin-main::before,
+body.bushisa-admin-dashboard .admin-main::after {
+  content:"";
+  display:block;
+  position:absolute;
+  z-index:0;
+  pointer-events:none;
+  box-sizing:border-box;
+  border-radius:50%;
+  background:none;
+  opacity:1;
+  width:auto;
+  height:auto;
+  box-shadow:none;
+  filter:none;
+  transform:none;
+}
+body.bushisa-admin-dashboard .admin-main::before {
+  /* Figma upper-right ring, including stroke aligned inside the 350px box. */
+  width:350px;
+  height:350px;
+  top:-195px;
+  right:-86px;
+  left:auto;
+  bottom:auto;
+  border:22px solid rgba(244,181,152,.075);
+}
+body.bushisa-admin-dashboard .admin-main::after {
+  width:360px;
+  height:360px;
+  left:-191px;
+  top:905px;
+  right:auto;
+  bottom:auto;
+  border:28px solid rgba(224,178,193,.085);
+}
+body.bushisa-admin-dashboard .admin-main > * {
+  position:relative;
+  z-index:1;
+}
+/* Figma glass fill remains translucent without lowering TEXT opacity. */
+body.bushisa-admin-dashboard .admin-metric,
+body.bushisa-admin-dashboard .admin-users-directory,
+body.bushisa-admin-dashboard .admin-users-mobile-card,
+body.bushisa-admin-dashboard .admin-confessions-directory,
+body.bushisa-admin-dashboard .admin-confessions-guidance,
+body.bushisa-admin-dashboard .admin-confessions-post,
+body.bushisa-admin-dashboard .admin-reports-directory,
+body.bushisa-admin-dashboard .admin-reports-guidance,
+body.bushisa-admin-dashboard .admin-reports-post,
+body.bushisa-admin-dashboard .admin-moderation-directory,
+body.bushisa-admin-dashboard .admin-moderation-guidance,
+body.bushisa-admin-dashboard .admin-moderation-case {
+  background-color:rgba(59,41,49,.82);
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+}
+/* The Figma mobile halo lives 79px below the admin MAIN start,
+   because the independent mobile masthead is 77px tall. */
+@media (max-width:750px) {
+  body.bushisa-admin-dashboard .admin-main {
+    background-image:
+      radial-gradient(ellipse 175px 200px at calc(100% - 45px) 245px,
+        rgba(94,53,75,.055),transparent 80%) !important;
+  }
+  body.bushisa-admin-dashboard .admin-main::before {
+    width:175px;
+    height:175px;
+    right:-85px;
+    top:79px;
+    left:auto;
+    border:16px solid rgba(244,181,152,.09);
+  }
+  body.bushisa-admin-dashboard .admin-main::after {
+    width:270px;
+    height:270px;
+    left:-160px;
+    top:1503px;
+    right:auto;
+    bottom:auto;
+    border:16px solid rgba(244,181,152,.07);
+  }
+}
+/* Figma reference screenshots show these decorations STATIC. We allow
+   only a 4px atmospheric float on desktop; motion is non-interactive,
+   cannot capture clicks, and is removed for reduced-motion users. */
+@media (min-width:751px) and (prefers-reduced-motion:no-preference) {
+  body.bushisa-admin-dashboard .admin-main::before {
+    animation:bushisa-figma-ring-drift 26s ease-in-out infinite alternate;
+  }
+}
+@keyframes bushisa-figma-ring-drift {
+  from {transform:translate3d(0,0,0)}
+  to {transform:translate3d(-4px,3px,0)}
+}
+@media (prefers-reduced-motion:reduce) {
+  body.bushisa-admin-dashboard .admin-main::before,
+  body.bushisa-admin-dashboard .admin-main::after {animation:none!important}
+}
+@media (prefers-contrast:more) {
+  body.bushisa-admin-dashboard .admin-metric,
+  body.bushisa-admin-dashboard .admin-users-directory,
+  body.bushisa-admin-dashboard .admin-confessions-directory,
+  body.bushisa-admin-dashboard .admin-reports-directory,
+  body.bushisa-admin-dashboard .admin-moderation-directory {
+    background-color:#302128;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
