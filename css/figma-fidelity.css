@@ -347,3 +347,245 @@ body.page-you-figma .you-editor-card {
     box-shadow:none;
   }
 }
+
+/* ===========================================================================
+   BUSHISA HOME — FIGMA GLASS OVERRIDE (4:2737 desktop, 4:3145 mobile).
+   Matches the source screenshot without replacing authentic PHP feed data.
+   Figma SVG assets below were exported from original design nodes, rather
+   than painted-over screenshots or approximate stock image backgrounds.
+   Scoped exclusively to the student Home page /discover.php.
+   =========================================================================== */
+
+/* ORIGINAL ambient art:
+   12:4 peach 420px at x-120 y-120 with 120px Figma blur;
+   12:5 cream 320px at x980 y-80 with 110px Figma blur;
+   12:6 cream 260px at x760 y72 with 96px Figma blur.
+   Coordinates remain centered on Figma's 1280px desktop canvas. */
+body.home-figma-app {
+  background-color:#21151a;
+  background-image:
+    url("../assets/figma/home/ambient-desktop-peach.svg"),
+    url("../assets/figma/home/ambient-desktop-cream.svg"),
+    url("../assets/figma/home/ambient-desktop-center.svg"),
+    radial-gradient(ellipse 560px 360px at 70% 11%,rgba(74,36,52,.095),transparent 84%);
+  background-repeat:no-repeat;
+  background-size:420px 420px,320px 320px,260px 260px,auto;
+  background-position:
+    left calc(50% - 760px) top -120px,
+    left calc(50% + 340px) top -80px,
+    left calc(50% + 120px) top 72px,
+    center top;
+}
+
+/* The Figma header is layered over the ambient art, not a solid rectangle. */
+body.home-figma-app .site-header {
+  background:rgba(33,21,26,.76);
+  border-bottom:1px solid rgba(248,237,226,.085);
+  -webkit-backdrop-filter:blur(15px);
+  backdrop-filter:blur(15px);
+}
+body.home-figma-app .desktop-nav a.active {
+  background:rgba(76,50,65,.76);
+  border:1px solid rgba(244,181,152,.12);
+}
+body.home-figma-app .preview-banner {
+  background:rgba(74,36,52,.4);
+  border-bottom:1px solid rgba(244,181,152,.065);
+}
+
+/* Chat strip follows Figma's airy spacing, with quiet frosted consent note. */
+body.home-figma-app .chat-note,
+body.home-figma-app .home-quiet-chats {
+  background:rgba(46,31,40,.68);
+  border:1px solid rgba(244,181,152,.13);
+  -webkit-backdrop-filter:blur(13px);
+  backdrop-filter:blur(13px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+body.home-figma-app .chats-strip .new-circle {
+  background:rgba(46,31,40,.65);
+  border-color:rgba(248,237,226,.19);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+
+/* Figma's extra blurred peach ellipse (17:249), behind the suggested cards. */
+body.home-figma-app .suggestions {
+  position:relative;
+  isolation:isolate;
+}
+body.home-figma-app .suggestions::before {
+  content:"";
+  display:block;
+  position:absolute;
+  top:-40px;
+  left:-60px;
+  width:240px;
+  height:240px;
+  background:url("../assets/figma/home/ambient-suggestions.svg") no-repeat 0 0 / 240px 240px;
+  opacity:1;
+  pointer-events:none;
+  z-index:0;
+}
+body.home-figma-app .suggestions > * {
+  position:relative;
+  z-index:1;
+}
+
+/* Main Figma discovery cards have a deep glass lower panel, a blurred
+   photo-chip and cream highlight on top; real profile images stay unaltered. */
+body.home-figma-app .figma-profile-card {
+  border:1px solid rgba(248,237,226,.09);
+  background:rgba(48,33,40,.82);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  box-shadow:0 16px 48px rgba(13,7,12,.25),
+             inset 0 1px 0 rgba(255,255,255,.045);
+  transition:box-shadow .24s ease,border-color .24s ease,transform .24s ease;
+}
+body.home-figma-app .figma-profile-card .profile-content {
+  background:linear-gradient(180deg,rgba(59,41,49,.66),rgba(48,33,40,.75));
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+body.home-figma-app .figma-profile-card .prompt-box {
+  background:rgba(80,54,66,.49);
+  border:1px solid rgba(248,237,226,.055);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  -webkit-backdrop-filter:blur(9px);
+  backdrop-filter:blur(9px);
+}
+body.home-figma-app .figma-profile-card :is(.tag,.small-action,.confess-button) {
+  border:1px solid rgba(244,181,152,.11);
+  background-color:rgba(81,49,63,.62);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+body.home-figma-app .figma-profile-card .overlay-action {
+  background:rgba(44,28,40,.70);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  box-shadow:0 5px 24px rgba(0,0,0,.20);
+}
+body.home-figma-app .figma-profile-card .profile-picture::after {
+  background:linear-gradient(0deg,rgba(48,33,40,.95) 0%,rgba(48,33,40,.56) 33%,transparent 100%);
+}
+body.home-figma-app .figma-profile-card .circle-action:not(.like) {
+  background:rgba(73,49,63,.57);
+  border-color:rgba(248,237,226,.17);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+body.home-figma-app .figma-profile-card .circle-action.like {
+  box-shadow:0 6px 22px rgba(244,181,152,.15);
+}
+
+/* The story and consent panels use the original Figma per-card glow SVGs.
+   No extra artwork is added over student profile photos. */
+body.home-figma-app .story-panel,
+body.home-figma-app .consent-panel {
+  border:1px solid rgba(248,237,226,.09);
+  background-color:rgba(59,41,49,.76);
+  background-repeat:no-repeat;
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 12px 38px rgba(13,7,12,.12);
+}
+body.home-figma-app .story-panel {
+  background-image:url("../assets/figma/home/glow-story.svg");
+  background-size:140px 140px;
+  background-position:right 12px bottom 10px;
+}
+body.home-figma-app .consent-panel {
+  background-image:url("../assets/figma/home/glow-consent.svg");
+  background-size:100px 100px;
+  background-position:left -16px top -16px;
+}
+body.home-figma-app :is(.home-firstlook,.home-path,.home-empty-summary,.caught-up,.beta-bar) {
+  border:1px solid rgba(248,237,226,.09);
+  background-color:rgba(59,41,49,.76);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+body.home-figma-app .home-firstlook {
+  background-image:linear-gradient(118deg,rgba(74,36,52,.40),rgba(48,33,40,.64));
+}
+body.home-figma-app .home-path--featured {
+  background:linear-gradient(110deg,rgba(95,49,69,.79),rgba(74,36,52,.72));
+}
+
+/* Prefer subtle, useful movement to an animated page full of distractions. */
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+  body.home-figma-app .figma-profile-card:hover {
+    border-color:rgba(244,181,152,.26);
+    box-shadow:0 21px 58px rgba(13,7,12,.31),
+               inset 0 1px 0 rgba(255,255,255,.07);
+    transform:translateY(-2px);
+  }
+  body.home-figma-app .suggestions::before {
+    animation:bushisa-home-ambient-float 24s ease-in-out infinite alternate;
+  }
+}
+@keyframes bushisa-home-ambient-float {
+  from {transform:translate3d(0,0,0)}
+  to {transform:translate3d(5px,-4px,0)}
+}
+
+/* Figma mobile 390px artwork:
+   12:36 peach x-60 y-40 (220px), 12:37 cream x250 y420 (180px).
+   The floating dock is a 60%-opaque glass pill, background blur 20px,
+   with the exported 17:96 peach glow behind its active Home item. */
+@media (max-width:700px) {
+  body.home-figma-app {
+    background-image:
+      url("../assets/figma/home/ambient-mobile-peach.svg"),
+      url("../assets/figma/home/ambient-mobile-cream.svg");
+    background-size:220px 220px,180px 180px;
+    background-position:left -60px top -40px,right -40px top 420px;
+    background-repeat:no-repeat;
+  }
+  body.home-figma-app .site-header {
+    background:rgba(33,21,26,.82);
+  }
+  body.home-figma-app .figma-profile-card {
+    border-color:rgba(248,237,226,.10);
+  }
+  body.home-figma-app .suggestions::before {
+    display:none;
+  }
+  body.home-figma-app .bottom-nav {
+    background-color:rgba(46,30,38,.64);
+    background-image:url("../assets/figma/home/glow-mobile-dock.svg");
+    background-repeat:no-repeat;
+    background-size:120px 100px;
+    background-position:left -20px top -20px;
+    border:1px solid rgba(248,237,226,.12);
+    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(20px);
+    box-shadow:0 14px 35px rgba(16,8,14,.35),
+               inset 0 1px 0 rgba(255,255,255,.065);
+  }
+  body.home-figma-app .bottom-nav a.active {
+    background:rgba(74,36,52,.9);
+  }
+}
+
+/* Respect user accessibility preferences and preserve readable content. */
+@media (prefers-reduced-motion:reduce) {
+  body.home-figma-app .suggestions::before,
+  body.home-figma-app .figma-profile-card {
+    animation:none!important;
+    transition:none!important;
+    transform:none!important;
+  }
+}
+@media (prefers-contrast:more) {
+  body.home-figma-app :is(.figma-profile-card,.story-panel,.consent-panel,.home-firstlook,.home-path,.home-empty-summary),
+  body.home-figma-app .figma-profile-card .profile-content,
+  body.home-figma-app .figma-profile-card .prompt-box {
+    background-color:#302128;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
