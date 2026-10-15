@@ -301,6 +301,17 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
   <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Seeing how things unfold"<?= $isChecked('connection_pace','Seeing how things unfold') ?>><span class="fm-option-copy"><strong>Seeing how things unfold</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
   <label class="fm-option"><input type="radio" name="connection_pace" data-answer-key="connection_pace" data-optional-answer value="Making plans when ready"<?= $isChecked('connection_pace','Making plans when ready') ?>><span class="fm-option-copy"><strong>Making plans when ready</strong></span><span class="fm-select-indicator" aria-hidden="true"></span></label>
 </fieldset>
+ <div class="fm-mini-question">
+  <p class="fm-followup-question">What would make a first meet-up feel comfortable?</p>
+  <fieldset class="fm-choices fm-extra-choices" aria-label="Preferred first meet-up">
+   <?php foreach (['Coffee or a walk', 'A campus activity', 'Somewhere familiar', 'Decide together'] as $firstMeet): ?>
+    <label class="fm-option">
+     <input type="radio" name="first_meet_style" data-answer-key="first_meet_style" data-optional-answer value="<?= e($firstMeet) ?>"<?= $isChecked('first_meet_style',$firstMeet) ?>>
+     <span class="fm-option-copy"><strong><?= e($firstMeet) ?></strong></span><span class="fm-select-indicator" aria-hidden="true"></span>
+    </label>
+   <?php endforeach; ?>
+  </fieldset>
+ </div>
  <button type="button" class="fm-clear-extra" data-clear-extra>Clear these optional answers</button>
  </div>
 </details>
