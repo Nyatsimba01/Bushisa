@@ -2,11 +2,16 @@
    Scoped to admin/confessions.php; does not affect the student feed.
    Inherits the approved admin base styles and theme from admin-dashboard.css. */
 body.bushisa-admin-confessions{background:#21151a;color:#f8ede2}
+/* Exact halo SVGs from the approved Figma Confessions frame (99:58, 99:59).
+   Match Users' Figma rings, not a synthetic gradient approximation. */
 .bushisa-admin-confessions .admin-confessions-main{
   position:relative;isolation:isolate;min-height:100dvh;
-  background:
-    radial-gradient(circle at 105% 2%,rgba(105,70,88,.13) 0 13%,transparent 13.2%),
-    radial-gradient(circle at -8% 100%,rgba(105,70,88,.13) 0 15%,transparent 15.2%);
+  background-image:
+    url("../assets/admin/users-desktop-halo-top.svg"),
+    url("../assets/admin/users-desktop-halo-bottom.svg");
+  background-repeat:no-repeat,no-repeat;
+  background-position:right top,left bottom;
+  background-size:264px 155px,169px 305px;
 }
 .bushisa-admin-confessions .admin-confessions-mobile-top,
 .bushisa-admin-confessions .admin-confessions-bottom-nav{display:none}
@@ -228,4 +233,17 @@ body.bushisa-admin-confessions{background:#21151a;color:#f8ede2}
 }
 @media(prefers-reduced-motion:reduce){
  .bushisa-admin-confessions *{scroll-behavior:auto}
+}
+
+/* On a 390px Figma mobile canvas the halos use their native cropped sizes.
+   The separate 77px top bar stays unmodified, and main begins below it. */
+@media(max-width:750px){
+  .bushisa-admin-confessions .admin-confessions-main{
+    background-image:
+      url("../assets/admin/users-mobile-halo-top.svg"),
+      url("../assets/admin/users-mobile-halo-bottom.svg");
+    background-repeat:no-repeat,no-repeat;
+    background-position:right 0 top 79px,left 0 bottom 16px;
+    background-size:90px 175px,110px 270px;
+  }
 }
