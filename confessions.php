@@ -14,6 +14,7 @@ require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/frontend.php';
 require_once __DIR__ . '/php/operational.php';
 require_once __DIR__ . '/php/confession_reports.php';
+require_once __DIR__ . '/php/confession_interactions.php';
 
 require_login();
 ensure_operational_schema($pdo);
@@ -25,6 +26,10 @@ $reportError = null;
 $reportSuccess = isset($_SESSION['confession_report_notice']) && is_string($_SESSION['confession_report_notice'])
     ? $_SESSION['confession_report_notice'] : null;
 unset($_SESSION['confession_report_notice']);
+$interactionNotice = isset($_SESSION['confession_interaction_notice']) && is_string($_SESSION['confession_interaction_notice'])
+    ? $_SESSION['confession_interaction_notice'] : null;
+unset($_SESSION['confession_interaction_notice']);
+$interactionError = null;
 $reportPostId = null;
 $csrfToken = null;
 $confessions = [];
@@ -43,18 +48,20 @@ $confessionColumns = $columnStatement !== false ? $columnStatement->fetchAll(PDO
 $usesUserContentSchema = in_array('user_id', $confessionColumns, true) && in_array('content', $confessionColumns, true);
 $usesAuthorBodySchema = in_array('author_id', $confessionColumns, true) && in_array('body', $confessionColumns, true);
 
-$countStatement = $pdo->query('SELECT COUNT(*) FROM confessions WHERE is_flagged = 0');
-$totalConfessions = $countStatement !== false ? (int) $countStatement->fetchColumn() : 0;
-$total_pages = $totalConfessions > 0 ? (int) ceil($totalConfessions / $perPage) : 1;
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $submittedToken = isset($_POST['csrf_token']) && is_string($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
     $isReporting = isset($_POST['report_confession']);
+    $isLikeAction = isset($_POST['toggle_like']);
+    $isOwnDeleteAction = isset($_POST['delete_own_confession']);
     $reportPostId = $isReporting ? clean_int($_POST['confession_id'] ?? null) : null;
+    $interactionPostId = ($isLikeAction || $isOwnDeleteAction)
+        ? clean_int($_POST['confession_id'] ?? null) : null;
 
     if ($submittedToken === '' || !validate_csrf_token($submittedToken)) {
         if ($isReporting) {
             $reportError = 'Invalid report form. Please try again.';
+        } elseif ($isLikeAction || $isOwnDeleteAction) {
+            $interactionError = 'Invalid action form. Please refresh and try again.';
         } else {
             $error = 'Invalid form submission. Please try again.';
         }
@@ -67,6 +74,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('confessions.php?sort=' . $sort . '&page=' . $page);
         }
         $reportError = $result['error'] ?? 'Unable to send this report.';
+    } elseif ($isLikeAction || $isOwnDeleteAction) {
+        // Only the logged-in account can like, or delete its own confession.
+        $result = $isLikeAction
+            ? bushisa_toggle_confession_like($pdo, $currentUserId, $interactionPostId ?? 0)
+            : bushisa_delete_own_confession($pdo, $currentUserId, $interactionPostId ?? 0);
+        if ($result['success']) {
+            $_SESSION['confession_interaction_notice'] = $isLikeAction
+                ? ((bool) $result['liked'] ? 'Confession liked.' : 'Like removed.')
+                : 'Your confession was deleted.';
+            redirect('confessions.php?sort=' . $sort . '&page=' . $page);
+        }
+        $interactionError = $result['error'] ?? 'Unable to update this confession.';
     } else {
         $rateLimitKey = (string) $currentUserId;
         if (!check_rate_limit($pdo, 'confession', $rateLimitKey, 5, 3600)) {
@@ -149,6 +168,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Recount after successful creation, so the displayed count is not stale.
+$countStatement = $pdo->query('SELECT COUNT(*) FROM confessions WHERE is_flagged = 0');
+$totalConfessions = $countStatement !== false ? (int) $countStatement->fetchColumn() : 0;
+$total_pages = $totalConfessions > 0 ? (int) ceil($totalConfessions / $perPage) : 1;
 $page = min($page, $total_pages);
 $offset = ($page - 1) * $perPage;
 $confessionRuntimeColumns = operational_confession_columns($pdo);
@@ -164,13 +187,15 @@ if ($usesUserContentSchema || $usesAuthorBodySchema) {
                 c.%1$s AS body,
                 c.created_at,
                 c.is_flagged,
+                c.%2$s AS confession_author_id,
                 %3$s,
-                COUNT(cv.id) AS view_count
+                (SELECT COUNT(*) FROM confession_views cv WHERE cv.confession_id = c.id) AS view_count,
+                (SELECT COUNT(*) FROM confession_likes cl WHERE cl.confession_id = c.id) AS like_count,
+                EXISTS(SELECT 1 FROM confession_likes mine
+                       WHERE mine.confession_id = c.id AND mine.user_id = :like_viewer_id) AS viewer_liked
              FROM confessions c
              LEFT JOIN profiles p ON p.user_id = c.%2$s
-             LEFT JOIN confession_views cv ON cv.confession_id = c.id
              WHERE c.is_flagged = 0
-             GROUP BY c.id, c.%1$s, c.created_at, c.is_flagged, p.anon_handle, p.display_name
              ORDER BY %4$s
              LIMIT :limit OFFSET :offset',
             $confessionRuntimeColumns['body'],
@@ -184,6 +209,7 @@ if ($usesUserContentSchema || $usesAuthorBodySchema) {
 }
 
 if ($feedStatement !== false) {
+    $feedStatement->bindValue(':like_viewer_id', $currentUserId, PDO::PARAM_INT);
     $feedStatement->bindValue(':limit', $perPage, PDO::PARAM_INT);
     $feedStatement->bindValue(':offset', $offset, PDO::PARAM_INT);
     $feedStatement->execute();
@@ -258,6 +284,12 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
     <?php if ($reportSuccess !== null): ?>
         <div class="cf-report-success" role="status"><?= e($reportSuccess) ?></div>
     <?php endif; ?>
+    <?php if ($interactionNotice !== null): ?>
+        <div class="cf-report-success" role="status"><?= e($interactionNotice) ?></div>
+    <?php endif; ?>
+    <?php if ($interactionError !== null): ?>
+        <div class="cf-interaction-error" role="alert"><?= e($interactionError) ?></div>
+    <?php endif; ?>
     <div class="cf-layout">
         <section class="cf-feed" aria-label="Anonymous confession feed">
             <div class="cf-toolbar">
@@ -297,6 +329,9 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                                 $handle = 'anonymous';
                             }
                             $views = max(0, (int) ($confession['view_count'] ?? 0));
+                            $likes = max(0, (int) ($confession['like_count'] ?? 0));
+                            $viewerLiked = (bool) ($confession['viewer_liked'] ?? false);
+                            $isOwnConfession = (int) ($confession['confession_author_id'] ?? 0) === $currentUserId;
                         ?>
                         <article class="cf-card">
                             <div class="cf-card__byline">
@@ -312,8 +347,30 @@ render_document_head('Confessions', $csrfToken, $currentUserId);
                                 <div class="cf-bubble__actions">
                                     <span class="cf-bubble__views"><?= e((string) $views) ?> <?= $views === 1 ? 'view' : 'views' ?></span>
                                     <div class="cf-bubble__links">
-                                        <button type="button" class="cf-report-trigger" data-report-confession="<?= e((string) $confession['id']) ?>" aria-label="Report confession #<?= e((string) $confession['id']) ?>">Report</button>
-                                        <button class="cf-bubble__soon" type="button" disabled title="Reactions are being tested">♡ Like soon</button>
+                                        <?php if ($isOwnConfession): ?>
+                                            <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>" class="cf-action-form">
+                                                <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                                                <input type="hidden" name="delete_own_confession" value="1">
+                                                <input type="hidden" name="confession_id" value="<?= e((string) $confession['id']) ?>">
+                                                <button type="submit" class="cf-delete-button"
+                                                    onclick="return confirm('Delete your confession permanently? This cannot be undone.')"
+                                                    aria-label="Delete your confession #<?= e((string) $confession['id']) ?>">Delete</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <button type="button" class="cf-report-trigger" data-report-confession="<?= e((string) $confession['id']) ?>" aria-label="Report confession #<?= e((string) $confession['id']) ?>">Report</button>
+                                        <?php endif; ?>
+                                        <form method="post" action="confessions.php?sort=<?= e($sort) ?>&amp;page=<?= e((string) $page) ?>" class="cf-action-form">
+                                            <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+                                            <input type="hidden" name="toggle_like" value="1">
+                                            <input type="hidden" name="confession_id" value="<?= e((string) $confession['id']) ?>">
+                                            <button type="submit" class="cf-like-button<?= $viewerLiked ? ' is-liked' : '' ?>"
+                                                aria-pressed="<?= $viewerLiked ? 'true' : 'false' ?>"
+                                                aria-label="<?= $viewerLiked ? 'Unlike' : 'Like' ?> confession #<?= e((string) $confession['id']) ?>">
+                                                <span aria-hidden="true"><?= $viewerLiked ? '♥' : '♡' ?></span>
+                                                <?= $viewerLiked ? 'Liked' : 'Like' ?>
+                                                <span class="cf-like-count"><?= e((string) $likes) ?></span>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
