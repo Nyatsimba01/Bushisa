@@ -88,3 +88,67 @@ body.bushisa-admin-dashboard{--adm-bg:#21151a;--adm-side:#1d1319;--adm-card:#302
 @media(max-width:750px){.admin-layout{display:block}.admin-sidebar{position:relative;height:auto;min-height:0;padding:17px 18px 12px;border-right:0;border-bottom:1px solid var(--adm-line)}.admin-brand{border:0;padding:0 0 13px;gap:12px;align-items:center}.admin-brand__heart{font-size:30px}.admin-brand__title{font-size:24px}.admin-brand__subtitle{font-size:9px}.admin-sidebar__middle{padding:0}.admin-sidebar__eyebrow{display:none}.admin-nav{display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}.admin-nav__link{min-height:39px;padding:5px 11px;gap:8px;border-radius:9px;white-space:nowrap;font-size:12px}.admin-nav__icon{width:15px;height:15px}.admin-nav__icon:before{font-size:18px}.admin-sidebar__footer{display:flex;flex-wrap:wrap;gap:6px 20px;margin:0;padding:2px 0 0;border:0}.admin-sidebar__back,.admin-sidebar__logout{padding:4px 0;font-size:12px}.admin-sidebar__motto{display:none}.admin-main{max-width:900px;padding:25px 18px 40px}.admin-page-header{flex-wrap:wrap}.admin-preview-tag{margin-top:0;min-width:0;font-size:10px}.admin-alert{align-items:flex-start;flex-direction:column;gap:12px}.admin-alert__totals{gap:8px 13px}}
 @media(max-width:460px){.admin-main{padding:22px 14px 34px}.admin-metrics{gap:10px}.admin-metric{padding:15px 13px 12px;min-height:142px}.admin-metric__value{font-size:34px}.admin-metric__note{font-size:10px}.admin-panel{padding:16px}.admin-panel__heading{align-items:flex-start}.admin-small-button{min-width:0}.admin-panel--reports{min-height:340px}.admin-page-header h1{font-size:32px}}
 @media(prefers-reduced-motion:reduce){.admin-nav__link{transition:none}}
+
+/* Admin overview: match the floating mobile dock used by Users management.
+   CSS-only change; the existing PHP links, permissions and live metrics remain intact.
+   Deliberately scoped away from the Users page, which already has its own dock. */
+@media (max-width: 750px) {
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) {
+    overflow-x: hidden;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-sidebar__middle {
+    padding: 0;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav {
+    position: fixed;
+    z-index: 100;
+    inset: auto auto max(10px, env(safe-area-inset-bottom, 0px)) 50%;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 2px;
+    width: min(420px, calc(100% - 22px));
+    min-height: 50px;
+    margin: 0;
+    padding: 5px;
+    overflow: visible;
+    background: rgba(59, 41, 49, 0.95);
+    border: 1px solid #57404a;
+    border-radius: 13px;
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 10px 30px rgba(18, 9, 15, 0.42);
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 2px;
+    border-radius: 9px;
+    white-space: nowrap;
+    font-size: clamp(9px, 2.45vw, 11px);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-align: center;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav__icon {
+    display: none;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-nav__link.is-current {
+    background: #684151;
+    border-color: #93657a;
+    color: #f8ede2 !important;
+    font-weight: 700;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-sidebar__footer {
+    margin-top: 0;
+    padding-top: 0;
+  }
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users) .admin-main {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+  }
+}
