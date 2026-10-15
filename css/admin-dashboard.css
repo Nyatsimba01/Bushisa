@@ -152,3 +152,57 @@ body.bushisa-admin-dashboard{--adm-bg:#21151a;--adm-side:#1d1319;--adm-card:#302
     padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+
+/* Figma background fidelity: use the ORIGINAL SVG ornament assets already in
+   Bushisa. These match the exported Figma halo vectors (Users desktop 83:42,
+   83:43 and mobile 85:35, 85:36). The approved Users page already loads them,
+   so these additions only fill the missing Dashboard background.
+   Keep text, navigation, data and button layers above all decorations. */
+body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confessions) .admin-main {
+  background-image:
+    url("../assets/admin/users-desktop-halo-top.svg"),
+    url("../assets/admin/users-desktop-halo-bottom.svg");
+  background-repeat: no-repeat, no-repeat;
+  background-position: right top, left bottom;
+  background-size: 264px 155px, 169px 305px;
+}
+
+/* The faint, rotated plum wash is a separate layer in the Figma desktop
+   design. It must never obscure content or capture clicks. */
+@media (min-width: 751px) {
+  body.bushisa-admin-dashboard .admin-main {
+    position: relative;
+    isolation: isolate;
+  }
+  body.bushisa-admin-dashboard .admin-main::before {
+    content: "";
+    position: absolute;
+    top: 144px;
+    right: 96px;
+    width: 360px;
+    height: 270px;
+    transform: rotate(10deg);
+    border-radius: 130px;
+    background: rgba(94, 53, 75, 0.05);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body.bushisa-admin-dashboard .admin-main > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Mobile uses the exact shorter SVG artwork from the approved Figma
+   screens rather than scaling the large desktop halos out of proportion. */
+@media (max-width: 750px) {
+  body.bushisa-admin-dashboard:not(.bushisa-admin-users):not(.bushisa-admin-confessions) .admin-main {
+    background-image:
+      url("../assets/admin/users-mobile-halo-top.svg"),
+      url("../assets/admin/users-mobile-halo-bottom.svg");
+    background-repeat: no-repeat, no-repeat;
+    background-position: right top, left bottom 16px;
+    background-size: 90px 175px, 110px 270px;
+  }
+}
