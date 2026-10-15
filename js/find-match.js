@@ -17,7 +17,7 @@
   const complete = root.querySelector('[data-match-complete]');
   const actions = root.querySelector('[data-match-actions]');
   const labels = ['Your intentions', 'Your vibe', 'Shared interests', 'Preferences'];
-  const optionalKeys = new Set(["connection_pace","hangout_style","sports","sport_style","football_team","music_styles","reading_styles","gaming_styles","creative_styles","outing_styles","planning_style","conversation_opener","food_styles","screen_styles","tech_styles","community_styles"]);
+  const optionalKeys = new Set(["connection_pace","first_meet_style","hangout_style","sports","sport_style","football_team","music_styles","reading_styles","gaming_styles","creative_styles","outing_styles","planning_style","conversation_opener","food_styles","screen_styles","tech_styles","community_styles"]);
   const conditional = Array.from(root.querySelectorAll('[data-conditional]'));
   const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   let step = 0;
