@@ -20,7 +20,7 @@ ensure_operational_schema($pdo);
 
 $currentUserId = (int) $_SESSION['user_id'];
 $coreQuestions = ['intent', 'interests', 'social_activity', 'communication_style', 'availability'];
-$optionalQuestions = ['connection_pace', 'hangout_style', 'sports', 'sport_style', 'football_team', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles', 'planning_style', 'conversation_opener', 'food_styles', 'screen_styles', 'tech_styles', 'community_styles'];
+$optionalQuestions = ['connection_pace', 'first_meet_style', 'hangout_style', 'sports', 'sport_style', 'football_team', 'music_styles', 'reading_styles', 'gaming_styles', 'creative_styles', 'outing_styles', 'planning_style', 'conversation_opener', 'food_styles', 'screen_styles', 'tech_styles', 'community_styles'];
 $allowedQuestions = array_merge($coreQuestions, $optionalQuestions);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
