@@ -124,10 +124,13 @@ function bushisa_render_discovery_card(array $candidate): string
                 </button>
             </div>
 
-            <button class="confess-button" type="button" disabled title="Profile-specific confessions are coming later">
-                <?= bushisa_discovery_card_icon('confess') ?>
-                <span class="figma-desktop-confess">Confess about…</span>
-                <span class="figma-mobile-confess">Write a confession</span>
+            <button class="confess-button home-connect-action" type="button"
+                data-swipe-target="<?= e($id) ?>" data-swipe-direction="like"
+                aria-label="Express interest in connecting with <?= e($name) ?>"
+                title="Express interest. Chat requires mutual interest and an accepted invitation.">
+                <?= bushisa_discovery_card_icon('nav-heart') ?>
+                <span class="figma-desktop-confess">Express interest →</span>
+                <span class="figma-mobile-confess">Connect →</span>
             </button>
         </div>
     </article>
