@@ -86,8 +86,7 @@
       }
       if (child.classList.contains('fm-mini-question')) {
         if (firstScreen.length) {
-          screens.push(firstScreen);
-          firstScreen.length = 0;
+          screens.push(firstScreen.splice(0));
         }
         screens.push([child]);
       } else {
