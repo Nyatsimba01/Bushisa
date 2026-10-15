@@ -131,6 +131,19 @@
   let previousStep = null;
   function sync(changedInput = null) {
     const step = activeStep();
+    // Make the first optional section speak to the actual selected intention.
+    const intent = steps[0]?.querySelector('input[data-answer-key="intent"]:checked')?.value || '';
+    const summary = steps[0]?.querySelector('details.fm-followups[data-when-key="intent"] summary');
+    const firstText = summary?.firstChild;
+    const intentTitles = {
+      'Something serious': 'Tell us about your pace ',
+      'Casual dating': 'Tell us more about casual dating ',
+      'Friendship first': 'Tell us about starting as friends ',
+      'Still exploring': 'Tell us what feels comfortable '
+    };
+    if (firstText?.nodeType === Node.TEXT_NODE) {
+      firstText.nodeValue = intentTitles[intent] || 'Your pace ';
+    }
     for (const fieldset of radioGroups) refreshRadioGroup(fieldset);
     if (!step) return;
     const isNewStep = previousStep !== step;
