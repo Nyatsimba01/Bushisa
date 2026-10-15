@@ -346,12 +346,35 @@ render_document_head('Reports management', $csrfToken);
                                                 <p class="admin-reports-muted">This confession is no longer available.</p>
                                             <?php endif; ?>
                                         <?php endif; ?>
-                                        <p class="admin-reports-muted">Submitted by account #<?= e((string) ($report['reporter_id'] ?? '')) ?>
-                                            <?php if ($report['reported_user_id'] !== null): ?>
-                                                · Reported account #<?= e((string) $report['reported_user_id']) ?>
+                                        <?php
+                                            $reporterId = (int) ($report['reporter_id'] ?? 0);
+                                            $reporterName = trim((string) ($report['reporter_display_name'] ?? ''));
+                                            $reportedUserId = (int) ($report['reported_user_id'] ?? 0);
+                                            $reportedUserName = trim((string) ($report['reported_display_name'] ?? ''));
+                                            $reporterLabel = $reporterName !== '' ? $reporterName
+                                                : ($reporterId > 0 ? 'Account #' . $reporterId : 'Unknown reporter');
+                                            $reportedUserLabel = $reportedUserName !== '' ? $reportedUserName
+                                                : 'Account #' . $reportedUserId;
+                                        ?>
+                                        <div class="admin-reports-identities" aria-label="Private report identity details">
+                                            <div class="admin-reports-identity">
+                                                <span class="admin-reports-identity-label">Reported by</span>
+                                                <strong><?= e($reporterLabel) ?></strong>
+                                                <?php if ($reporterName !== '' && $reporterId > 0): ?>
+                                                    <span class="admin-reports-muted">Account #<?= e($reporterId) ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php if ($reportedUserId > 0): ?>
+                                                <div class="admin-reports-identity">
+                                                    <span class="admin-reports-identity-label">Reported account</span>
+                                                    <strong><?= e($reportedUserLabel) ?></strong>
+                                                    <?php if ($reportedUserName !== ''): ?>
+                                                        <span class="admin-reports-muted">Account #<?= e($reportedUserId) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
                                             <?php endif; ?>
-                                            · visible only to authorised moderators
-                                        </p>
+                                        </div>
+                                        <p class="admin-reports-muted">Reporter identities are confidential and visible only to authorised moderators.</p>
 
                                         <div class="admin-reports-actions">
                                             <?php foreach (['reviewed' => 'Mark reviewed', 'dismiss' => 'Dismiss report'] as $action => $label): ?>
