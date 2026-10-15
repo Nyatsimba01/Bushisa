@@ -1187,3 +1187,39 @@ body.bushisa-admin-dashboard .admin-main{
     border-color:#7a5c69;
   }
 }
+
+/* ================================================================
+   STUDENT MOBILE FLOATING DOCK — ONE CONSISTENT HOME GLASS TREATMENT
+   Home was already styled in this file at 64% surface opacity / 20px blur;
+   other pages inherited the base Figma 96% opacity / 12px blur.
+   Apply the exact Home visual treatment to all four student tabs.
+   Keep the actual nav element, sizing, mobile placement and links intact.
+   ================================================================ */
+@media (max-width:700px){
+  body:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) .bottom-nav{
+    background-color:rgba(46,30,38,.64);
+    background-image:url("../assets/figma/home/glow-mobile-dock.svg");
+    background-repeat:no-repeat;
+    background-size:120px 100px;
+    background-position:left -20px top -20px;
+    border-color:rgba(248,237,226,.12);
+    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(20px);
+    box-shadow:0 14px 35px rgba(16,8,14,.35),
+               inset 0 1px 0 rgba(255,255,255,.065);
+  }
+  body:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) .bottom-nav a.active{
+    background:rgba(74,36,52,.90);
+  }
+}
+/* Accessibility: maintain an opaque backdrop if high contrast is requested.
+   Avoid reducing opacity on the whole dock: icons and labels remain legible. */
+@media (max-width:700px) and (prefers-contrast:more){
+  body:is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) .bottom-nav{
+    background-color:#302128;
+    background-image:none;
+    border-color:#b48b9f;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+}
