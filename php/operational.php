@@ -164,6 +164,16 @@ function ensure_operational_schema(PDO $pdo): void
     );
 
     $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS confession_likes (
+            confession_id INT UNSIGNED NOT NULL,
+            user_id INT UNSIGNED NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (confession_id, user_id),
+            INDEX idx_confession_likes_user (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+    );
+
+    $pdo->exec(
         'CREATE TABLE IF NOT EXISTS confession_references (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             confession_id INT UNSIGNED NOT NULL,
