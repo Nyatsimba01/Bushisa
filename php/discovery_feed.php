@@ -62,6 +62,7 @@ INNER JOIN users u ON u.id = p.user_id
 {$detailsJoin}
 WHERE p.user_id <> :viewer_id
   AND u.is_suspended = 0
+  AND u.is_verified = 1
   AND p.date_of_birth IS NOT NULL
   AND TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) BETWEEN :age_min AND :age_max
   AND NOT EXISTS (
