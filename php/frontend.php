@@ -90,7 +90,7 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
     <?php endif; ?>
     <title><?= e($title) ?> | Bushisa</title>
     <link rel="stylesheet" href="<?= e(asset_path('css/style.css')) ?>">
-    <?php if (in_array(current_page_name(), ['dashboard.php', 'users.php', 'confessions.php', 'reports.php'], true) && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin'): ?>
+    <?php if (in_array(current_page_name(), ['dashboard.php', 'users.php', 'confessions.php', 'reports.php', 'moderation.php'], true) && basename(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin'): ?>
         <link rel="stylesheet" href="<?= e(asset_path('css/admin-dashboard.css')) ?>">
         <?php if (current_page_name() === 'users.php'): ?>
             <link rel="stylesheet" href="<?= e(asset_path('css/admin-users.css')) ?>">
@@ -100,6 +100,9 @@ function render_document_head(string $title, ?string $csrfToken = null, ?int $cu
         <?php endif; ?>
         <?php if (current_page_name() === 'reports.php'): ?>
             <link rel="stylesheet" href="<?= e(asset_path('css/admin-reports.css')) ?>">
+        <?php endif; ?>
+        <?php if (current_page_name() === 'moderation.php'): ?>
+            <link rel="stylesheet" href="<?= e(asset_path('css/admin-moderation.css')) ?>">
         <?php endif; ?>
     <?php endif; ?>
     <?php if (current_page_name() === 'discover.php'): ?>
