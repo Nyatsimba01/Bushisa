@@ -39,7 +39,7 @@ if (isset($_GET['after'])) {
 
 try {
     $preferences = get_preferences($pdo, $viewerId);
-    $batch = bushisa_discovery_batch($pdo, $viewerId, $preferences, $afterId);
+    $batch = bushisa_discovery_batch($pdo, $viewerId, null, $afterId, 'everyone');
     json_response([
         'html' => bushisa_render_discovery_cards($batch['profiles']),
         'has_more' => $batch['has_more'],

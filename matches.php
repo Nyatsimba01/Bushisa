@@ -9,6 +9,9 @@ require_once __DIR__ . '/php/db.php';
 require_once __DIR__ . '/php/function.php';
 require_once __DIR__ . '/php/frontend.php';
 require_once __DIR__ . '/php/csrf.php';
+require_once __DIR__ . '/php/block_handler.php';
+require_once __DIR__ . '/php/discovery_feed.php';
+require_once __DIR__ . '/php/common_ground.php';
 
 require_login();
 
@@ -94,7 +97,8 @@ foreach ($requiredMatchingAnswers as $requiredMatchingKey) {
         break;
     }
 }
-$showMatchingMap = $hasCompletedMatching && (($_GET['edit'] ?? '') !== '1');
+$showCommonGround = $hasCompletedMatching && (($_GET['edit'] ?? '') !== '1');
+$commonGroundProfiles = $showCommonGround ? bushisa_common_ground($pdo, $currentUserId, $savedAnswers) : [];
 
 $profile = get_profile($pdo, $currentUserId);
 $profileName = trim((string) ($profile['display_name'] ?? ''));
@@ -155,12 +159,12 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 </header>
 <?php render_notification_panel(); ?>
 
-<main class="fm-main" <?= $showMatchingMap ? '' : 'data-find-match' ?> id="main">
+<main class="fm-main" <?= $showCommonGround ? '' : 'data-find-match' ?> id="main">
     <header class="fm-intro">
         <span class="fm-eyebrow">LESS GUESSING. MORE CONNECTION.</span>
-        <?php if ($showMatchingMap): ?>
-            <h1>Find your kind of connection</h1>
-            <p>Your story is saved. Discover the campus, at your own pace.</p>
+        <?php if ($showCommonGround): ?>
+            <h1>Find your people</h1>
+            <p>Discover students with shared interests and compatible questionnaire answers.</p>
         <?php else: ?>
             <h1>Find someone on your wavelength</h1>
             <p>A few thoughtful answers to help you find common ground. Start with what you’re looking for.</p>
@@ -168,43 +172,77 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
     </header>
 
 
-    <?php if ($showMatchingMap): ?>
-        <div class="fm-map-layout">
-            <section class="fm-map-panel" aria-labelledby="fm-map-title">
-                <div class="fm-map-heading">
+    <?php if ($showCommonGround): ?>
+        <div class="fm-compat-layout">
+            <section class="fm-compat-directory" aria-labelledby="fm-compatible-title">
+                <div class="fm-compat-heading">
                     <div>
-                        <h2 id="fm-map-title">Your campus, your connections.</h2>
-                        <p>Explore broad campus areas. When verified profiles become available, this will be the place to discover them.</p>
+                        <span class="fm-eyebrow">SHARED INTERESTS</span>
+                        <h2 id="fm-compatible-title">People on your wavelength</h2>
+                        <p>We look for common ground in your saved answers, not your location.</p>
                     </div>
-                    <span class="fm-map-tag">Campus preview</span>
+                    <span class="fm-compat-counter"><?= e((string) count($commonGroundProfiles)) ?> suggestions</span>
                 </div>
-                <div class="fm-map-stage" data-fm-map aria-label="Illustrative campus area map. No people or precise locations are shown.">
-                    <div class="fm-map-grid" aria-hidden="true"></div>
-                    <div class="fm-map-ring" aria-hidden="true"></div>
-                    <div class="fm-map-road" aria-hidden="true"></div>
-                    <button type="button" class="fm-map-zone" data-zone-name="Study spaces" style="--zone-x:24%;--zone-y:24%" aria-pressed="false">Study spaces</button>
-                    <button type="button" class="fm-map-zone" data-zone-name="Campus commons" style="--zone-x:72%;--zone-y:20%" aria-pressed="false">Campus commons</button>
-                    <button type="button" class="fm-map-zone" data-zone-name="Library area" style="--zone-x:67%;--zone-y:50%" aria-pressed="false">Library area</button>
-                    <button type="button" class="fm-map-zone" data-zone-name="Teaching areas" style="--zone-x:28%;--zone-y:58%" aria-pressed="false">Teaching areas</button>
-                    <div class="fm-map-status" role="status" aria-live="polite">
-                        <strong data-zone-title>It's a little quiet around campus for now.</strong>
-                        <p data-zone-description>Profile markers are not enabled in this development build. Explore the broad areas while discovery is being prepared.</p>
+                <?php if ($commonGroundProfiles === []): ?>
+                    <div class="fm-compat-empty">
+                        <span aria-hidden="true">♡</span>
+                        <h3>No shared-interest profiles yet</h3>
+                        <p>Other eligible students will appear here once they have also completed the questionnaire and have something in common with you.</p>
+                        <a href="discover.php">Browse everyone on Home →</a>
                     </div>
-                </div>
-                <p class="fm-map-caption">✧ This is a concept map, not a live location service. It does not request GPS access or show anyone's whereabouts.</p>
+                <?php else: ?>
+                    <div class="fm-compat-results">
+                        <?php foreach ($commonGroundProfiles as $item): ?>
+                            <?php
+                                $person = $item['candidate'];
+                                $personId = (int) $person['user_id'];
+                                $personName = trim((string) ($person['display_name'] ?? ''));
+                                $personName = $personName !== '' ? $personName : 'Student';
+                                $photo = profile_photo_url(isset($person['profile_photo_path'])
+                                    ? (string) $person['profile_photo_path'] : null);
+                                $initial = function_exists('mb_substr')
+                                    ? mb_strtoupper(mb_substr($personName, 0, 1))
+                                    : strtoupper(substr($personName, 0, 1));
+                            ?>
+                            <article class="fm-person-card" data-candidate-id="<?= e($personId) ?>">
+                                <div class="fm-person-photo">
+                                    <?php if ($photo !== null): ?>
+                                        <img src="<?= e($photo) ?>" alt="<?= e($personName) ?> profile photo" loading="lazy">
+                                    <?php else: ?>
+                                        <span aria-label="No profile photo"><?= e($initial) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="fm-person-details">
+                                    <span class="fm-compat-label">YOU HAVE COMMON GROUND</span>
+                                    <h3><?= e($personName) ?></h3>
+                                    <p><?= e((string) ($person['faculty'] ?? 'NUST student')) ?></p>
+                                    <div class="fm-common-tags" aria-label="Things you share">
+                                        <?php foreach ($item['shared'] as $sharedInterest): ?>
+                                            <span><?= e($sharedInterest) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <button type="button" class="fm-person-connect"
+                                        data-swipe-target="<?= e($personId) ?>" data-swipe-direction="like">
+                                        Express interest <span aria-hidden="true">♡</span>
+                                    </button>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </section>
-
-            <aside class="fm-map-summary" aria-label="Your matching preferences">
-                <span class="fm-map-eyebrow">THE DETAILS THAT MAKE YOU, YOU</span>
-                <h2>You've found your starting point.</h2>
-                <p>Your questionnaire is saved, and you can update it whenever you like.</p>
+            <aside class="fm-compat-sidebar">
+                <span class="fm-eyebrow">YOUR ANSWERS</span>
+                <h2>Shared interests, not a mystery score.</h2>
+                <p>Only interests and broad answers you have in common are highlighted. Other students' private answers stay private.</p>
                 <dl>
-                    <div><dt>Looking for</dt><dd><?= e($savedAnswers['intent'] ?? 'Not set') ?></dd></div>
+                    <div><dt>Your goals</dt><dd><?= e($savedAnswers['intent'] ?? 'Not set') ?></dd></div>
                     <div><dt>Your vibe</dt><dd><?= e($savedAnswers['social_activity'] ?? 'Not set') ?></dd></div>
-                    <div><dt>Shared interests</dt><dd><?= e($savedAnswers['interests'] ?? 'Not set') ?></dd></div>
+                    <div><dt>Your interests</dt><dd><?= e($savedAnswers['interests'] ?? 'Not set') ?></dd></div>
                 </dl>
-                <a class="fm-map-edit" href="matches.php?edit=1">Change my answers →</a>
-                <p class="fm-map-safety">Real profile markers and profile cards are not enabled yet. Verified 18+ eligibility, consent and coarse-area sharing are required before activating discovery. Your exact location is never requested here.</p>
+                <a href="matches.php?edit=1" class="fm-map-edit">Edit my questionnaire →</a>
+                <p class="fm-compat-consent">Expressing interest is private until it's mutual. Chat invitations require consent. No GPS data or real-time locations are used.</p>
+                <a href="discover.php" class="fm-compat-home">See everyone on Home →</a>
             </aside>
         </div>
     <?php else: ?>
@@ -556,7 +594,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             </div>
             <section class="fm-complete" data-match-complete hidden aria-live="polite">
                 <h2>A little more of your story, saved.</h2>
-                <p>Your answers have been saved to your profile’s questionnaire. Compatibility scoring from these answers has not yet been launched, and student and age verification still need to be enforced before real discovery.</p>
+                <p>Your answers have been saved to your profile’s questionnaire. Find Match uses the answers you share to highlight common interests with eligible students. You can edit your answers anytime.</p>
                 <p><a href="profile.php">Review your profile →</a></p>
                 <button type="button" class="fm-back" data-match-edit>Review my answers</button>
             </section>
@@ -566,7 +604,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             <div class="fm-guidance">
                 <span class="fm-sparkle" aria-hidden="true">✧</span>
                 <h2>Common ground,<br>not a score.</h2>
-                <p>When discovery is ready, compatibility will be explained through shared answers, interests and intentions — not a mysterious percentage.</p>
+                <p>Find Match highlights the shared interests and broad answers that give you common ground — without a mysterious compatibility percentage.</p>
             </div>
             <div class="fm-consent">
                 <h2>You both get a say.</h2>
@@ -580,7 +618,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
 
     <div class="fm-beta">
         <strong>BETA</strong>
-        <span>Matching and chat are still in testing. This questionnaire saves your answers; verified compatibility results are not available yet.</span>
+        <span>Questionnaire suggestions use real saved answers. Accounts must meet eligibility checks, and conversations still need mutual interest and an accepted invitation.</span>
     </div>
     <?php endif; ?>
 
@@ -606,7 +644,7 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
             </div>
         </details>
     <?php endif; ?>
-    <?php if (!$showMatchingMap): ?><noscript><p class="fm-error">JavaScript is required to complete the step-by-step questionnaire. Your existing account information is unchanged.</p></noscript><?php endif; ?>
+    <?php if (!$showCommonGround): ?><noscript><p class="fm-error">JavaScript is required to complete the step-by-step questionnaire. Your existing account information is unchanged.</p></noscript><?php endif; ?>
 </main>
 
 <footer class="site-footer fm-footer">
@@ -622,11 +660,11 @@ render_document_head('Find Match', $csrfToken, $currentUserId);
     <?php endforeach; ?>
 </nav>
 <script src="<?= e(asset_path('js/app.js')) ?>"></script>
-<?php if (!$showMatchingMap): ?>
+<?php if (!$showCommonGround): ?>
 <script src="<?= e(asset_path('js/find-match.js')) ?>"></script>
 <script src="<?= e(asset_path('js/find-match-delight.js')) ?>"></script>
 <?php endif; ?>
-<script src="<?= e(asset_path('js/find-match-map.js')) ?>"></script>
+
 <script src="<?= e(asset_path('js/find-match-full-profile.js')) ?>"></script>
 </body>
 </html>

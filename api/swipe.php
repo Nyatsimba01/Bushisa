@@ -60,12 +60,28 @@ if (operational_is_blocked($pdo, $currentUserId, $targetId)) {
     json_response(['error' => 'This profile is unavailable'], 403);
 }
 
-$targetStatement = $pdo->prepare('SELECT id, is_suspended FROM users WHERE id = :id LIMIT 1');
-$targetStatement->execute([':id' => $targetId]);
-$targetUser = $targetStatement->fetch(PDO::FETCH_ASSOC);
-
-if ($targetUser === false || ((int) ($targetUser['is_suspended'] ?? 0)) === 1) {
-    json_response(['error' => 'Target user is unavailable'], 404);
+// The client is not an authority for student verification or age eligibility.
+// Recheck both accounts before recording a request for connection.
+$eligibilityQuery = $pdo->prepare(
+    'SELECT u.id, u.is_suspended, u.is_verified,
+            TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age
+     FROM users u
+     LEFT JOIN profiles p ON p.user_id = u.id
+     WHERE u.id IN (:viewer_id, :target_id)'
+);
+$eligibilityQuery->execute([':viewer_id' => $currentUserId, ':target_id' => $targetId]);
+$eligibleIds = [];
+foreach ($eligibilityQuery->fetchAll(PDO::FETCH_ASSOC) ?: [] as $account) {
+    if ((int) ($account['is_suspended'] ?? 0) === 0
+        && (int) ($account['is_verified'] ?? 0) === 1
+        && (int) ($account['age'] ?? 0) >= 18) {
+        $eligibleIds[(int) $account['id']] = true;
+    }
+}
+if (!isset($eligibleIds[$currentUserId]) || !isset($eligibleIds[$targetId])) {
+    json_response([
+        'error' => 'Connection interests require two eligible, age-verified student accounts.',
+    ], 403);
 }
 
 $swipeColumns = operational_swipe_columns($pdo);

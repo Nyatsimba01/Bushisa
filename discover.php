@@ -17,7 +17,7 @@ require_login();
 
 $currentUserId = (int) $_SESSION['user_id'];
 $preferences = get_preferences($pdo, $currentUserId);
-$discovery = bushisa_discovery_batch($pdo, $currentUserId, $preferences);
+$discovery = bushisa_discovery_batch($pdo, $currentUserId, null, null, 'everyone');
 $candidates = $discovery['profiles'];
 $currentProfile = get_profile($pdo, $currentUserId);
 $displayName = trim((string) ($currentProfile['display_name'] ?? ''));
@@ -37,7 +37,7 @@ $hasProfileStory = trim((string) ($currentProfile['bio'] ?? '')) !== ''
     || trim($ownPersonality['conversation_prompt']) !== ''
     || $ownPersonality['interests'] !== [];
 $needsDiscoverySetup = $preferences === null;
-$showEmptyHome = $needsDiscoverySetup || $candidates === [];
+$showEmptyHome = $candidates === [];
 
 
 $matchColumnsStatement = $pdo->query('SHOW COLUMNS FROM matches');
@@ -227,8 +227,8 @@ render_document_head('Home', $csrfToken, $currentUserId);
     <section class="suggestions" aria-labelledby="suggested-title">
         <div class="section-head">
             <div>
-                <h2 id="suggested-title" class="section-title">Suggested for you</h2>
-                <p class="section-head-sub">Discover eligible profiles at your own pace.</p>
+                <h2 id="suggested-title" class="section-title">Explore students on Bushisa</h2>
+                <p class="section-head-sub">Browse eligible members and express interest. Shared interests are explored in Find Match.</p>
             </div>
             <div class="suggestion-tools">
                 <a class="soft-button" href="profile.php#preferences">
@@ -251,18 +251,14 @@ render_document_head('Home', $csrfToken, $currentUserId);
                         <img src="<?= e(asset_path('preview/assets/icons/brand-heart.svg')) ?>" alt="">
                     </div>
                     <h3 id="home-firstlook-title">
-                        <?= $needsDiscoverySetup
-                            ? 'Every good story starts somewhere.'
-                            : 'Nothing new to discover just yet.' ?>
+                        No new profiles available just yet.
                     </h3>
                     <p class="home-firstlook__lead">
-                        <?= $needsDiscoverySetup
-                            ? 'Set up your preferences and make your profile yours. There’s more to explore along the way.'
-                            : 'No eligible profiles match your preferences right now. In the meantime, you can explore more of Bushisa.' ?>
+                        Browse again when more eligible students join, or explore shared interests in Find Match.
                     </p>
                     <span class="home-firstlook__status">
                         <span class="home-firstlook__status-dot" aria-hidden="true"></span>
-                        <?= $needsDiscoverySetup ? 'Start with your discovery preferences' : 'Explore at your own pace' ?>
+                        Explore at your own pace
                     </span>
                 </div>
                 <div class="home-firstlook__explore" aria-label="Explore Bushisa">

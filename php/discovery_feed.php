@@ -7,6 +7,8 @@ require_once __DIR__ . '/profile_personality.php';
 /**
  * Shared, stable discovery pagination for the Home page and its API.
  *
+ * The Home 'everyone' scope lists eligible adult accounts without questionnaire filters.
+ * Find Match performs additional common-ground ranking separately.
  * Candidates are ordered by immutable user IDs instead of RAND(). Keyset
  * pagination avoids repeats/skips caused by changing offsets after swipes.
  * This is server-authoritative: clients cannot choose eligibility filters.
@@ -18,16 +20,17 @@ const BUSHISA_DISCOVERY_BATCH_SIZE = 6;
  * @param array<string,mixed>|null $preferences
  * @return array{profiles:array<int,array<string,mixed>>,has_more:bool,next_cursor:?int}
  */
-function bushisa_discovery_batch(PDO $pdo, int $viewerId, ?array $preferences, ?int $afterId = null): array
+function bushisa_discovery_batch(PDO $pdo, int $viewerId, ?array $preferences, ?int $afterId = null, string $scope = 'preferences'): array
 {
     $empty = ['profiles' => [], 'has_more' => false, 'next_cursor' => null];
-    if ($viewerId <= 0 || $preferences === null || !isset($preferences['preferred_gender'])) {
+    if ($viewerId <= 0 || ($scope !== 'everyone' && ($preferences === null || !isset($preferences['preferred_gender'])))) {
         return $empty;
     }
 
-    $gender = (string) $preferences['preferred_gender'];
-    $ageMin = max(18, (int) ($preferences['age_range_min'] ?? 18));
-    $ageMax = min(99, (int) ($preferences['age_range_max'] ?? 30));
+    $allEligibleUsers = $scope === 'everyone';
+    $gender = $allEligibleUsers ? '' : (string) $preferences['preferred_gender'];
+    $ageMin = $allEligibleUsers ? 18 : max(18, (int) ($preferences['age_range_min'] ?? 18));
+    $ageMax = $allEligibleUsers ? 99 : min(99, (int) ($preferences['age_range_max'] ?? 30));
     if ($ageMax < $ageMin) {
         return $empty;
     }
@@ -59,7 +62,7 @@ INNER JOIN users u ON u.id = p.user_id
 {$detailsJoin}
 WHERE p.user_id <> :viewer_id
   AND u.is_suspended = 0
-  AND p.gender = :gender
+  AND u.is_verified = 1
   AND p.date_of_birth IS NOT NULL
   AND TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) BETWEEN :age_min AND :age_max
   AND NOT EXISTS (
@@ -75,7 +78,6 @@ SQL;
 
     $params = [
         ':viewer_id' => $viewerId,
-        ':gender' => $gender,
         ':age_min' => $ageMin,
         ':age_max' => $ageMax,
         ':swipe_viewer' => $viewerId,
@@ -83,7 +85,12 @@ SQL;
         ':match_viewer_b' => $viewerId,
     ];
 
-    $faculty = (string) ($preferences['preferred_faculty'] ?? 'Any');
+    if (!$allEligibleUsers) {
+        $sql .= "\n AND p.gender = :gender";
+        $params[':gender'] = $gender;
+    }
+
+    $faculty = $allEligibleUsers ? 'Any' : (string) ($preferences['preferred_faculty'] ?? 'Any');
     if ($faculty !== 'Any' && $faculty !== '') {
         $sql .= "\n AND p.faculty = :faculty";
         $params[':faculty'] = $faculty;
