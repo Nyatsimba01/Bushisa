@@ -386,3 +386,87 @@
 @media(prefers-reduced-motion:reduce){
   .page-match-figma .fm-full-panel{scroll-behavior:auto}
 }
+
+/* Find Match after questionnaire — actual shared-interest member results.
+   Replaces illustrative campus map; card data is PHP-backed and only shows
+   shared answers rather than private questionnaire responses or GPS. */
+.page-match-figma .fm-compat-layout{
+  display:grid;grid-template-columns:minmax(0,1.78fr) minmax(270px,.88fr);
+  align-items:start;gap:23px;
+}
+.page-match-figma .fm-compat-directory,.page-match-figma .fm-compat-sidebar{
+  min-width:0;border:1px solid rgba(176,128,144,.48);
+  border-radius:22px;background:rgba(59,41,49,.72);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 15px 42px rgba(17,8,13,.15);
+  padding:27px;
+}
+.page-match-figma .fm-compat-heading{
+  display:flex;align-items:start;justify-content:space-between;
+  gap:18px;margin-bottom:23px;padding-bottom:23px;border-bottom:1px solid #57404a;
+}
+.page-match-figma .fm-compat-heading h2,.page-match-figma .fm-compat-sidebar h2,
+.page-match-figma .fm-compat-empty h3{
+  margin:9px 0 8px;font:500 27px/1.25 Lora,Georgia,serif;color:#f8ede2;
+}
+.page-match-figma .fm-compat-heading p,.page-match-figma .fm-compat-sidebar p{
+  font:400 13px/1.6 Inter,Arial,sans-serif;color:#c8b4b9;margin:0;
+}
+.page-match-figma .fm-compat-counter{
+  flex-shrink:0;border:1px solid #745565;background:#503443;
+  border-radius:24px;color:#f6c4b1;padding:8px 12px;font-size:11px;
+}
+.page-match-figma .fm-compat-results{display:grid;gap:15px}
+.page-match-figma .fm-person-card{
+  display:flex;align-items:stretch;gap:17px;min-width:0;min-height:186px;
+  padding:13px;border:1px solid rgba(144,103,122,.62);border-radius:16px;
+  background:rgba(79,50,65,.67);
+}
+.page-match-figma .fm-person-photo{
+  flex:0 0 clamp(115px,29%,160px);min-width:0;border-radius:11px;overflow:hidden;
+  background:#674251;display:grid;place-items:center;
+}
+.page-match-figma .fm-person-photo img{width:100%;height:100%;object-fit:cover;aspect-ratio:3/4}
+.page-match-figma .fm-person-photo span{font:600 44px/1 Lora,Georgia,serif;color:#ffd2be}
+.page-match-figma .fm-person-details{flex:1;min-width:0;display:flex;flex-direction:column;align-items:start;gap:8px;padding:5px 0}
+.page-match-figma .fm-compat-label{font:700 10px Inter,Arial,sans-serif;letter-spacing:.06em;color:#f4b598}
+.page-match-figma .fm-person-details h3{margin:0;font:500 23px/1.2 Lora,Georgia,serif}
+.page-match-figma .fm-person-details>p{margin:0;font-size:12px;color:#c8b4b9}
+.page-match-figma .fm-common-tags{display:flex;flex-wrap:wrap;gap:6px}
+.page-match-figma .fm-common-tags span{
+  max-width:100%;overflow-wrap:anywhere;border:1px solid #735563;
+  border-radius:20px;background:rgba(44,28,40,.64);
+  color:#ead1d6;padding:6px 9px;font-size:11px;
+}
+.page-match-figma .fm-person-connect,.page-match-figma .fm-compat-home{
+  display:inline-flex;align-items:center;gap:9px;
+  margin-top:auto;padding:11px 16px;border:0;border-radius:12px;
+  background:#f4b598;color:#2c1721;font:700 12px Inter,Arial,sans-serif;
+  cursor:pointer;text-decoration:none;
+}
+.page-match-figma .fm-person-connect:hover,.page-match-figma .fm-compat-home:hover{background:#ffd1b9}
+.page-match-figma .fm-person-connect:focus-visible{outline:2px solid #fff1e0;outline-offset:3px}
+.page-match-figma .fm-person-connect[disabled]{opacity:.6;cursor:progress}
+.page-match-figma .fm-compat-sidebar{display:flex;flex-direction:column;gap:14px}
+.page-match-figma .fm-compat-sidebar dl{margin:3px 0;display:grid;gap:13px}
+.page-match-figma .fm-compat-sidebar dl div{padding:11px;border:1px solid #644852;border-radius:11px;background:rgba(40,26,35,.49)}
+.page-match-figma .fm-compat-sidebar dt{color:#ba9fa9;font-size:11px}
+.page-match-figma .fm-compat-sidebar dd{margin:6px 0 0;color:#f8ede2;font-size:12px;overflow-wrap:anywhere}
+.page-match-figma .fm-compat-sidebar .fm-compat-consent{font-size:12px;color:#c8b4b9}
+.page-match-figma .fm-compat-home{align-self:stretch;justify-content:center;margin-top:0;background:rgba(99,58,78,.85);color:#f4b598}
+.page-match-figma .fm-compat-home:hover{background:#6b4255}
+.page-match-figma .fm-compat-empty{text-align:center;padding:38px 23px;background:rgba(79,50,65,.52);border-radius:15px}
+.page-match-figma .fm-compat-empty>span{font-size:38px;color:#f4b598}
+.page-match-figma .fm-compat-empty p{font-size:13px;line-height:1.65;color:#c8b4b9}
+.page-match-figma .fm-compat-empty a{display:inline-block;color:#f4b598;margin-top:15px;font-size:13px}
+@media(max-width:900px){.page-match-figma .fm-compat-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){
+  .page-match-figma .fm-compat-directory,.page-match-figma .fm-compat-sidebar{padding:17px;border-radius:16px}
+  .page-match-figma .fm-compat-heading{flex-wrap:wrap}
+  .page-match-figma .fm-compat-heading h2{font-size:23px}
+  .page-match-figma .fm-person-card{gap:12px;padding:11px;min-height:162px}
+  .page-match-figma .fm-person-photo{flex-basis:99px}
+  .page-match-figma .fm-person-details h3{font-size:19px}
+  .page-match-figma .fm-common-tags span{font-size:10px}
+  .page-match-figma .fm-person-connect{padding:10px 11px}
+}
