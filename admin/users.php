@@ -8,11 +8,19 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/admin_access.php';
 require_once __DIR__ . '/../php/frontend.php';
+require_once __DIR__ . '/../php/csrf.php';
 
 require_login();
 bushisa_require_moderator($pdo);
+// Account directories contain personal data: moderation alone is insufficient.
+if (!is_admin()) {
+    http_response_code(403);
+    exit('Administrator access is required to view account records.');
+}
 
 header('Cache-Control: no-store, private');
+header('Referrer-Policy: no-referrer');
+header('X-Robots-Tag: noindex, nofollow');
 
 /**
  * Users Management mirrors Bushisa Figma nodes 83:18 (desktop) and 85:34
@@ -80,13 +88,15 @@ $filters = ['q' => $search, 'role' => $role, 'status' => $status, 'verification'
 $where = [];
 $bindings = [];
 if ($search !== '') {
-    $where[] = '(p.display_name LIKE :search_name OR u.email LIKE :search_email
-                 OR u.nust_student_id LIKE :search_student OR CAST(u.id AS CHAR) LIKE :search_id)';
-    $like = '%' . $search . '%';
+    $where[] = "(p.display_name LIKE :search_name ESCAPE '!' OR u.email LIKE :search_email ESCAPE '!'
+                 OR u.nust_student_id LIKE :search_student ESCAPE '!' OR CAST(u.id AS CHAR) LIKE :search_id ESCAPE '!' OR u.id = :exact_id)";
+    // Treat SQL wildcard characters as literal search text.
+    $like = '%' . strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
     $bindings[':search_name'] = $like;
     $bindings[':search_email'] = $like;
     $bindings[':search_student'] = $like;
     $bindings[':search_id'] = $like;
+    $bindings[':exact_id'] = preg_match('/^#?([0-9]{1,10})$/D', $search, $idMatch) === 1 ? ltrim($idMatch[1], '0') : '-1';
 }
 if ($role !== 'all') {
     $where[] = 'u.role = :role';
@@ -111,75 +121,97 @@ $summarySql = 'SELECT COUNT(*) AS total,
                  COALESCE(SUM(CASE WHEN is_suspended = 1 THEN 1 ELSE 0 END),0) AS suspended,
                  COALESCE(SUM(CASE WHEN role = "admin" THEN 1 ELSE 0 END),0) AS admins
                FROM users';
-$summary = $pdo->query($summarySql)->fetch(PDO::FETCH_ASSOC) ?: [];
-$summary = [
-    'total' => (int) ($summary['total'] ?? 0),
-    'verified' => (int) ($summary['verified'] ?? 0),
-    'suspended' => (int) ($summary['suspended'] ?? 0),
-    'admins' => (int) ($summary['admins'] ?? 0),
-];
+try {
+    $summary = $pdo->query($summarySql)->fetch(PDO::FETCH_ASSOC) ?: [];
+    $summary = [
+        'total' => (int) ($summary['total'] ?? 0),
+        'verified' => (int) ($summary['verified'] ?? 0),
+        'suspended' => (int) ($summary['suspended'] ?? 0),
+        'admins' => (int) ($summary['admins'] ?? 0),
+    ];
 
-$prepareFilters = static function (PDOStatement $statement) use ($bindings): void {
-    foreach ($bindings as $name => $value) {
-        $statement->bindValue($name, $value, PDO::PARAM_STR);
-    }
-};
-
-// Only administrators may export; the file intentionally contains masked email
-// addresses and no student IDs, credentials, profile secrets or anonymous handles.
-if (isset($_GET['export']) && $_GET['export'] === 'csv') {
-    if (!is_admin()) {
-        http_response_code(403);
-        exit('Only administrators can export an account directory.');
-    }
-    $csv = $pdo->prepare('SELECT ' . $columns . $fromSql . $whereSql . ' ORDER BY u.id DESC LIMIT 1000');
-    $prepareFilters($csv);
-    $csv->execute();
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="bushisa-users-directory.csv"');
-    header('X-Content-Type-Options: nosniff');
-    $output = fopen('php://output', 'wb');
-    if ($output !== false) {
-        fputcsv($output, ['Account ID', 'Display name', 'Masked email', 'Role', 'Verification', 'Status', 'Joined']);
-        while (($entry = $csv->fetch(PDO::FETCH_ASSOC)) !== false) {
-            fputcsv($output, [
-                (int) $entry['id'],
-                admin_users_csv_safe(admin_user_label($entry)),
-                admin_users_csv_safe(admin_masked_email((string) $entry['email'])),
-                admin_users_csv_safe(ucfirst((string) $entry['role'])),
-                (int) $entry['is_verified'] === 1 ? 'Verified' : 'Pending',
-                (int) $entry['is_suspended'] === 1 ? 'Suspended' : 'Active',
-                admin_users_csv_safe(substr((string) $entry['created_at'], 0, 10)),
-            ]);
+    $prepareFilters = static function (PDOStatement $statement) use ($bindings): void {
+        foreach ($bindings as $name => $value) {
+            $statement->bindValue($name, $value, PDO::PARAM_STR);
         }
-        fclose($output);
+    };
+
+    // Only administrators may export; the file intentionally contains masked email
+    // addresses and no student IDs, credentials, profile secrets or anonymous handles.
+    if (isset($_GET['export']) || isset($_POST['export'])) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            header('Allow: POST');
+            exit('Use the Export CSV button in the account directory.');
+        }
+        if (!is_string($_POST['csrf_token'] ?? null) || !validate_csrf_token($_POST['csrf_token'])) {
+            http_response_code(403);
+            exit('Export session expired. Reload the account directory and try again.');
+        }
+        if (!is_admin()) {
+            http_response_code(403);
+            exit('Only administrators can export an account directory.');
+        }
+        $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $csv = $pdo->prepare('SELECT ' . $columns . $fromSql . $whereSql . ' ORDER BY u.created_at DESC, u.id DESC');
+        $prepareFilters($csv);
+        $csv->execute();
+        // Stream every matching record without buffering a large directory in PHP.
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="bushisa-users-directory.csv"');
+        header('X-Content-Type-Options: nosniff');
+        $output = fopen('php://output', 'wb');
+        if ($output !== false) {
+            fputcsv($output, ['Account ID', 'Display name', 'Masked email', 'Role', 'Verification', 'Status', 'Joined'], ',', '"', '');
+            while (($entry = $csv->fetch(PDO::FETCH_ASSOC)) !== false) {
+                fputcsv($output, [
+                    (int) $entry['id'],
+                    admin_users_csv_safe(admin_user_label($entry)),
+                    admin_users_csv_safe(admin_masked_email((string) $entry['email'])),
+                    admin_users_csv_safe(ucfirst((string) $entry['role'])),
+                    (int) $entry['is_verified'] === 1 ? 'Verified' : 'Pending',
+                    (int) $entry['is_suspended'] === 1 ? 'Suspended' : 'Active',
+                    admin_users_csv_safe(substr((string) $entry['created_at'], 0, 10)),
+                ], ',', '"', '');
+            }
+            fclose($output);
+        }
+        error_log('Bushisa account export completed by administrator #' . (int) $_SESSION['user_id']);
+        exit;
     }
-    exit;
+
+    $countStmt = $pdo->prepare('SELECT COUNT(DISTINCT u.id)' . $fromSql . $whereSql);
+    $prepareFilters($countStmt);
+    $countStmt->execute();
+    $filteredCount = (int) $countStmt->fetchColumn();
+    $totalPages = max(1, (int) ceil($filteredCount / $perPage));
+    $page = min($page, $totalPages);
+    $offset = ($page - 1) * $perPage;
+
+    $rowsStmt = $pdo->prepare('SELECT ' . $columns . $fromSql . $whereSql
+        . ' ORDER BY u.created_at DESC, u.id DESC LIMIT :rows_limit OFFSET :rows_offset');
+    $prepareFilters($rowsStmt);
+    $rowsStmt->bindValue(':rows_limit', $perPage, PDO::PARAM_INT);
+    $rowsStmt->bindValue(':rows_offset', $offset, PDO::PARAM_INT);
+    $rowsStmt->execute();
+    $users = $rowsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+    $selectedUser = null;
+    $selectedId = filter_var($_GET['account'] ?? null, FILTER_VALIDATE_INT);
+    if (is_int($selectedId) && $selectedId > 0) {
+        $selectedStmt = $pdo->prepare('SELECT ' . $columns . $fromSql . ' WHERE u.id = :account_id LIMIT 1');
+        $selectedStmt->bindValue(':account_id', $selectedId, PDO::PARAM_INT);
+        $selectedStmt->execute();
+        $selectedUser = $selectedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+} catch (PDOException $exception) {
+    error_log('Bushisa users directory database error: ' . $exception->getCode());
+    http_response_code(503);
+    exit('The account directory is temporarily unavailable. Please try again later.');
 }
-
-$countStmt = $pdo->prepare('SELECT COUNT(DISTINCT u.id)' . $fromSql . $whereSql);
-$prepareFilters($countStmt);
-$countStmt->execute();
-$filteredCount = (int) $countStmt->fetchColumn();
-$totalPages = max(1, (int) ceil($filteredCount / $perPage));
-$page = min($page, $totalPages);
-$offset = ($page - 1) * $perPage;
-
-$rowsStmt = $pdo->prepare('SELECT ' . $columns . $fromSql . $whereSql
-    . ' ORDER BY u.created_at DESC, u.id DESC LIMIT :rows_limit OFFSET :rows_offset');
-$prepareFilters($rowsStmt);
-$rowsStmt->bindValue(':rows_limit', $perPage, PDO::PARAM_INT);
-$rowsStmt->bindValue(':rows_offset', $offset, PDO::PARAM_INT);
-$rowsStmt->execute();
-$users = $rowsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-$selectedUser = null;
-$selectedId = filter_var($_GET['account'] ?? null, FILTER_VALIDATE_INT);
-if (is_int($selectedId) && $selectedId > 0) {
-    $selectedStmt = $pdo->prepare('SELECT ' . $columns . $fromSql . ' WHERE u.id = :account_id LIMIT 1');
-    $selectedStmt->bindValue(':account_id', $selectedId, PDO::PARAM_INT);
-    $selectedStmt->execute();
-    $selectedUser = $selectedStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+$accountRequested = isset($_GET['account']);
+if ($accountRequested && $selectedUser === null) {
+    http_response_code(404);
 }
 $baseQuery = admin_user_params($filters, ['page' => $page]);
 $nav = [
@@ -238,7 +270,7 @@ render_document_head('Users management');
                 <h1>User management</h1>
                 <p class="admin-page-header__description">Review accounts, verification and access.</p>
             </div>
-            <div class="admin-preview-tag"><span class="admin-preview-tag__dot" aria-hidden="true"></span> DEVELOPMENT PREVIEW</div>
+            <div class="admin-preview-tag"><span class="admin-preview-tag__dot" aria-hidden="true"></span> ADMIN ACCESS</div>
         </header>
 
         <div class="admin-users-notice">
@@ -246,7 +278,7 @@ render_document_head('Users management');
                 <span class="admin-eyebrow">ACCOUNT SAFETY</span>
                 <p>Sensitive student information belongs behind authorised admin access.</p>
             </div>
-            <span class="admin-users-note-chip">LIVE / LOCAL DATA</span>
+            <span class="admin-users-note-chip">PRIVATE ACCOUNT RECORDS</span>
         </div>
 
         <section class="admin-metrics admin-users-metrics" aria-label="User statistics">
@@ -297,14 +329,23 @@ render_document_head('Users management');
                     </select>
                 </label>
                 <?php if (is_admin()): ?>
-                    <a class="admin-users-export" href="users.php?<?= e(admin_user_params($filters, ['export' => 'csv'])) ?>">
+                    <button class="admin-users-export" type="submit" form="admin-users-export-form">
                         Export CSV <span aria-hidden="true">↗</span>
-                    </a>
+                    </button>
                 <?php endif; ?>
             </div>
+            <noscript><button class="admin-users-view" type="submit">Apply filters</button></noscript>
             <p class="admin-users-filter-help">Verification and export are available on desktop.</p>
         </form>
 
+        <form id="admin-users-export-form" method="post" action="users.php?<?= e(admin_user_params($filters)) ?>">
+            <?= csrf_input_field() ?>
+            <input type="hidden" name="export" value="csv">
+        </form>
+
+        <?php if ($accountRequested && $selectedUser === null): ?>
+            <p class="admin-users-empty" role="status">This account could not be found. <a href="users.php?<?= e($baseQuery) ?>">Back to directory</a>.</p>
+        <?php endif; ?>
         <section class="admin-users-directory" aria-labelledby="users-directory-heading">
             <header class="admin-users-directory__heading">
                 <div>
@@ -349,7 +390,7 @@ render_document_head('Users management');
                                 <td><span class="<?= e(admin_user_badge('role', $roleValue)) ?>"><?= e($roleLabel($user)) ?></span></td>
                                 <td><span class="<?= e(admin_user_badge('verified', $verValue)) ?>"><?= e($verificationLabel($user)) ?></span></td>
                                 <td><span class="<?= e(admin_user_badge('status', $stateValue)) ?>"><?= e($statusLabel($user)) ?></span></td>
-                                <td><a class="admin-users-view" href="<?= e($detailsUrl) ?>">View <span aria-hidden="true">→</span></a></td>
+                                <td><a class="admin-users-view" href="<?= e($detailsUrl) ?>" aria-label="View details for <?= e($name) ?>">View <span aria-hidden="true">→</span></a></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -380,7 +421,7 @@ render_document_head('Users management');
                         <div class="admin-users-mobile-card__bottom">
                             <span class="<?= e(admin_user_badge('verified', $verValue)) ?>"><?= e($verificationLabel($user)) ?></span>
                             <span class="<?= e(admin_user_badge('status', $stateValue)) ?>"><?= e($statusLabel($user)) ?></span>
-                            <a class="admin-users-view" href="<?= e($detailsUrl) ?>">View details <span aria-hidden="true">→</span></a>
+                            <a class="admin-users-view" href="<?= e($detailsUrl) ?>" aria-label="View details for <?= e($name) ?>">View details <span aria-hidden="true">→</span></a>
                         </div>
                     </article>
                 <?php endforeach; ?>

@@ -21,6 +21,8 @@
   if (!(dialog instanceof HTMLElement)) return;
 
   // Keep keyboard focus in the open account summary until it is closed.
+  const background = document.querySelector('.admin-users-layout');
+  if (background instanceof HTMLElement) background.inert = true;
   close.focus({ preventScroll: true });
   const previousOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
@@ -49,5 +51,6 @@
 
   window.addEventListener('pagehide', () => {
     document.body.style.overflow = previousOverflow;
+    if (background instanceof HTMLElement) background.inert = false;
   }, { once: true });
 })();

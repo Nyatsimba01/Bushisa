@@ -1,3 +1,5 @@
+@font-face{font-family:BushisaUsersInter;src:url('../assets/admin/fonts/Inter.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:BushisaUsersLora;src:url('../assets/admin/fonts/Lora.ttf') format('truetype');font-style:normal;font-weight:400 700;font-display:swap}
 /* Bushisa Users Management
    Editable Figma desktop 83:18 and user-adjusted mobile 85:34.
    Uses the same tokens and base sidebar as css/admin-dashboard.css.
@@ -54,7 +56,7 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
   display:block;box-sizing:border-box;width:100%;height:45px;min-height:45px;
   border:1px solid #57404a;border-radius:10px;
   background:#291c25;color:#f8ede2;
-  font:500 12px/1.35 Inter,Arial,sans-serif;
+  font:500 12px/1.35 BushisaUsersInter,Arial,sans-serif;
   outline:none;
 }
 .bushisa-admin-users .admin-users-search-wrap input{padding:0 14px 0 45px}
@@ -100,7 +102,7 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
   gap:15px;padding-bottom:24px;border-bottom:1px solid #57404a;
 }
 .bushisa-admin-users .admin-users-directory__heading h2{
-  margin-top:9px;font:500 23px/1.3 Lora,Georgia,serif;letter-spacing:-.02em;
+  margin-top:9px;font:500 23px/1.3 BushisaUsersLora,Georgia,serif;letter-spacing:-.02em;
 }
 .bushisa-admin-users .admin-users-directory__count{
   display:inline-flex;justify-content:center;align-items:center;
@@ -111,7 +113,7 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
 .bushisa-admin-users .admin-users-table-wrap{overflow-x:auto}
 .bushisa-admin-users .admin-users-table{
   width:100%;border-spacing:0;border-collapse:collapse;table-layout:fixed;
-  font:400 12px/1.4 Inter,Arial,sans-serif;color:#c8b4b9;
+  font:400 12px/1.4 BushisaUsersInter,Arial,sans-serif;color:#c8b4b9;
 }
 .bushisa-admin-users .admin-users-table th{
   height:43px;padding:10px 7px;text-align:left;
@@ -208,7 +210,7 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
   position:absolute;right:19px;top:13px;
   font-size:29px;color:#f4b598;line-height:1;
 }
-.bushisa-admin-users .admin-users-detail h2{margin-top:10px;font:500 27px/1.3 Lora,Georgia,serif}
+.bushisa-admin-users .admin-users-detail h2{margin-top:10px;font:500 27px/1.3 BushisaUsersLora,Georgia,serif}
 .bushisa-admin-users .admin-users-detail__subtitle{margin:7px 0 25px!important;font-size:12px;color:#c8b4b9}
 .bushisa-admin-users .admin-users-detail dl{margin:0;border-top:1px solid #57404a}
 .bushisa-admin-users .admin-users-detail dl div{
@@ -255,13 +257,13 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
  }
  .bushisa-admin-users .admin-users-mobile-brand{
    display:flex;align-items:center;gap:16px;
-   color:#f8ede2!important;font:500 25px/1 Lora,Georgia,serif;
+   color:#f8ede2!important;font:500 25px/1 BushisaUsersLora,Georgia,serif;
  }
  .bushisa-admin-users .admin-users-mobile-brand>span{
-   font:400 30px/1 Lora,Georgia,serif;color:#f4b598;
+   font:400 30px/1 BushisaUsersLora,Georgia,serif;color:#f4b598;
  }
  .bushisa-admin-users .admin-users-mobile-caption{
-   color:#f4b598;font:650 11px/1.4 Inter,Arial,sans-serif;
+   color:#f4b598;font:650 11px/1.4 BushisaUsersInter,Arial,sans-serif;
  }
  .bushisa-admin-users .admin-users-main{
    width:100%;max-width:500px;margin:0 auto;
@@ -394,4 +396,29 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
 }
 @media(prefers-reduced-motion:reduce){
  .bushisa-admin-users .admin-users-bottom-nav{scroll-behavior:auto}
+}
+
+/* Complete the native export control and keep long account data inside panes. */
+.bushisa-admin-users button.admin-users-export{border:0;font-family:inherit;cursor:pointer}
+.bushisa-admin-users button:focus-visible{outline:2px solid #f4b598;outline-offset:3px}
+.bushisa-admin-users .admin-users-detail h2,
+.bushisa-admin-users .admin-users-detail__subtitle,
+.bushisa-admin-users .admin-users-detail dd{overflow-wrap:anywhere;min-width:0}
+.bushisa-admin-users .admin-users-header{min-height:129px}
+.bushisa-admin-users .admin-users-notice{background:rgba(59,41,49,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bushisa-admin-users .admin-users-filters{backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+@media(max-width:750px){
+ .bushisa-admin-users .admin-users-header{min-height:119px}
+ .bushisa-admin-users .admin-users-header .admin-page-header__description{margin-top:28px}
+ .bushisa-admin-users .admin-users-notice{margin-top:37px}
+ .bushisa-admin-users .admin-users-mobile-card__top{min-height:52px}
+ .bushisa-admin-users .admin-users-bottom-nav{position:relative;left:auto;bottom:auto;transform:none;margin:16px auto max(20px,env(safe-area-inset-bottom,0px))}
+ .bushisa-admin-users .admin-users-main{padding-bottom:0}
+}
+
+body.bushisa-admin-users{font-family:BushisaUsersInter,Arial,sans-serif}
+.bushisa-admin-users :is(.admin-brand__title,.admin-brand__heart,.admin-metric__value,.admin-users-header h1){font-family:BushisaUsersLora,Georgia,serif}
+.bushisa-admin-users .admin-metric h2{font-family:BushisaUsersInter,Arial,sans-serif}
+@media(min-width:751px){
+ .bushisa-admin-users .admin-users-notice{padding-top:9px;padding-bottom:9px}
 }
