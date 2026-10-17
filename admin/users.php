@@ -296,7 +296,7 @@ render_document_head('Users management');
             <?php endforeach; ?>
         </section>
 
-        <form class="admin-users-filters" action="users.php" method="get" role="search" id="admin-users-filter-form">
+        <form class="admin-users-filters" action="users.php#admin-users-filter-form" method="get" role="search" id="admin-users-filter-form">
             <label class="admin-eyebrow admin-users-filters__title" for="admin-user-search">FIND AN ACCOUNT</label>
             <div class="admin-users-filters__fields">
                 <div class="admin-users-search-wrap">
