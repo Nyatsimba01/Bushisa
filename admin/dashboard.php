@@ -135,7 +135,7 @@ $snapshot = [
 $navigation = [
     ['href'=>'dashboard.php','label'=>'Overview','icon'=>'overview','active'=>true],
     ['href'=>'users.php','label'=>'Users','icon'=>'users','active'=>false],
-    ['href'=>'#latest-confession','label'=>'Confessions','icon'=>'confessions','active'=>false],
+    ['href'=>'confessions.php','label'=>'Confessions','icon'=>'confessions','active'=>false],
     ['href'=>'reports.php','label'=>'Reports','icon'=>'reports','active'=>false],
     ['href'=>'moderation.php','label'=>'Moderation','icon'=>'moderation','active'=>false],
 ];

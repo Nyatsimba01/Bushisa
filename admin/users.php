@@ -217,7 +217,7 @@ $baseQuery = admin_user_params($filters, ['page' => $page]);
 $nav = [
     ['href' => 'dashboard.php', 'title' => 'Overview', 'icon' => 'overview'],
     ['href' => 'users.php', 'title' => 'Users', 'icon' => 'users'],
-    ['href' => '../confessions.php', 'title' => 'Confessions', 'icon' => 'confessions'],
+    ['href' => 'confessions.php', 'title' => 'Confessions', 'icon' => 'confessions'],
     ['href' => 'reports.php', 'title' => 'Reports', 'icon' => 'reports'],
     ['href' => 'moderation.php', 'title' => 'Moderation', 'icon' => 'moderation'],
 ];
@@ -446,7 +446,6 @@ render_document_head('Users management');
 
     <nav class="admin-users-bottom-nav" aria-label="Mobile admin navigation">
         <?php foreach ($nav as $item): ?>
-            <?php if ($item['title'] === 'Confessions') continue; ?>
             <a href="<?= e($item['href']) ?>" class="<?= $item['title'] === 'Users' ? 'is-current' : '' ?>"
                 <?= $item['title'] === 'Users' ? 'aria-current="page"' : '' ?>><?= e($item['title']) ?></a>
         <?php endforeach; ?>

@@ -49,3 +49,6 @@ body.bushisa-admin-reports{--adm-bg:#21151a;--adm-side:#1d1319;--adm-card:#30212
 @media(prefers-reduced-transparency:reduce){.glass{background:#3b2931;backdrop-filter:none}}
 
 .admin-layout{background:#1d1319}.admin-main{background-color:#21151a}@media(max-width:750px){.admin-layout{background:#21151a}}
+
+/* Shared Confessions and Moderation details. */
+.linked-report{padding:14px 0;border-bottom:1px solid #87677685}.linked-report>a{color:#f4b598!important}.linked-report>.status{margin-left:12px}.linked-report>p{margin-top:10px!important;color:#c8b4b9}.admin-content-workspace .report-content{margin-top:16px}.admin-content-workspace .reports-header h1{padding-right:0}@media(min-width:1201px){.admin-content-workspace .reports-header h1{max-width:calc(100% - 195px)}}@media(max-width:750px){.admin-content-workspace .reports-header h1{margin-bottom:34px}.admin-content-workspace .linked-report>.status{display:inline-block;margin-top:6px}}

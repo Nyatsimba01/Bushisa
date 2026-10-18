@@ -2,10 +2,14 @@
 
 Branch: `figma-integration` only.
 
-Copy these two files from this branch into your existing project, keeping their folders:
+For the complete admin update, follow [ADMIN_MANAGEMENT_XAMPP.md](ADMIN_MANAGEMENT_XAMPP.md).
+The Reports feature now also requires `php/admin_evidence.php` and
+`admin/report-evidence.php`. Copy these files, keeping their folders:
 
 - `admin/reports.php`
 - `css/admin-reports.css`
+- `php/admin_evidence.php`
+- `admin/report-evidence.php`
 
 For your installation, the destination is `C:\xampp\htdocs\Bushisa-figma\`.
 The page reuses the fonts and four halo SVG files already installed under
@@ -27,9 +31,9 @@ no new migration or sample records are added.
 - Twenty reports per page, newest first. Search and page links return to the filters.
 - Details show the reason, available confession content, private account IDs and status.
 - No names, email addresses, anonymous handles, passwords or private file paths are exposed.
-- Existing evidence attachments are indicated, but are not served or linked publicly.
-  The project has no established protected attachment viewer. Separate attachment
-  previews remain unavailable; reported confession content is shown securely.
+- Supported evidence images and PDFs are served through a protected, audited
+  endpoint from private storage. See the complete admin guide for storage paths
+  and limits. Missing or unsafe files stay unavailable.
 - Moderators and administrators can mark pending reports reviewed, dismiss them,
   or hide reported confessions with confirmation.
 - Only administrators can suspend reported non-staff accounts after confirmation.
@@ -57,4 +61,5 @@ Tested with PHP 8.3, MariaDB 10.11 and Chromium, at widths 1440, 1024, 750, 390 
 CSRF, confirmation, staff protection, review actions, audit failure rollback,
 stale decisions and legacy confession-column compatibility.
 
-The other application pages and shared backend files are unchanged.
+The complete update adds dedicated admin Confessions and Moderation pages.
+Student-facing pages and the existing shared account/report logic are preserved.

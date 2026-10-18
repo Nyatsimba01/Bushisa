@@ -9,6 +9,7 @@ require_once __DIR__ . '/../php/function.php';
 require_once __DIR__ . '/../php/admin_access.php';
 require_once __DIR__ . '/../php/frontend.php';
 require_once __DIR__ . '/../php/logger.php';
+require_once __DIR__ . '/../php/admin_evidence.php';
 require_login();
 bushisa_require_moderator($pdo);
 header('Cache-Control: no-store, private');
@@ -122,7 +123,7 @@ $csrfToken = generate_csrf_token();
 $nav = [
  ['href'=>'dashboard.php','title'=>'Overview','icon'=>'overview'],
  ['href'=>'users.php','title'=>'Users','icon'=>'users'],
- ['href'=>'../confessions.php','title'=>'Confessions','icon'=>'confessions'],
+ ['href'=>'confessions.php','title'=>'Confessions','icon'=>'confessions'],
  ['href'=>'reports.php','title'=>'Reports','icon'=>'reports'],
  ['href'=>'moderation.php','title'=>'Moderation','icon'=>'moderation'],
 ];
@@ -189,7 +190,14 @@ $nav = [
                 <h3>Reported confession</h3><p class="report-content"><?= e($selected['post_id'] ? $selected['post_body'] : 'This confession is no longer available.') ?></p>
                 <?php if ((int)$selected['is_flagged'] === 1): ?><p class="hint">This post is hidden from the public feed.</p><?php endif; ?>
             <?php endif; ?>
-            <p class="hint"><?= empty($selected['evidence_path']) ? 'No separate evidence attachment recorded.' : 'An evidence attachment is recorded. File preview is unavailable; its private storage location is not exposed.' ?></p>
+            <?php $attachment = admin_evidence_open((string)($selected['evidence_path'] ?? '')); ?>
+            <?php if ($attachment): ?>
+                <a class="report-link" href="report-evidence.php?report=<?= e($selected['id']) ?>" target="_blank" rel="noopener noreferrer"><?= $attachment['download'] ? 'Download evidence PDF' : 'View evidence image' ?> <span aria-hidden="true">↗</span></a>
+                <?php fclose($attachment['stream']); ?>
+                <p class="hint">Confidential attachment · Access is checked and recorded when opened.</p>
+            <?php else: ?>
+                <p class="hint"><?= empty($selected['evidence_path']) ? 'No separate evidence attachment recorded.' : 'An attachment is recorded but is unavailable in protected storage or uses an unsupported format.' ?></p>
+            <?php endif; ?>
             <?php if ($selected['status'] === 'pending'): ?>
             <div class="review-actions"><h3>Review decision</h3><p>Read the reason and available content before taking action. Reports alone do not establish a violation.</p>
             <form method="post" action="<?= e(report_url($filters, ['report'=>(int)$selected['id']], 'report-detail')) ?>">

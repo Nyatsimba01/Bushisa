@@ -367,7 +367,7 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
  .bushisa-admin-users .admin-users-bottom-nav{
    position:fixed;z-index:100;bottom:max(10px,env(safe-area-inset-bottom,0px));
    left:50%;transform:translateX(-50%);
-   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+   display:flex;overflow-x:auto;scrollbar-width:thin;
    gap:3px;width:min(364px,calc(100% - 26px));
    min-height:46px;padding:5px;
    background:rgba(59,41,49,.94);
@@ -376,8 +376,8 @@ body.bushisa-admin-users{background:#21151a;color:#f8ede2}
    box-shadow:0 10px 30px rgba(18,9,15,.42);
  }
  .bushisa-admin-users .admin-users-bottom-nav a{
-   display:flex;align-items:center;justify-content:center;min-width:0;
-   min-height:34px;padding:7px 2px;
+   display:flex;align-items:center;justify-content:center;min-width:0;flex:none;white-space:nowrap;
+   min-height:34px;padding:7px 12px;
    border:1px solid transparent;border-radius:9px;
    color:#c8b4b9;font-size:11px;font-weight:500;
  }
