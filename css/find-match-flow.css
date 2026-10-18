@@ -1,0 +1,23 @@
+/* One question at a time, within the existing four phases. */
+.page-match-figma .fm-question-flow [hidden]{display:none!important;}
+.page-match-figma .fm-question-flow .fm-followups{display:none!important;}
+.page-match-figma .fm-flow-question{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.page-match-figma .fm-question-flow .fm-questionnaire{scroll-margin-top:24px;}
+.page-match-figma .fm-flow-position{margin:0;color:#c8b4b9;font:400 12px/1.5 Inter,Arial,sans-serif;}
+.page-match-figma .fm-flow-question--optional{padding:22px;border:1px solid rgba(169,118,130,.6);border-radius:18px;background:rgba(59,41,49,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.page-match-figma .fm-flow-kicker{align-self:flex-start;margin:0;padding:7px 12px;background:rgba(244,181,152,.08);border:1px solid rgba(244,181,152,.3);border-radius:30px;color:#f4b598;font:600 12px/1.4 Inter,Arial,sans-serif;}
+.page-match-figma .fm-question-flow .fm-question h2:focus{outline:none;}
+.page-match-figma .fm-question-flow .fm-step-actions{margin-top:0;}
+.page-match-figma .fm-question-flow .fm-actions-right{width:100%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;}
+.page-match-figma .fm-question-flow [data-match-back]{margin-right:auto;}
+.page-match-figma .fm-flow-skip-rest{align-self:flex-end;border:0;padding:4px 0;background:transparent;color:#c8b4b9;text-decoration:underline;text-underline-offset:4px;font:400 12px/1.5 Inter,Arial,sans-serif;cursor:pointer;}
+.page-match-figma .fm-flow-save-note{margin:0;color:#c8b4b9;font:400 11px/1.5 Inter,Arial,sans-serif;}
+.page-match-figma .fm-question-flow button:focus-visible{outline:2px solid #f4b598;outline-offset:4px;}
+.page-match-figma .fm-question-flow .fm-extra-choices{gap:10px;}
+@media(max-width:700px){
+ .page-match-figma .fm-flow-question--optional{padding:18px 16px;gap:18px;}
+ .page-match-figma .fm-question-flow .fm-extra-choices{grid-template-columns:1fr;}
+ .page-match-figma .fm-question-flow .fm-actions-right{gap:8px;}
+ .page-match-figma .fm-question-flow .fm-actions-right button{min-height:44px;padding:12px;font-size:13px;}
+ .page-match-figma .fm-flow-question--optional .fm-question h2{font-size:23px;}
+}
