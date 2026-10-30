@@ -167,3 +167,47 @@
 @media (prefers-contrast: more) {
   .page-you-figma .you-main::before { opacity:.4; }
 }
+
+
+/* Bushisa motion: short, purposeful responses without changing the layout. */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.home-figma-app,.page-match-figma,.page-confessions-figma,.page-you-figma) :is(.desktop-nav a,.bottom-nav a,.round-button,.fm-option,.fm-continue,.fm-back,.cf-tab,.cf-post-button,.cf-report-trigger,.you-prompt-option,.you-save-button) {
+    transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+  .page-match-figma .fm-question-flow .fm-flow-question:not([hidden]) {
+    animation: bushisa-soft-arrive .24s cubic-bezier(.2,.7,.25,1) both;
+  }
+  .page-confessions-figma .cf-modal:not([hidden]) .cf-composer,
+  .bushisa-admin-users .admin-users-detail {
+    animation: bushisa-dialog-arrive .22s cubic-bezier(.2,.7,.25,1) both;
+  }
+  .bushisa-admin-dashboard :is(.admin-nav__link,.admin-users-view,.admin-users-export,.admin-users-bottom-nav a,.admin-users-detail__back) {
+    transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .page-you-figma .you-settings-expander[open] .you-settings-inner {
+    animation: bushisa-soft-arrive .2s ease-out both;
+  }
+}
+@keyframes bushisa-soft-arrive {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bushisa-dialog-arrive {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Match the approved, read-only Figma account-details state. */
+.bushisa-admin-users .admin-users-detail {
+  width: min(520px, 100%);
+  border-color: #705663;
+}
+.bushisa-admin-users .admin-users-detail__privacy {
+  padding: 14px 16px;
+  background: rgba(59,41,49,.82);
+  border-radius: 12px;
+  color: #f8ede2;
+}
+@media (max-width: 750px) {
+  .bushisa-admin-users .admin-users-detail { padding: 24px 22px; }
+  .bushisa-admin-users .admin-users-detail__back { justify-content: center; width: 100%; box-sizing: border-box; }
+}

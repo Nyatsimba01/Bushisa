@@ -52,3 +52,18 @@ body.bushisa-admin-reports{--adm-bg:#21151a;--adm-side:#1d1319;--adm-card:#30212
 
 /* Shared Confessions and Moderation details. */
 .linked-report{padding:14px 0;border-bottom:1px solid #87677685}.linked-report>a{color:#f4b598!important}.linked-report>.status{margin-left:12px}.linked-report>p{margin-top:10px!important;color:#c8b4b9}.admin-content-workspace .report-content{margin-top:16px}.admin-content-workspace .reports-header h1{padding-right:0}@media(min-width:1201px){.admin-content-workspace .reports-header h1{max-width:calc(100% - 195px)}}@media(max-width:750px){.admin-content-workspace .reports-header h1{margin-bottom:34px}.admin-content-workspace .linked-report>.status{display:inline-block;margin-top:6px}}
+
+
+/* Consistent, restrained interaction feedback for the moderation workspace. */
+@media (prefers-reduced-motion: no-preference) {
+  .bushisa-admin-reports :is(.admin-nav__link,.reports-bottom-nav a,button,.report-link,.pagination a,.close-details) {
+    transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .bushisa-admin-reports .report-detail {
+    animation: bushisa-admin-arrive .22s ease-out both;
+  }
+}
+@keyframes bushisa-admin-arrive {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
